@@ -281,24 +281,6 @@ function mostrarCongresos(congresos) {
                                         onclick='cambiarEstado(${congreso.id_congreso}, "${congreso.estado}")'>
                                     <i class="fas fa-exchange-alt mr-1"></i> Cambiar Estado
                                 </button>
-                                ${congreso.estado === 'REGISTRO' || congreso.estado === 'EN_CURSO' ? `
-                                    <div class="row no-gutters mt-2 mb-2">
-                                        <div class="col-6 pr-1">
-                                            <button class="btn btn-success btn-lg btn-block font-weight-bold shadow-sm" 
-                                                    style="font-size:1rem;" 
-                                                    onclick='registrarAsistencia(${congreso.id_congreso}, "${congreso.nombre_congreso}", "llegada")'>
-                                                <i class="fas fa-sign-in-alt mr-1"></i> Llegada
-                                            </button>
-                                        </div>
-                                        <div class="col-6 pl-1">
-                                            <button class="btn btn-warning btn-lg btn-block font-weight-bold shadow-sm" 
-                                                    style="font-size:1rem;" 
-                                                    onclick='registrarAsistencia(${congreso.id_congreso}, "${congreso.nombre_congreso}", "almuerzo")'>
-                                                <i class="fas fa-utensils mr-1"></i> Almuerzo
-                                            </button>
-                                        </div>
-                                    </div>
-                                ` : ''}
                             </div>
                         </div>
                     </div>
@@ -380,11 +362,6 @@ function cambiarEstado(idCongreso, estadoActual) {
     document.getElementById('idCongresoEstado').value = idCongreso;
     document.getElementById('nuevoEstado').value = estadoActual;
     $('#cambiarEstadoModal').modal('show');
-}
-
-// Agregar la función de registro de asistencia
-function registrarAsistencia(idCongreso, nombreCongreso, tipo) {
-    window.location.href = `registrar-asistencia.php?id_congreso=${idCongreso}&nombre=${encodeURIComponent(nombreCongreso)}&tipo=${tipo}`;
 }
 </script>
 
