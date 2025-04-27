@@ -1,47 +1,57 @@
-version: "3.8"
-
 services:
   wordpress:
-    image: wordpress:latest
+    build: .
+    restart: always
     ports:
-      - "8081:80"
+      - 8081:80
     environment:
-      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_HOST: mariadb
       WORDPRESS_DB_USER: emmaus_wpgenesis
-      WORDPRESS_DB_PASSWORD: 4)3p9bd!Sn
+      WORDPRESS_DB_PASSWORD: emmaus_wpgenesis
       WORDPRESS_DB_NAME: emmaus_wpgenesis
+      WORDPRESS_TABLE_PREFIX: edgen_
+      BOG_DB_HOST: postgres
+      BOG_DB_NAME: emmaus_estudiantes
+      BOG_DB_USER: emmaus_admin
+      BOG_DB_PASSWORD: emmaus1234+
     volumes:
-      - .:/var/www/html
+      - ./wp-content:/var/www/html/wp-content
     depends_on:
-      - mysql
-      - postgres
-    restart: unless-stopped
+      - mariadb
 
-  mysql:
-    image: mysql:8.0
+  mariadb:
+    image: mariadb:10.3.39
+    restart: always
+    ports:
+      - 3306:3306
     environment:
       MYSQL_DATABASE: emmaus_wpgenesis
       MYSQL_USER: emmaus_wpgenesis
-      MYSQL_PASSWORD: 4)3p9bd!Sn
-      MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "3306:3306"
+      MYSQL_PASSWORD: emmaus_wpgenesis
+      MYSQL_ROOT_PASSWORD: emmaus_wpgenesis
+      LANG: C.UTF-8
+    command:
+      - --character-set-server=latin1
+      - --collation-server=latin1_swedish_ci
+      - --skip-character-set-client-handshake
     volumes:
       - mysql_data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password
-    restart: unless-stopped
+      - ./migration/emmaus_wpgenesis (2).sql:/docker-entrypoint-initdb.d/01-emmaus_wpgenesis.sql
+      - ./migration/update_urls.sql:/docker-entrypoint-initdb.d/02-update_urls.sql
 
   postgres:
     image: postgres:15
+    restart: always
     environment:
+      POSTGRES_USER: emmaus_admin
+      POSTGRES_PASSWORD: emmaus1234+
       POSTGRES_DB: emmaus_estudiantes
-      POSTGRES_USER: emmaus_public
-      POSTGRES_PASSWORD: kmpl6mb40qo2
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+      - ./wp-content/plugins/plg-genesis/migration/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./wp-content/plugins/plg-genesis/migration/datos270420251117.sql:/docker-entrypoint-initdb.d/migrations/datos270420251117.sql
 
 volumes:
   mysql_data:

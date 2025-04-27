@@ -29,7 +29,25 @@ define( 'DB_USER', 'emmaus_wpgenesis' );
 define( 'DB_PASSWORD', '4)3p9bd!Sn' );
 
 /** Database hostname (poner en localhost en producción y en docker poner mysql)*/
-define( 'DB_HOST', 'mysql' );
+if (getenv('WORDPRESS_DB_HOST') === 'mariadb:3306') {
+    // Ambiente de desarrollo (Docker)
+    define('DB_HOST', 'mariadb');
+    
+    // Configuración de PostgreSQL para desarrollo
+    define('BOG_DB_HOST', 'postgres');
+    define('BOG_DB_NAME', 'emmaus_estudiantes');
+    define('BOG_DB_USER', 'emmaus_admin');
+    define('BOG_DB_PASSWORD', 'emmaus1234+');
+} else {
+    // Ambiente de producción
+    define('DB_HOST', 'localhost');
+    
+    // Configuración de PostgreSQL para producción
+    define('BOG_DB_HOST', 'localhost');
+    define('BOG_DB_NAME', 'emmaus_estudiantes');
+    define('BOG_DB_USER', 'emmaus_admin');
+    define('BOG_DB_PASSWORD', 'emmaus1234+');
+}
 
 /** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8' );
@@ -37,14 +55,7 @@ define( 'DB_CHARSET', 'utf8' );
 /** The database collate type. Don't change this if in doubt. */
 define( 'DB_COLLATE', '' );
 
-
-/** VARIABLES PARA CONECTARSE A LA BASE DE DATOS**/
-// Credenciales de la base de datos de cada oficina
-define('BOG_DB_HOST', 'localhost');
-define('BOG_DB_NAME', 'emmaus_estudiantes');
-define('BOG_DB_USER', 'emmaus_admin');
-define('BOG_DB_PASSWORD', 'emmaus1234+');
-
+// Configuración de PostgreSQL para otras oficinas
 define('PER_DB_HOST', 'localhost');
 define('PER_DB_NAME', 'emmaus_per_estudiantes');
 define('PER_DB_USER', 'emmaus_admin');
@@ -74,7 +85,6 @@ define('BO_DB_HOST', 'localhost');
 define('BO_DB_NAME', 'emmaus_bo_estudiantes');
 define('BO_DB_USER', 'emmaus_bo_admin');
 define('BO_DB_PASSWORD', 'uAfSwtGaCtbK');
-
 
 /**#@+
  * Authentication unique keys and salts.
@@ -121,10 +131,6 @@ $table_prefix = 'edgen_';
 define( 'WP_DEBUG', false );
 
 /* Add any custom values between this line and the "stop editing" line. */
-
-
-
-/* That's all, stop editing! Happy publishing. */
 
 /** Absolute path to the WordPress directory. */
 if ( ! defined( 'ABSPATH' ) ) {
