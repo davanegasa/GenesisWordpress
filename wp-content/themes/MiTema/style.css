@@ -1,0 +1,36 @@
+/*
+Theme Name: Tema Personalizado
+Theme URI: https://example.com
+Author: Tu nombre
+Author URI: https://example.com
+Description: Un tema personalizado para tu sitio
+Version: 1.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: tema-personalizado
+*/
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 100%;
+    padding: 20px;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #343a40;
+    color: #fff;
+    padding: 15px;
+    float: left;
+    height: 100vh;
+}
+
+.content {
+    margin-left: 260px;
+    padding: 20px;
+}

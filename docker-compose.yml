@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  wordpress:
+    image: wordpress:latest
+    ports:
+      - "8081:80"
+    environment:
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_USER: emmaus_wpgenesis
+      WORDPRESS_DB_PASSWORD: 4)3p9bd!Sn
+      WORDPRESS_DB_NAME: emmaus_wpgenesis
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+      - postgres
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: emmaus_wpgenesis
+      MYSQL_USER: emmaus_wpgenesis
+      MYSQL_PASSWORD: 4)3p9bd!Sn
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: emmaus_estudiantes
+      POSTGRES_USER: emmaus_public
+      POSTGRES_PASSWORD: kmpl6mb40qo2
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  postgres_data:

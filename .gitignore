@@ -1,0 +1,19 @@
+# Docker
+.env
+docker-compose.override.yml
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log
+
+# IDE y editores
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Dependencias
+node_modules/
+vendor/ 
