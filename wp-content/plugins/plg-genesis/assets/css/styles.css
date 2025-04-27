@@ -1,0 +1,684 @@
+:root {
+    /* Azul oscuro, usado como color principal */
+    --primary-color: #002855;
+
+    /* Verde complementario, usado para botones y estados hover */
+    --secondary-color: #3fab49;
+
+    /* Fondo claro */
+    --background-color: #f8f9fa;
+
+    /* Color de texto principal */
+    --text-color: #333333;
+
+    /* Azul intermedio para hover en enlaces */
+    --link-hover-color: #0056b3;
+
+    /* Gris claro */
+    --gray-light: #e8ebef;
+
+    /* Gris oscuro */
+    --gray-dark: #6c757d;
+
+    /* Blanco */
+    --white: #ffffff;
+
+    /* Color para hover en botones primarios */
+    --hover-color: #ffd700; /* Amarillo dorado */
+
+    /* Nuevas variables para el sidebar */
+    --sidebar-width: 250px;
+    --sidebar-collapsed-width: 70px;
+    --sidebar-bg: var(--primary-color);
+    --sidebar-hover: #003872;  /* Un tono más claro del primary-color */
+    --sidebar-active: var(--secondary-color);
+    --sidebar-text: #ffffff;
+    --sidebar-icon-size: 20px;
+    --transition-speed: 0.3s;
+}
+
+/* Estilos generales */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: var(--background-color);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* Wrapper principal */
+#wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Sidebar */
+#sidebar {
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    color: var(--white);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+/* Contenido principal */
+#content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    padding: 20px;
+    background-color: var(--background-color);
+    min-height: 100vh;
+    width: calc(100% - var(--sidebar-width));
+    position: relative;
+    z-index: 1;
+}
+
+/* Estilos del sidebar */
+.sidebar-logo {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background-color: var(--sidebar-bg);
+}
+
+.sidebar-logo img {
+    max-width: 150px;
+    height: auto;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--white);
+    text-decoration: none;
+    transition: all var(--transition-speed) ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-link:hover {
+    background: var(--sidebar-hover);
+    border-left-color: var(--secondary-color);
+    color: var(--white);
+    text-decoration: none;
+}
+
+.sidebar-link.active {
+    background: var(--sidebar-active);
+    border-left-color: var(--white);
+}
+
+.sidebar-link i {
+    margin-right: 10px;
+    font-size: var(--sidebar-icon-size);
+    width: 20px;
+    text-align: center;
+}
+
+.submenu {
+    display: none;
+    padding: 0;
+    background: rgba(0,0,0,0.1);
+}
+
+.submenu .sidebar-link {
+    padding-left: 40px;
+}
+
+.sidebar-link.collapsed + .submenu {
+    display: block;
+}
+
+/* Animación para los iconos */
+.sidebar-link i {
+    transition: transform var(--transition-speed) ease;
+}
+
+.sidebar-link.collapsed i.fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #sidebar {
+        transform: translateX(-100%);
+        transition: transform var(--transition-speed) ease;
+    }
+    
+    #sidebar.active {
+        transform: translateX(0);
+    }
+    
+    #content {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .sidebar-logo img {
+        max-width: 100px;
+    }
+}
+
+iframe {
+    width: 100%;
+    height: calc(100% - 40px);
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+/* Botones */
+.btn {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--hover-color);
+    color: var(--primary-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+    background-color: var(--gray-dark);
+    color: var(--white);
+}
+
+.btn-secondary:hover {
+    background-color: #495057;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Formularios */
+form {
+    max-width: 600px; /* Ancho máximo para el formulario */
+    margin: 0 auto; /* Centrado horizontal */
+    padding: 20px; /* Espaciado interno */
+    background-color: var(--background-color); /* Fondo claro */
+    border: 1px solid #ddd; /* Borde tenue */
+    border-radius: 8px; /* Esquinas redondeadas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+}
+
+/* Etiquetas de los campos */
+form label {
+    display: block; /* Forzar a que ocupen una línea */
+    font-weight: bold; /* Texto en negrita */
+    margin-bottom: 8px; /* Espaciado entre la etiqueta y el campo */
+    color: var(--text-color); /* Color de texto estándar */
+}
+
+/* Campos de Entrada */
+form input,
+form select,
+form textarea {
+    display: block; /* Ocupa todo el ancho disponible */
+    width: 100%; /* Ancho total */
+    padding: 10px; /* Espaciado interno */
+    font-size: 14px; /* Tamaño de fuente */
+    border: 1px solid #ccc; /* Borde tenue */
+    border-radius: 4px; /* Esquinas redondeadas */
+    margin-bottom: 15px; /* Espacio entre campos */
+    box-sizing: border-box; /* Incluye padding y border en el ancho */
+}
+
+/* Hover y Focus en campos */
+form input:focus,
+form select:focus,
+form textarea:focus {
+    border-color: var(--primary-color); /* Borde azul oscuro */
+    outline: none; /* Eliminar outline */
+    box-shadow: 0 0 4px rgba(0, 40, 85, 0.5); /* Sombra sutil */
+}
+
+/* Botón del formulario */
+form button {
+    display: inline-block;
+    width: 100%; /* Botón ocupa todo el ancho */
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+form button:hover {
+    background-color: var(--secondary-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.form-container {
+    background-color: var(--white);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+}
+
+.form-title {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Mensajes de alerta */
+.alert {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Centrado de formularios */
+.centered-form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: var(--background-color);
+}
+
+
+/*CARD*/
+/* Ajustar tarjetas al contenido */
+.card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: auto; /* Ajusta la altura automáticamente al contenido */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden; /* Previene que el contenido desborde */
+}
+
+/* Ajustar el contenido del body de la tarjeta */
+.card-body {
+    padding: 10px;
+    flex-grow: 1; /* Permite que el contenido crezca si es necesario */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Alinea el texto al inicio */
+}
+
+/* Ajustar el título de las tarjetas */
+.card-title {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    white-space: nowrap; /* Evita que el texto del título se desborde */
+    overflow: hidden; /* Oculta el contenido adicional */
+    text-overflow: ellipsis; /* Muestra "..." si el texto es muy largo */
+}
+
+/* Ajustar el texto de la tarjeta */
+.card-text {
+    font-size: 0.875rem;
+    color: #555;
+    margin-bottom: 8px;
+    word-wrap: break-word; /* Rompe las palabras largas */
+    overflow: hidden; /* Oculta contenido adicional */
+    text-overflow: ellipsis; /* Muestra "..." si el texto es muy largo */
+    display: -webkit-box; /* Compatibilidad con truncado múltiple */
+    -webkit-line-clamp: 3; /* Limita a 3 líneas */
+    -webkit-box-orient: vertical;
+}
+
+/* Ajustar el pie de las tarjetas */
+.card-footer {
+    background-color: #f8f9fa;
+    text-align: center;
+    padding: 8px;
+}
+
+/* Distribuir tarjetas horizontalmente */
+.row.g-4 {
+    display: flex;
+    flex-wrap: wrap; /* Permite que las tarjetas pasen a la siguiente fila si es necesario */
+    gap: 15px; /* Espaciado entre tarjetas */
+}
+
+.col-md-4, .col-sm-6 {
+    flex: 1 1 calc(33.333% - 15px); /* Ajusta a 3 tarjetas por fila con espacio entre ellas */
+    max-width: calc(33.333% - 15px);
+}
+
+@media (max-width: 768px) {
+    .col-md-4, .col-sm-6 {
+        flex: 1 1 calc(50% - 15px); /* Ajusta a 2 tarjetas por fila en pantallas medianas */
+        max-width: calc(50% - 15px);
+    }
+}
+
+@media (max-width: 576px) {
+    .col-md-4, .col-sm-6 {
+        flex: 1 1 100%; /* Una tarjeta por fila en pantallas pequeñas */
+        max-width: 100%;
+    }
+}
+
+/*modales*/
+.modal-header {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.bg-light {
+    background-color: var(--background-color) !important;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+#modalInformePDF .modal-body {
+    padding: 0; /* Elimina el espacio interno del modal */
+}
+
+#pdfViewer {
+    border: none;
+    height: 90vh; /* Usa el 90% de la altura del viewport */
+}
+
+/*Sidebar Dashboard*/
+.sidebar {
+    width: 250px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sidebar-logo {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.sidebar-logo img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 20px;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+}
+
+.sidebar-menu li {
+    margin: 10px 0;
+}
+
+.sidebar-menu li a {
+    text-decoration: none;
+    color: var(--white);
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-menu li a:hover {
+    background-color: var(--secondary-color);
+}
+
+
+/*para los selects con filtros*/
+/* Estilo general del select */
+.select2-container .select2-selection {
+    background-color: #f8f9fa; /* Fondo claro */
+    border: 1px solid #ced4da; /* Color del borde */
+    border-radius: 0.375rem; /* Esquinas redondeadas */
+    height: calc(2.5rem + 2px); /* Altura consistente con Bootstrap */
+    font-size: 1rem;
+    padding: 0.375rem 0.75rem; /* Espaciado interno */
+}
+
+/* Texto dentro del select */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #495057; /* Color de texto */
+    font-weight: 400; /* Peso del texto */
+    line-height: 1.5;
+}
+
+/* Icono de dropdown */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 100%;
+    top: 0;
+    right: 0.5rem;
+}
+
+/* Estilo del dropdown */
+.select2-container--default .select2-results__options {
+    max-height: 200px; /* Limitar la altura del dropdown */
+    overflow-y: auto; /* Scroll para listas largas */
+    background-color: #ffffff; /* Fondo blanco */
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+}
+
+/* Elementos de la lista */
+.select2-container--default .select2-results__option {
+    padding: 0.5rem; /* Espaciado interno */
+    font-size: 1rem;
+}
+
+/* Elemento seleccionado */
+.select2-container--default .select2-results__option--highlighted {
+    background-color: #3fab49; /* Verde del tema */
+    color: #ffffff;
+}
+
+/* Botón de limpiar selección */
+.select2-container--default .select2-selection--single .select2-selection__clear {
+    position: absolute;
+    right: 2rem; /* Alineación derecha */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: #dc3545; /* Rojo */
+    cursor: pointer;
+}
+
+.custom-select-dropdown {
+    background-color: #f8f9fa; /* Fondo claro */
+    border: 1px solid #ced4da; /* Borde */
+    font-size: 14px; /* Tamaño de fuente */
+    border-radius: 0.25rem; /* Esquinas redondeadas */
+}
+
+.form-select {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    padding: 0.375rem 0.75rem;
+}
+
+#cursosContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
+
+.col {
+    flex: 1 1 calc(25% - 15px);
+    max-width: calc(25% - 15px);
+}
+
+@media (max-width: 1024px) {
+    .col {
+        flex: 1 1 calc(33.333% - 15px);
+        max-width: calc(33.333% - 15px);
+    }
+}
+
+@media (max-width: 768px) {
+    .col {
+        flex: 1 1 calc(50% - 15px);
+        max-width: calc(50% - 15px);
+    }
+}
+
+@media (max-width: 576px) {
+    .col {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
+/* Contenedor de los filtros */
+.filters-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px; /* Espaciado entre los elementos */
+    margin-bottom: 20px;
+}
+
+/* Estilos generales para los filtros y barras de busqueda*/
+/* Contenedor de los filtros */
+.filters-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px; /* Espaciado entre el input y el select */
+    margin-bottom: 20px;
+}
+
+/* Estilos generales para el input y el select */
+#searchInput,
+#sortSelect {
+    width: 280px; /* Tamaño uniforme */
+    height: 45px; /* Altura igual */
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+/* Ajuste especial para el select */
+#sortSelect {
+    appearance: none; /* Oculta el diseño nativo */
+    cursor: pointer;
+    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"%3E%3Cpath d="M7 10l5 5 5-5z"/%3E%3C/svg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    padding-right: 40px; /* Espacio para la flecha */
+}
+
+/* Centrar completamente los filtros */
+@media (max-width: 768px) {
+    .filters-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #searchInput,
+    #sortSelect {
+        width: 100%; /* Que ocupen todo el ancho en móviles */
+    }
+}
+
+/* Actualizar estilos del sidebar */
+#sidebar {
+    background: var(--sidebar-bg);
+    color: var(--white);
+}
+
+/* Quitar los puntos de las listas */
+#sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#sidebar li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.submenu {
+    display: none;
+    padding: 0;
+    background: rgba(0,0,0,0.1);
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--white);
+    text-decoration: none;
+    transition: all var(--transition-speed) ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-link:hover {
+    background: var(--sidebar-hover);
+    border-left-color: var(--secondary-color);
+    color: var(--white);
+    text-decoration: none;
+}
+
+.sidebar-link.active {
+    background: var(--sidebar-active);
+    border-left-color: var(--white);
+}
+
+.submenu .sidebar-link {
+    padding-left: 40px;
+}
+

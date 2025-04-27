@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscar Estudiantes</title>
+  <style>
+
+    /* Estilos para la lista de estudiantes */
+    #studentList {
+      list-style-type: none; /* Quita los puntos de la lista */
+      padding: 0;
+    }
+    #studentList li {
+      background-color: #f4f4f4; /* Color de fondo de cada elemento de la lista */
+      border-bottom: 1px solid #ccc; /* Línea divisoria entre elementos de la lista */
+      padding: 10px; /* Espaciado interno de cada elemento de la lista */
+      margin-bottom: 5px; /* Margen inferior entre elementos de la lista */
+      display: flex; /* Hace que los elementos de la lista se alineen en una fila */
+      justify-content: space-between; /* Distribuye el espacio entre los elementos de la lista */
+    }
+    .studentDetailsButton, .addCourseButton, .queryButton {
+      background-color: #007bff; /* Color de fondo del botón */
+      color: white; /* Color del texto del botón */
+      border: none; /* Quita el borde del botón */
+      padding: 5px 10px; /* Espaciado interno del botón */
+      border-radius: 5px; /* Borde redondeado del botón */
+      cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+      margin-left: 10px; /* Espacio entre botones */
+    }
+    .addCourseButton {
+      background-color: #28a745;
+    }
+    .queryButton {
+      background-color: #dc3545;
+    }
+    /* Estilos para el modal */
+    .modal {
+      display: none; /* Ocultar el modal por defecto */
+      position: fixed; /* Posición fija */
+      z-index: 1; /* Hace que el modal esté por encima de todo */
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto; /* Habilita el desplazamiento si el contenido es demasiado grande para caber en el modal */
+      background-color: rgb(0,0,0); /* Fondo oscuro */
+      background-color: rgba(0,0,0,0.4); /* Fondo oscuro con transparencia */
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto; /* Centro del modal */
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%; /* Ancho del modal */
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Buscar Estudiantes</h1>
+  <form id="searchForm">
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" name="nombre">
+    <label for="apellido">Apellido:</label>
+    <input type="text" id="apellido" name="apellido">
+    <label for="contacto">Contacto:</label>
+    <input type="text" id="contacto" name="contacto">
+    <button type="submit">Buscar</button>
+  </form>
+  <ul id="studentList"></ul>
+
+  <!-- Modal para agregar curso -->
+  <div id="addCourseModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Agregar Curso</h2>
+      <!-- Formulario para agregar curso -->
+      <form id="addCourseForm">
+        <input type="hidden" id="studentIdInput" name="est"> <!-- Campo oculto para el estudiante_id -->
+        <label for="courseSelect">Seleccionar Curso:</label>
+        <select id="courseSelect" name="courseSelect"></select>
+        <label for="coursePercentage">Porcentaje:</label>
+        <input type="number" id="coursePercentage" name="coursePercentage">
+        <button type="submit">Agregar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    var selectedStudentName = ''; // Variable global para almacenar el nombre completo del estudiante seleccionado
+
+    // Obtener el modal para agregar curso
+    var addCourseModal = document.getElementById('addCourseModal');
+
+    // Obtener el botón de cierre del modal
+    var closeButton = document.querySelector('.close');
+
+    // Función para abrir el modal al hacer clic en el botón "Agregar Curso" y pasar el estudiante_id
+    function openModal(studentId, studentName) {
+      addCourseModal.style.display = 'block';
+      document.getElementById('studentIdInput').value = studentId;
+      selectedStudentName = studentName; // Almacenar el nombre del estudiante seleccionado
+    }
+
+    // Función para cerrar el modal al hacer clic en el botón de cierre
+    closeButton.addEventListener('click', function() {
+      addCourseModal.style.display = 'none';
+    });
+
+    // Función para cerrar el modal al hacer clic fuera del área del modal
+    window.addEventListener('click', function(event) {
+      if (event.target === addCourseModal) {
+        addCourseModal.style.display = 'none';
+      }
+    });
+
+    // Función para realizar la búsqueda al enviar el formulario
+    document.getElementById('searchForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Evitar que el formulario se envíe por defecto
+
+      // Obtener los valores de nombre y apellido del formulario
+      var nombre = document.getElementById('nombre').value.trim();
+      var apellido = document.getElementById('apellido').value.trim();
+      var contacto = document.getElementById('contacto').value.trim();
+
+      // Realizar una solicitud AJAX al servicio de búsqueda de estudiantes
+      fetch('findByNameOrLastName.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'nombre=' + encodeURIComponent(nombre) + '&apellido=' + encodeURIComponent(apellido) + '&id_contacto=' + encodeURIComponent(contacto)
+      })
+      .then(response => response.json())
+      .then(data => {
+        var studentList = document.getElementById('studentList');
+        studentList.innerHTML = ''; // Limpiar resultados anteriores
+
+        if (data.length > 0) {
+          data.forEach(estudiante => {
+            var listItem = document.createElement('li');
+            listItem.textContent = estudiante.id_estudiante + ' - ' + estudiante.nombre1 + ' ' + estudiante.nombre2 + ' ' + estudiante.apellido1 + ' ' + estudiante.apellido2;
+            var buttonGroup = document.createElement('div');
+            buttonGroup.className = 'buttonGroup';
+
+            // Crear botón para agregar curso
+            var addCourseButton = document.createElement('button');
+            addCourseButton.textContent = 'Agregar Curso';
+            addCourseButton.classList.add('addCourseButton');
+            addCourseButton.dataset.studentId = estudiante.id; // Almacenar el estudiante_id como atributo de datos
+            addCourseButton.addEventListener('click', function() {
+              // Pasar el nombre completo del estudiante al abrir el modal
+              var studentName = estudiante.nombre1 + ' ' + estudiante.apellido1;
+              openModal(estudiante.id, studentName); 
+            });
+
+            buttonGroup.appendChild(addCourseButton);
+            listItem.appendChild(buttonGroup);
+            studentList.appendChild(listItem);
+          });
+        } else {
+          studentList.textContent = 'No se encontraron estudiantes.';
+        }
+      })
+      .catch(error => {
+        console.error('Error al realizar la búsqueda:', error);
+        document.getElementById('studentList').textContent = 'Error al realizar la búsqueda.';
+      });
+    });
+
+    // Función para cargar la lista de cursos al abrir el modal
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('../cursos/getCourses.php')
+        .then(response => response.json())
+        .then(data => {
+          var courseSelect = document.getElementById('courseSelect');
+          courseSelect.innerHTML = ''; // Limpiar opciones anteriores
+
+          if (data.length > 0) {
+            data.forEach(curso => {
+              var option = document.createElement('option');
+              option.value = curso.id;
+              option.textContent = curso.nombre;
+              courseSelect.appendChild(option);
+            });
+          } else {
+            var option = document.createElement('option');
+            option.textContent = 'No hay cursos disponibles';
+            courseSelect.appendChild(option);
+          }
+        })
+        .catch(error => {
+          console.error('Error al obtener la lista de cursos:', error);
+        });
+    });
+
+    // Obtener el formulario de agregar curso
+    var addCourseForm = document.getElementById('addCourseForm');
+
+    // Función para manejar el envío del formulario
+    addCourseForm.addEventListener('submit', function(event) {
+      event.preventDefault(); // Evitar el envío automático
+
+      // Obtener los valores del formulario
+      var courseId = document.getElementById('courseSelect').value;
+      var coursePercentage = document.getElementById('coursePercentage').value;
+      var courseName = document.getElementById('courseSelect').options[document.getElementById('courseSelect').selectedIndex].text; // Nombre del curso seleccionado
+      var estudianteId = document.getElementById('studentIdInput').value;
+
+      // Confirmar con el nombre del curso y el nombre del estudiante
+      var confirmation = confirm("¿Estás seguro de que deseas registrar el curso: " + courseName + " para el estudiante: " + selectedStudentName + "?\n\n" +
+                                 "Porcentaje del Curso: " + coursePercentage);
+
+      if (confirmation) {
+        // Realizar una solicitud AJAX para enviar los datos al archivo PHP
+        fetch('../cursos/insertCourse.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: 'courseId=' + encodeURIComponent(courseId) + 
+                '&coursePercentage=' + encodeURIComponent(coursePercentage) + 
+                '&estudianteId=' + encodeURIComponent(estudianteId)
+        })
+        .then(response => response.text())
+        .then(data => {
+          alert('Curso registrado correctamente');
+          addCourseModal.style.display = 'none';
+          addCourseForm.reset(); // Resetear el formulario
+        })
+        .catch(error => {
+          console.error('Error al enviar los datos:', error);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
