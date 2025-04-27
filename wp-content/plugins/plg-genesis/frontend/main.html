@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Genesis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-section h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #3b82f6;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            color: #64748b;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #1e293b;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .action-button:hover {
+            background: #e2e8f0;
+            transform: translateX(5px);
+        }
+
+        .action-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            color: #3b82f6;
+        }
+
+        .recent-activity {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .activity-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            color: #3b82f6;
+            margin-right: 0.5rem;
+        }
+
+        .activity-time {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .welcome-section {
+                padding: 2rem 0;
+                margin: 1rem;
+                border-radius: 12px;
+            }
+
+            .stats-card {
+                margin: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-3">
+        <!-- Sección de Bienvenida -->
+        <div class="welcome-section text-center">
+            <div class="container">
+                <h1 class="mb-2">Bienvenido a Genesis</h1>
+                <p class="lead mb-0">Sistema de gestión para la escuela Biblica Emmaus</p>
+            </div>
+        </div>
+
+        <!-- Estadísticas Principales -->
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="bi bi-people stats-icon"></i>
+                    <div class="stats-number estudiantes-activos">0</div>
+                    <div class="stats-label">Estudiantes Activos</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="bi bi-book stats-icon"></i>
+                    <div class="stats-number cursos-mes">0</div>
+                    <div class="stats-label">Cursos este Mes</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="bi bi-calendar-check stats-icon"></i>
+                    <div class="stats-number cursos-completados">0</div>
+                    <div class="stats-label">Cursos Completados</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="bi bi-person-badge stats-icon"></i>
+                    <div class="stats-number contactos-activos">0</div>
+                    <div class="stats-label">Contactos Registrados</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas y Actividad Reciente -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="quick-actions">
+                    <h3 class="mb-4">Acciones Rapidas</h3>
+                    <a href="estudiantes/crear_estudiante_v2.php" class="action-button">
+                        <i class="bi bi-person-plus action-icon"></i>
+                        <div>
+                            <strong>Nuevo Estudiante</strong>
+                            <div class="text-muted">Registrar un nuevo estudiante en el sistema</div>
+                        </div>
+                    </a>
+                    <a href="cursos/crear_curso.php" class="action-button">
+                        <i class="bi bi-journal-plus action-icon"></i>
+                        <div>
+                            <strong>Crear Curso</strong>
+                            <div class="text-muted">Anadir un nuevo curso al catalogo</div>
+                        </div>
+                    </a>
+                    <a href="contactos/crear_contacto.php" class="action-button">
+                        <i class="bi bi-person-vcard action-icon"></i>
+                        <div>
+                            <strong>Nuevo Contacto</strong>
+                            <div class="text-muted">Registrar un nuevo contacto</div>
+                        </div>
+                    </a>
+                    <a href="cursos/calendario_cursos.php" class="action-button">
+                        <i class="bi bi-calendar2-week action-icon"></i>
+                        <div>
+                            <strong>Calendario de Cursos</strong>
+                            <div class="text-muted">Cursos registrados en el sistema por dia</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="recent-activity">
+                    <h3 class="mb-4">Actividad Reciente</h3>
+                    <div id="actividad-reciente">
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-clock-history fs-1 mb-3 d-block"></i>
+                            Cargando actividad reciente...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Función para cargar las estadísticas
+        async function cargarEstadisticas() {
+            try {
+                const response = await fetch('../backend/estadisticas/obtener_estadisticas.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.querySelector('.estudiantes-activos').textContent = data.data.estudiantes_activos;
+                    document.querySelector('.cursos-mes').textContent = data.data.cursos_mes;
+                    document.querySelector('.cursos-completados').textContent = data.data.cursos_completados;
+                    document.querySelector('.contactos-activos').textContent = data.data.contactos_activos;
+                    
+                    // Actualizar actividad reciente
+                    const contenedor = document.getElementById('actividad-reciente');
+                    contenedor.innerHTML = data.data.actividad_reciente.map(actividad => {
+                        let iconClass = 'bi-dot';
+                        switch (actividad.tipo) {
+                            case 'estudiante':
+                                iconClass = 'bi-person-plus';
+                                break;
+                            case 'curso':
+                                iconClass = 'bi-book';
+                                break;
+                            case 'contacto':
+                                iconClass = 'bi-person-vcard';
+                                break;
+                        }
+                        
+                        return `
+                            <div class="activity-item">
+                                <i class="bi ${iconClass} activity-icon"></i>
+                                ${actividad.texto}
+                                <div class="activity-time">${actividad.tiempo}</div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    console.error('Error al cargar estadísticas:', data.error);
+                    mostrarError('Error al cargar las estadísticas');
+                }
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+                mostrarError('Error al cargar las estadísticas');
+            }
+        }
+
+        function mostrarError(mensaje) {
+            // Mostrar mensaje de error en cada estadística
+            document.querySelectorAll('.stats-number').forEach(el => {
+                el.innerHTML = '<i class="bi bi-exclamation-triangle text-warning"></i>';
+            });
+            
+            // Mostrar mensaje de error en actividad reciente
+            document.getElementById('actividad-reciente').innerHTML = `
+                <div class="text-center text-warning py-4">
+                    <i class="bi bi-exclamation-triangle fs-1 mb-3 d-block"></i>
+                    ${mensaje}
+                </div>
+            `;
+        }
+
+        // Cargar datos al iniciar y cada 5 minutos
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarEstadisticas();
+            // Actualizar cada 5 minutos
+            setInterval(cargarEstadisticas, 300000);
+        });
+    </script>
+</body>
+</html>

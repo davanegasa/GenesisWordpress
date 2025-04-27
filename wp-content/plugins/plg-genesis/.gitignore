@@ -1,0 +1,99 @@
+# WordPress
+wp-config.php
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/backup-db/
+wp-content/cache/
+wp-content/backups/
+
+# Entorno de desarrollo
+.env
+*.log
+.DS_Store
+node_modules/
+vendor/
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de configuración de WordPress
+wp-config.php
+
+# Archivos de caché y temporales
+*.log
+*.cache
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Archivos de entorno
+.env
+.env.*
+!.env.example
+
+# Archivos de dependencias
+/vendor/
+/node_modules/
+
+# Archivos de IDE y editores
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de compilación
+*.compiled.*
+*.min.*
+
+# Archivos de respaldo
+*.bak
+*.backup
+*~
+
+# Archivos de configuración local
+config.local.php
+db.local.php
+
+# Archivos de registro de errores
+error_log
+php_errors.log
+
+# Archivos de sesión
+/sessions/
+*.sess
+
+# Archivos de carga
+/uploads/
+/media/
+
+# Archivos de caché de WordPress
+wp-content/cache/
+wp-content/upgrade/
+wp-content/uploads/
+wp-content/backup*/
+wp-content/backup-db/
+wp-content/blogs.dir/
+wp-content/mu-plugins/
+wp-content/wp-cache-config.php
+wp-content/plugins/hello.php
+
+# Archivos de base de datos
+*.sql
+*.sqlite
+
+# Exclusiones adicionales
+.git/
+*.zip 
