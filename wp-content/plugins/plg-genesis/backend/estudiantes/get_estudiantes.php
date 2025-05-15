@@ -3,7 +3,7 @@
 include '../db.php'; // Ajusta la ruta seg煤n tu estructura
 
 // Consulta para obtener todos los datos (ejemplo con estudiantes)
-$query = "SELECT id, id_estudiante, nombre1, nombre2, apellido1, apellido2, email, celular, doc_identidad FROM estudiantes";
+$query = "SELECT id, id_estudiante, nombre1, nombre2, apellido1, apellido2, email, celular, doc_identidad, estado_civil, escolaridad, ocupacion FROM estudiantes";
 $resultado = pg_query($conexion, $query);
 
 // Convertir los resultados a JSON

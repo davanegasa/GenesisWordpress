@@ -28,7 +28,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit;
 }
 
-if (!isset($data['estudiante_id']) || !is_numeric($data['estudiante_id'])) {
+if (!isset($data['id']) || !is_numeric($data['id'])) {
     http_response_code(400);
     echo json_encode(['error' => 'ID de estudiante no válido']);
     exit;
@@ -40,7 +40,7 @@ if (!isset($data['observacion']) || empty(trim($data['observacion']))) {
     exit;
 }
 
-$estudiante_id = intval($data['estudiante_id']);
+$estudiante_id = intval($data['id']);
 $observacion = trim($data['observacion']);
 $usuario_id = get_current_user_id(); // Usuario autenticado en WordPress
 
@@ -56,6 +56,16 @@ $tipo = isset($data['tipo']) ? trim($data['tipo']) : 'General';
 if (!$conexion) {
     http_response_code(500);
     echo json_encode(['error' => 'Error en la conexión a la base de datos']);
+    exit;
+}
+
+// Verificar si el estudiante existe
+$query_check = "SELECT id FROM estudiantes WHERE id = $1";
+$result_check = pg_query_params($conexion, $query_check, [$estudiante_id]);
+
+if (!$result_check || pg_num_rows($result_check) === 0) {
+    http_response_code(404);
+    echo json_encode(['error' => 'Estudiante no encontrado']);
     exit;
 }
 

@@ -102,6 +102,18 @@ if (isset($_GET['id'])) {
                         <p class="card-text mb-1" style="font-size: 0.85rem;">
                             <strong>Iglesia:</strong> <?php echo $detalle_estudiante['iglesia']; ?>
                         </p>
+                        <!-- Estado Civil -->
+                        <p class="card-text mb-1" style="font-size: 0.85rem;">
+                            <strong>Estado Civil:</strong> <?php echo $detalle_estudiante['estado_civil'] ?: 'No especificado'; ?>
+                        </p>
+                        <!-- Escolaridad -->
+                        <p class="card-text mb-1" style="font-size: 0.85rem;">
+                            <strong>Escolaridad:</strong> <?php echo $detalle_estudiante['escolaridad'] ?: 'No especificado'; ?>
+                        </p>
+                        <!-- Ocupación -->
+                        <p class="card-text mb-1" style="font-size: 0.85rem;">
+                            <strong>Ocupación:</strong> <?php echo $detalle_estudiante['ocupacion'] ?: 'No especificado'; ?>
+                        </p>
                         <button id="edit-student-btn" class="btn btn-primary mt-3">Editar Información</button>
                     </div>
                 </div>
@@ -193,6 +205,34 @@ if (isset($_GET['id'])) {
                                     <div class="form-group mb-3">
                                         <label for="iglesia" class="form-label">Iglesia</label>
                                         <input type="text" class="form-control" id="iglesia" name="iglesia" value="<?php echo $detalle_estudiante['iglesia']; ?>">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="estado_civil" class="form-label">Estado Civil</label>
+                                        <select class="form-select" id="estado_civil" name="estado_civil">
+                                            <option value="">Seleccione estado civil</option>
+                                            <option value="Soltero" <?php echo $detalle_estudiante['estado_civil'] == 'Soltero' ? 'selected' : ''; ?>>Soltero/a</option>
+                                            <option value="Casado" <?php echo $detalle_estudiante['estado_civil'] == 'Casado' ? 'selected' : ''; ?>>Casado/a</option>
+                                            <option value="Divorciado" <?php echo $detalle_estudiante['estado_civil'] == 'Divorciado' ? 'selected' : ''; ?>>Divorciado/a</option>
+                                            <option value="Viudo" <?php echo $detalle_estudiante['estado_civil'] == 'Viudo' ? 'selected' : ''; ?>>Viudo/a</option>
+                                            <option value="Union libre" <?php echo $detalle_estudiante['estado_civil'] == 'Union libre' ? 'selected' : ''; ?>>Unión libre</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="escolaridad" class="form-label">Escolaridad</label>
+                                        <select class="form-select" id="escolaridad" name="escolaridad">
+                                            <option value="">Seleccione nivel de escolaridad</option>
+                                            <option value="Primaria" <?php echo $detalle_estudiante['escolaridad'] == 'Primaria' ? 'selected' : ''; ?>>Primaria</option>
+                                            <option value="Secundaria" <?php echo $detalle_estudiante['escolaridad'] == 'Secundaria' ? 'selected' : ''; ?>>Secundaria</option>
+                                            <option value="Técnico" <?php echo $detalle_estudiante['escolaridad'] == 'Técnico' ? 'selected' : ''; ?>>Técnico</option>
+                                            <option value="Tecnólogo" <?php echo $detalle_estudiante['escolaridad'] == 'Tecnólogo' ? 'selected' : ''; ?>>Tecnólogo</option>
+                                            <option value="Universitario" <?php echo $detalle_estudiante['escolaridad'] == 'Universitario' ? 'selected' : ''; ?>>Universitario</option>
+                                            <option value="Postgrado" <?php echo $detalle_estudiante['escolaridad'] == 'Postgrado' ? 'selected' : ''; ?>>Postgrado</option>
+                                            <option value="Ninguno" <?php echo $detalle_estudiante['escolaridad'] == 'Ninguno' ? 'selected' : ''; ?>>Ninguno</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="ocupacion" class="form-label">Ocupación</label>
+                                        <input type="text" class="form-control" id="ocupacion" name="ocupacion" value="<?php echo $detalle_estudiante['ocupacion']; ?>">
                                     </div>
                                     <div class="form-group mb-3">
                                         <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>

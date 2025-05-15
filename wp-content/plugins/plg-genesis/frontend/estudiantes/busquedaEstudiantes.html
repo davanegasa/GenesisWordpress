@@ -4,46 +4,570 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Estudiantes</title>
-    <link rel="stylesheet" href="../../assets/css/styles.css">
+    <!-- Asegurarnos de que jQuery se cargue primero -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    
+    <!-- Bootstrap CSS y JS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
+    <!-- Estilos personalizados -->
     <style>
-        /* Mejorar el diseño del dropdown */f
-        .dropdown .btn {
-            width: 120px; /* Ajusta el ancho del botón */
+        :root {
+            --primary-color: #1a3b89;
+            --primary-hover: #132c66;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --border-color: #e2e8f0;
+            --background-light: #f7fafc;
+            --background-section: #edf2f7;
+            --error-color: #e53e3e;
+            --success-color: #38a169;
         }
-    
-        /* Alinear el menú dropdown correctamente */
+
+        body.bg-light {
+            background-color: var(--background-light) !important;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 1.2rem;
+            background-color: #fff;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .search-container {
+            background-color: var(--background-section);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.5rem 0.8rem;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(26, 59, 137, 0.1);
+            outline: none;
+        }
+
+        .table {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            border-bottom: none;
+            padding: 0.8rem;
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--background-light);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 400;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #718096;
+            border-color: #718096;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .modal-content {
+            border-radius: 6px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background-color: var(--background-light);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+        }
+
+        .modal-title {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+        }
+
         .dropdown-menu {
-            min-width: 160px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            font-size: 0.85rem;
+            position: absolute;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1050;
+            background: white;
+            display: none;
         }
-    
-        /* Mejorar los items dentro del menú */
-        .dropdown-menu .dropdown-item {
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .curso-search-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        #filtroCurso {
+            width: 100%;
+            padding-right: 30px;
+        }
+
+        .curso-selected {
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            background: var(--background-light);
+            border-radius: 4px;
+            display: none;
+        }
+
+        .curso-selected.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--background-light);
+            color: var(--primary-color);
+        }
+
+        .alert {
+            font-size: 0.85rem;
+            padding: 0.8rem 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-danger {
+            background-color: #fff5f5;
+            border-color: #fed7d7;
+            color: var(--error-color);
+        }
+
+        .list-group-item {
+            font-size: 0.85rem;
+            padding: 0.8rem 1rem;
+            border-color: var(--border-color);
+        }
+
+        /* Mejoras específicas para la tabla de estudiantes */
+        .table td {
+            vertical-align: middle;
+            padding: 0.8rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons .btn {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            transition: all 0.2s ease;
+        }
+
+        .action-buttons .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .action-buttons .btn i {
+            font-size: 0.9rem;
+        }
+
+        /* Estilos para los modales */
+        .form-label {
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+        }
+
+        .table td.editable {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .table td.editable:hover::after {
+            content: '\f044';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 10px;
+            color: var(--primary-color);
+            opacity: 0.5;
+        }
+
+        .table td.editing {
+            padding: 0 !important;
+        }
+
+        .editing-container {
             display: flex;
             align-items: center;
-            gap: 8px; /* Espacio entre icono y texto */
-            padding: 8px 12px;
+            width: 100%;
+            height: 100%;
+            background: white;
         }
-    
-        /* Efecto hover para mejorar la visualización */
-        .dropdown-menu .dropdown-item:hover {
-            background-color: #007bff;
+
+        .editing-container input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px 0 0 4px;
+            outline: none;
+        }
+
+        .editing-actions {
+            display: flex;
+            border: 2px solid var(--primary-color);
+            border-left: none;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .editing-actions button {
+            border: none;
+            background: none;
+            padding: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .editing-actions button:hover {
+            background-color: var(--background-section);
+        }
+
+        .editing-actions button.save {
+            color: var(--success-color);
+        }
+
+        .editing-actions button.cancel {
+            color: var(--error-color);
+            border-left: 1px solid var(--border-color);
+        }
+
+        /* Estilos responsivos para la tabla */
+        @media screen and (max-width: 768px) {
+            .table {
+                display: block;
+                width: 100%;
+            }
+
+            .table thead {
+                display: none; /* Ocultamos el encabezado en móviles */
+            }
+
+            .table tbody,
+            .table tr {
+                display: block;
+                width: 100%;
+            }
+
+            .table tr {
+                margin-bottom: 1rem;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                background: white;
+                padding: 0.5rem;
+            }
+
+            .table td {
+                display: flex;
+                padding: 0.5rem !important;
+                text-align: left;
+                border: none !important;
+            }
+
+            .table td::before {
+                content: attr(data-label);
+                font-weight: 500;
+                width: 120px;
+                min-width: 120px;
+                color: var(--primary-color);
+            }
+
+            .table td.editable {
+                position: relative;
+                padding-right: 2rem !important;
+            }
+
+            .action-buttons {
+                justify-content: flex-start;
+                margin-top: 0.5rem;
+            }
+
+            .action-buttons .btn {
+                padding: 0.4rem 0.8rem;
+            }
+
+            .editing-container {
+                flex: 1;
+            }
+
+            .editing-container input {
+                width: 100%;
+            }
+        }
+
+        /* Tooltip personalizado */
+        [title] {
+            position: relative;
+        }
+
+        [title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.3rem 0.6rem;
+            background: rgba(0,0,0,0.8);
             color: white;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        /* Estilos para la vista rápida */
+        .info-group {
+            margin-bottom: 0.8rem;
+        }
+
+        .info-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-group label {
+            font-weight: 500;
+            color: var(--text-secondary);
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .info-group span {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .card-header {
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .card-header i {
+            width: 16px;
+            text-align: center;
+        }
+
+        #modalVistaRapida .card {
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+
+        #modalVistaRapida .card:last-child {
+            margin-bottom: 0;
+        }
+
+        #modalVistaRapida .card-body {
+            padding: 1rem;
+        }
+
+        .stat-item {
+            padding: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .curso-info,
+        .observacion-info {
+            font-size: 0.85rem;
+        }
+
+        .curso-info .fecha,
+        .observacion-info .fecha {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .curso-info .nivel {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+
+        .curso-info .porcentaje {
+            font-weight: 500;
+            color: var(--success-color);
+        }
+
+        .observacion-info .tipo {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+
+        .observacion-info .usuario {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Estilos para las notificaciones toast */
+        #toastContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast-notification {
+            padding: 15px 25px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            color: white;
+            display: flex;
+            align-items: center;
+            min-width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .toast-notification.success {
+            background-color: #48bb78;
+        }
+
+        .toast-notification.error {
+            background-color: #fc8181;
+        }
+
+        .toast-notification i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
         }
     </style>
 </head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center text-primary">Lista de Estudiantes</h1>
-        <div class="mb-3">
-            <input type="text" id="filter-global" class="form-control" placeholder="Buscar por nombre, documento, celular o correo">
+<body class="bg-light">
+    <!-- Contenedor para las notificaciones toast -->
+    <div id="toastContainer"></div>
+
+    <div class="container">
+        <h1 class="page-title">Lista de Estudiantes</h1>
+        
+        <div class="search-container">
+            <div class="search-input">
+                <i class="fas fa-search"></i>
+                <input type="text" id="filter-global" class="form-control" placeholder="Buscar por nombre, documento, celular o correo">
+            </div>
         </div>
-    
-        <table class="table table-striped table-hover">
-            <thead class="table-primary">
+
+        <table class="table">
+            <thead>
                 <tr>
                     <th>ID Estudiante</th>
                     <th>Nombre Completo</th>
@@ -71,28 +595,36 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="formAgregarCurso">
-                        <div class="mb-3 dropdown position-relative">
+                    <form id="formAgregarCurso" class="form-container">
+                        <div class="mb-3">
                             <label for="filtroCurso" class="form-label">Selecciona un Curso</label>
-                            <div class="input-group">
-                                <input type="text" id="filtroCurso" class="form-control" placeholder="Escribe para buscar un curso...">
+                            <div class="curso-search-container">
+                                <input type="text" id="filtroCurso" class="form-control" 
+                                       placeholder="Escribe para buscar un curso..." 
+                                       autocomplete="off">
+                                <div id="cursoSeleccionado" class="curso-selected">
+                                    <i class="fas fa-book me-2"></i>
+                                    <span></span>
+                                </div>
+                                <ul id="dropdownCursos" class="dropdown-menu"></ul>
                             </div>
-    
-                            <!-- Dropdown para mostrar cursos filtrados -->
-                            <ul id="dropdownCursos" class="dropdown-menu w-100 position-absolute" style="max-height: 300px; overflow-y: auto; top: 100%; z-index: 1000;"></ul>
-    
                             <input type="hidden" id="idCursoSeleccionado" name="idCursoSeleccionado">
                         </div>
                         <div class="mb-3">
                             <label for="inputPorcentaje" class="form-label">Porcentaje Obtenido</label>
-                            <input type="number" id="inputPorcentaje" class="form-control" min="0" max="100" placeholder="Ingrese el porcentaje obtenido" tabindex="2" required>
+                            <input type="number" id="inputPorcentaje" class="form-control" 
+                                   min="1" max="100" 
+                                   placeholder="Ingrese el porcentaje obtenido (1-100)" required>
+                            <div class="invalid-feedback">
+                                El porcentaje debe estar entre 1 y 100
+                            </div>
                         </div>
                         <input type="hidden" id="idEstudianteSeleccionado">
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" tabindex="4">Cerrar</button>
-                    <button type="button" class="btn btn-primary" id="btnAsignarCurso" tabindex="3">Asignar Curso</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnAsignarCurso">Asignar Curso</button>
                 </div>
             </div>
         </div>
@@ -107,7 +639,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="formEditarDato">
+                    <form id="formEditarDato" class="form-container">
                         <div class="mb-3">
                             <label for="campoEditar" class="form-label">Nuevo Valor</label>
                             <input type="text" id="campoEditar" class="form-control" placeholder="Ingrese el nuevo valor">
@@ -117,7 +649,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" id="guardarCambio">Guardar Cambios</button>
                 </div>
             </div>
@@ -133,7 +665,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="formAgregarObservaciones">
+                    <form id="formAgregarObservaciones" class="form-container">
                         <div class="mb-3">
                             <label for="inputObservacion" class="form-label">Observación</label>
                             <textarea id="inputObservacion" class="form-control" rows="4" placeholder="Escribe la observación aquí..."></textarea>
@@ -142,7 +674,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" id="btnGuardarObservacion">Guardar Observación</button>
                 </div>
             </div>
@@ -169,16 +701,188 @@
         </div>
     </div>
 
+    <!-- Modal para vista rápida de detalles -->
+    <div class="modal fade" id="modalVistaRapida" tabindex="-1" aria-labelledby="modalVistaRapidaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalVistaRapidaLabel">
+                        <i class="fas fa-user-circle me-2"></i>Detalles del Estudiante
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Spinner de carga -->
+                    <div id="vistaRapidaSpinner" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Cargando información...</p>
+                    </div>
+
+                    <!-- Contenido principal -->
+                    <div id="vistaRapidaContenido" class="d-none">
+                        <div class="row">
+                            <!-- Columna izquierda: Información personal -->
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-primary text-white">
+                                        <i class="fas fa-user me-2"></i>Información Personal
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="info-group">
+                                            <label>Código:</label>
+                                            <span id="vr-codigo"></span>
+                                        </div>
+                                        <div class="info-group">
+                                            <label>Nombre:</label>
+                                            <span id="vr-nombre"></span>
+                                        </div>
+                                        <div class="info-group">
+                                            <label>Documento:</label>
+                                            <span id="vr-documento"></span>
+                                        </div>
+                                        <div class="info-group">
+                                            <label>Email:</label>
+                                            <span id="vr-email"></span>
+                                        </div>
+                                        <div class="info-group">
+                                            <label>Celular:</label>
+                                            <span id="vr-celular"></span>
+                                        </div>
+                                        <div class="info-group">
+                                            <label>Ciudad:</label>
+                                            <span id="vr-ciudad"></span>
+                                        </div>
+                                        <div class="info-group">
+                                            <label>Iglesia:</label>
+                                            <span id="vr-iglesia"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Información del contacto -->
+                                <div class="card">
+                                    <div class="card-header bg-info text-white">
+                                        <i class="fas fa-address-book me-2"></i>Información de Contacto
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="info-group">
+                                            <label>Código:</label>
+                                            <span id="vr-contacto-codigo"></span>
+                                        </div>
+                                        <div class="info-group">
+                                            <label>Nombre:</label>
+                                            <span id="vr-contacto-nombre"></span>
+                                        </div>
+                                        <div class="info-group">
+                                            <label>Iglesia:</label>
+                                            <span id="vr-contacto-iglesia"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Columna derecha: Cursos y Observaciones -->
+                            <div class="col-md-6">
+                                <!-- Estadísticas -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-success text-white">
+                                        <i class="fas fa-chart-bar me-2"></i>Estadísticas
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row text-center">
+                                            <div class="col-4">
+                                                <div class="stat-item">
+                                                    <div class="stat-value" id="vr-total-cursos">0</div>
+                                                    <div class="stat-label">Cursos</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="stat-item">
+                                                    <div class="stat-value" id="vr-promedio">0%</div>
+                                                    <div class="stat-label">Promedio</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="stat-item">
+                                                    <div class="stat-value" id="vr-ultima-actividad">-</div>
+                                                    <div class="stat-label">Últ. Actividad</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Último curso -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-warning text-dark">
+                                        <i class="fas fa-graduation-cap me-2"></i>Último Curso
+                                    </div>
+                                    <div class="card-body" id="vr-ultimo-curso">
+                                        <div class="text-center text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>No hay cursos registrados
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Última observación -->
+                                <div class="card">
+                                    <div class="card-header bg-secondary text-white">
+                                        <i class="fas fa-comment-alt me-2"></i>Última Observación
+                                    </div>
+                                    <div class="card-body" id="vr-ultima-observacion">
+                                        <div class="text-center text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>No hay observaciones registradas
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="#" class="btn btn-primary" id="vr-ver-completo">
+                        <i class="fas fa-external-link-alt me-1"></i>Ver Perfil Completo
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     $(document).ready(function () {
         let estudiantes = [];
         let cursos = [];
+        let editingCell = null;
+    
+        // Función para mostrar notificaciones toast
+        function showToast(message, type = 'success') {
+            const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
+            const toast = $(`
+                <div class="toast-notification ${type}">
+                    <i class="fas fa-${icon}"></i>
+                    <span>${message}</span>
+                </div>
+            `);
+            
+            $('#toastContainer').append(toast);
+            
+            // Animación de desvanecimiento y eliminación
+            setTimeout(() => {
+                toast.css('animation', 'fadeOut 0.5s ease-out forwards');
+                setTimeout(() => {
+                    toast.remove();
+                }, 500);
+            }, 4500);
+        }
     
         function filtrarEstudiantes() {
             const filtroGlobal = ($('#filter-global').val() || '').toLowerCase();
         
             if (!filtroGlobal) {
-                mostrarEstudiantes(estudiantes.slice(0, 100)); // Si no hay filtro, mostrar los primeros 100
+                mostrarEstudiantes(estudiantes.slice(0, 100));
                 return;
             }
         
@@ -193,352 +897,590 @@
                 );
             });
         
-            mostrarEstudiantes(estudiantesFiltrados); // Mostrar solo los que coincidan
+            mostrarEstudiantes(estudiantesFiltrados);
         }
     
         function mostrarError(mensaje) {
             $('#mensaje-error').removeClass('d-none').text(mensaje);
-            $('#tabla-cuerpo').empty(); // Limpiar la tabla
+            $('#tabla-cuerpo').empty();
         }
         
         function cargarEstudiantes() {
-            $.getJSON('../../backend/estudiantes/get_estudiantes.php?pagina=1&limite=5000', function (data) {
+            $.getJSON('../../backend/estudiantes/get_estudiantes.php?pagina=1&limite=5000')
+                .done(function (data) {
+                    if (Array.isArray(data) && data.length > 0) {
+                        estudiantes = data;
+                        mostrarEstudiantes(estudiantes.slice(0, 20));
+                        $('#mensaje-error').addClass('d-none');
+                    } else {
+                        mostrarError('No se encontraron estudiantes disponibles.');
+                    }
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    console.error("Error al conectar con el servidor:", textStatus, errorThrown);
+                    mostrarError('Error al conectar con el servidor.');
+                });
+        }
         
-                if (Array.isArray(data) && data.length > 0) {
-                    estudiantes = data;
-                    mostrarEstudiantes(estudiantes.slice(0, 20)); // Mostrar solo los primeros 100
-                } else {
-                    mostrarError('No se encontraron estudiantes disponibles.');
-                }
-            }).fail(function (jqXHR, textStatus, errorThrown) {
-                console.error("Error al conectar con el servidor:", textStatus, errorThrown);
-                mostrarError('Error al conectar con el servidor.');
+        function mostrarEstudiantes(estudiantesFiltrados) {
+            const cuerpoTabla = $('#tabla-cuerpo');
+            cuerpoTabla.empty();
+        
+            estudiantesFiltrados.forEach(estudiante => {
+                const nombreCompleto = [
+                    estudiante.nombre1 || '',
+                    estudiante.nombre2 || '',
+                    estudiante.apellido1 || '',
+                    estudiante.apellido2 || ''
+                ].filter(Boolean).join(' ');
+        
+                const fila = $('<tr>').append(
+                    $('<td>').attr('data-label', 'ID').text(estudiante.id_estudiante),
+                    $('<td>').attr('data-label', 'Nombre').text(nombreCompleto),
+                    $('<td>').attr('data-label', 'Documento').text(estudiante.doc_identidad || ''),
+                    $('<td>')
+                        .attr('data-label', 'Celular')
+                        .addClass('editable')
+                        .attr('data-id', estudiante.id_estudiante)
+                        .attr('data-campo', 'celular')
+                        .attr('title', 'Haz clic para editar')
+                        .text(estudiante.celular || ''),
+                    $('<td>')
+                        .attr('data-label', 'Email')
+                        .addClass('editable')
+                        .attr('data-id', estudiante.id_estudiante)
+                        .attr('data-campo', 'email')
+                        .attr('title', 'Haz clic para editar')
+                        .text(estudiante.email || ''),
+                    $('<td>')
+                        .attr('data-label', 'Acciones')
+                        .html(`
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-sm ver-detalles" data-id="${estudiante.id}" title="Ver Detalles">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                            <button class="btn btn-success btn-sm agregar-curso" data-id="${estudiante.id}" title="Asignar Curso">
+                                <i class="fas fa-graduation-cap"></i>
+                            </button>
+                            <button class="btn btn-info btn-sm agregar-observacion" data-id="${estudiante.id}" title="Agregar Observación">
+                                <i class="fas fa-comment-alt"></i>
+                            </button>
+                            <button class="btn btn-warning btn-sm ver-observaciones" data-id="${estudiante.id}" title="Ver Observaciones">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    `)
+                );
+        
+                cuerpoTabla.append(fila);
             });
+        }
+        
+        function cargarCursos() {
+            $.getJSON('../../backend/cursos/obtener_cursos.php')
+                .done(function (data) {
+                    if (data.success && data.cursos) {
+                        cursos = data.cursos;
+                        actualizarDropdownCursos(cursos);
+                    } else {
+                        console.error('Error al cargar los cursos.');
+                    }
+                })
+                .fail(function (error) {
+                    console.error('Error al cargar los cursos:', error);
+                });
         }
         
         function actualizarDropdownCursos(listaCursos) {
             const dropdown = $('#dropdownCursos');
             dropdown.empty();
-    
+        
             if (listaCursos.length > 0) {
                 listaCursos.forEach(curso => {
-                    const item = $(`<li><a class="dropdown-item" href="#" data-id="${curso.id}">${curso.descripcion}</a></li>`);
+                    const item = $(`
+                        <li>
+                            <a class="dropdown-item" href="#" data-id="${curso.id}">
+                                <i class="fas fa-book me-2"></i>
+                                ${curso.descripcion}
+                            </a>
+                        </li>
+                    `);
                     dropdown.append(item);
                 });
-                dropdown.show(); // Mostrar siempre el dropdown cuando hay elementos
             } else {
-                dropdown.append('<li><a class="dropdown-item disabled" href="#">No se encontraron cursos</a></li>');
-                dropdown.show(); // Mostrar el dropdown incluso si no hay coincidencias
+                dropdown.append('<li><a class="dropdown-item disabled" href="#"><i class="fas fa-info-circle me-2"></i>No se encontraron cursos</a></li>');
             }
-        }
-        
-        function cargarCursos() {
-            $.getJSON('../../backend/cursos/obtener_cursos.php', function (data) {
-                if (data.success && data.cursos) {
-                    cursos = data.cursos;
-                    actualizarDropdownCursos(cursos);
-                } else {
-                    alert('Error al cargar los cursos.');
-                }
-            });
-        }
-    
-        function mostrarEstudiantes(estudiantesFiltrados) {
-            const cuerpoTabla = $('#tabla-cuerpo');
-            const mensajeError = $('#mensaje-error');
-        
-            mensajeError.addClass('d-none');
-            cuerpoTabla.empty();
-        
-            let index = 0;
-            const batchSize = 10; // Número de estudiantes a renderizar por lote
-        
-            function renderBatch() {
-                const fragment = document.createDocumentFragment();
-        
-                for (let i = 0; i < batchSize && index < estudiantesFiltrados.length; i++, index++) {
-                    const estudiante = estudiantesFiltrados[index];
-                    
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${estudiante.id_estudiante}</td>
-                        <td>
-                            <span data-id="${estudiante.id}" data-campo="nombre">${estudiante.nombre1} ${estudiante.nombre2} ${estudiante.apellido1} ${estudiante.apellido2}</span>
-                        </td>
-                        <td>
-                            <a href="#" class="editable" data-id="${estudiante.id}" data-campo="doc_identidad">${estudiante.doc_identidad || '<i class="fas fa-pencil-alt text-primary"></i>'}</a>
-                        </td>
-                        <td>
-                            <a href="#" class="editable" data-id="${estudiante.id}" data-campo="celular">${estudiante.celular || '<i class="fas fa-pencil-alt text-primary"></i>'}</a>
-                        </td>
-                        <td>
-                            <a href="#" class="editable" data-id="${estudiante.id}" data-campo="email">${estudiante.email || '<i class="fas fa-pencil-alt text-primary"></i>'}</a>
-                        </td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    Acciones
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item ver-mas" href="#" data-id="${estudiante.id}">
-                                            <i class="fas fa-info-circle"></i> Ver Detalles
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item agregar-curso" href="#" data-id="${estudiante.id}">
-                                            <i class="fas fa-book"></i> Asignar Curso
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item agregar-observaciones" href="#" data-id="${estudiante.id}">
-                                            <i class="fas fa-comment-dots"></i> Agregar Observación
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item ver-observaciones" href="#" data-id="${estudiante.id}">
-                                            <i class="fas fa-eye"></i> Ver Observaciones
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                    `;
-        
-                    fragment.appendChild(row);
-                }
-        
-                cuerpoTabla.append(fragment);
-        
-                if (index < estudiantesFiltrados.length) {
-                    requestAnimationFrame(renderBatch);
-                } else {
-                    asignarEventos(); // Solo asignar eventos después de renderizar todo
-                }
-            }
-        
-            requestAnimationFrame(renderBatch);
-        }
-        
-        // Función separada para asignar eventos después del renderizado
-        function asignarEventos() {
-            $('.ver-mas').on('click', function () {
-                const idEstudiante = $(this).data('id');
-                window.location.href = `ver_detalle.php?id=${idEstudiante}`;
-            });
-        
-            $('.agregar-curso').on('click', function () {
-                const idEstudiante = $(this).data('id');
-                $('#idEstudianteSeleccionado').val(idEstudiante);
-                cargarCursos();
-                // Llamar a la función para cargar los cursos cuando se abre el modal
-                $('#modalAgregarCurso').on('show.bs.modal', function () {
-                    cargarCursos();
-                });
-                $('#modalAgregarCurso').modal('show');
-            });
-        
-            $('.agregar-observaciones').on('click', function () {
-                const idEstudiante = $(this).data('id');
-                $('#idEstudianteSeleccionadoObservacion').val(idEstudiante);
-                $('#inputObservacion').val('');
-                $('#modalAgregarObservaciones').modal('show');
-            });
             
-            $('.ver-observaciones').on('click', function () {
-                const idEstudiante = $(this).data('id');
-                cargarObservaciones(idEstudiante);
-                $('#modalVerObservaciones').modal('show');
-            });
+            dropdown.show();
         }
         
-        function cargarObservaciones(idEstudiante) {
-            $('#listaObservaciones').html('<li class="list-group-item text-center">Cargando...</li>');
+        // Event Listeners
+        $('#filter-global').on('input', filtrarEstudiantes);
         
-            $.getJSON(`../../backend/estudiantes/get_observaciones.php?estudiante_id=${idEstudiante}`, function (data) {
-                if (data.success && Array.isArray(data.observaciones)) {
-                    $('#listaObservaciones').empty();
-                    if (data.observaciones.length > 0) {
-                        data.observaciones.forEach(obs => {
-                            $('#listaObservaciones').append(`<li class="list-group-item">${obs.fecha} - ${obs.observacion}</li>`);
-                        });
-                    } else {
-                        $('#listaObservaciones').html('<li class="list-group-item text-center">No hay observaciones registradas.</li>');
-                    }
-                } else {
-                    $('#listaObservaciones').html('<li class="list-group-item text-center text-danger">Error al cargar las observaciones.</li>');
-                }
-            }).fail(function () {
-                $('#listaObservaciones').html('<li class="list-group-item text-center text-danger">Error al conectar con el servidor.</li>');
-            });
-        }
-    
-        $('#tabla-cuerpo').on('click', '.editable', function () {
-            const id = $(this).data('id');
-            const campo = $(this).data('campo');
-            const valor = $(this).text();
-    
-            $('#idEstudiante').val(id);
-            $('#campoNombre').val(campo);
-            $('#campoEditar').val(valor);
-    
-            $('#modalEditarDato').modal('show');
+        // Event Listeners para el modal de cursos
+        $('#filtroCurso').on('focus', function() {
+            $('#dropdownCursos').show();
         });
-    
-        // Guardar cambios al servidor de los datos editables... celular, telefono
-        $('#guardarCambio').on('click', function () {
+
+        $('#filtroCurso').on('input', function() {
+            const filtro = $(this).val().toLowerCase();
+            const cursosFiltrados = cursos.filter(curso => 
+                curso.descripcion.toLowerCase().includes(filtro)
+            );
+            actualizarDropdownCursos(cursosFiltrados);
+            $('#cursoSeleccionado').removeClass('show');
+            $('#dropdownCursos').show();
+        });
+        
+        $('#dropdownCursos').on('click', '.dropdown-item', function(e) {
+            e.preventDefault();
+            const cursoId = $(this).data('id');
+            const cursoDescripcion = $(this).text().trim();
+            $('#filtroCurso').val('');
+            $('#idCursoSeleccionado').val(cursoId);
+            $('#cursoSeleccionado').addClass('show').find('span').text(cursoDescripcion);
+            $('#dropdownCursos').hide();
+        });
+
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.curso-search-container').length) {
+                $('#dropdownCursos').hide();
+            }
+        });
+
+        $('#modalAgregarCurso').on('show.bs.modal', function() {
+            $('#filtroCurso').val('');
+            $('#idCursoSeleccionado').val('');
+            $('#inputPorcentaje').val('');
+            $('#cursoSeleccionado').removeClass('show');
+            $('#dropdownCursos').hide();
+        });
+        
+        // Inicialización
+        cargarEstudiantes();
+        cargarCursos();
+
+        // Event handlers para guardar cambios
+        $('#guardarCambio').on('click', function() {
             const id = $('#idEstudiante').val();
             const campo = $('#campoNombre').val();
             const valor = $('#campoEditar').val();
-    
+            
+            guardarValorEditado(id, campo, valor, editingCell);
+        });
+
+        // Función para guardar el valor editado
+        function guardarValorEditado(idEstudiante, campo, valor, elemento) {
             $.ajax({
                 url: '../../backend/estudiantes/editar_estudiante.php',
                 method: 'POST',
                 contentType: 'application/json',
                 dataType: 'json',
                 data: JSON.stringify({
-                    id: id,
+                    id: idEstudiante,
                     campo: campo,
                     valor: valor
                 }),
-                success: function (response) {
+                success: function(response) {
                     if (response.success) {
-                        alert('Dato actualizado exitosamente.');
-                        $('#modalEditarDato').modal('hide');
-                        cargarEstudiantes(); // Recargar estudiantes
+                        // Actualizar el estudiante en el array local
+                        const estudiante = estudiantes.find(e => e.id_estudiante === idEstudiante);
+                        if (estudiante) {
+                            estudiante[campo] = valor;
+                        }
+                        elemento.text(valor || '').removeClass('editing');
+                        editingCell = null;
+                        
+                        // Mostrar mensaje de éxito
+                        showToast(response.message || 'Dato actualizado exitosamente');
                     } else {
-                        alert(response.error || 'Error al actualizar el dato.');
+                        console.error('Error del servidor:', response);
+                        showToast('Error al actualizar el dato: ' + (response.error || 'Error desconocido'), 'error');
+                        cancelarEdicion(elemento);
                     }
                 },
-                error: function () {
-                    alert('Error al conectar con el servidor.');
+                error: function(xhr, status, error) {
+                    console.error('Error en la petición:', {
+                        status: status,
+                        error: error,
+                        response: xhr.responseText
+                    });
+                    showToast('Error al conectar con el servidor', 'error');
+                    cancelarEdicion(elemento);
+                }
+            });
+        }
+
+        function cancelarEdicion(elemento) {
+            if (elemento) {
+                elemento.text(elemento.attr('data-original-value') || '').removeClass('editing');
+                editingCell = null;
+            }
+        }
+
+        function activarEdicion(elemento) {
+            if (editingCell) {
+                cancelarEdicion(editingCell);
+            }
+
+            const valorActual = elemento.text();
+            elemento.attr('data-original-value', valorActual);
+            
+            const contenedorEdicion = $('<div>').addClass('editing-container');
+            const input = $('<input>')
+                .addClass('form-control')
+                .val(valorActual)
+                .on('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        cancelarEdicion(elemento);
+                    }
+                });
+
+            const botonesAccion = $('<div>').addClass('editing-actions').append(
+                $('<button>')
+                    .addClass('save')
+                    .attr('title', 'Guardar')
+                    .html('<i class="fas fa-check"></i>')
+                    .on('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const newValue = input.val();
+                        const id = elemento.attr('data-id');
+                        const campo = elemento.attr('data-campo');
+                        guardarValorEditado(id, campo, newValue, elemento);
+                    }),
+                $('<button>')
+                    .addClass('cancel')
+                    .attr('title', 'Cancelar')
+                    .html('<i class="fas fa-times"></i>')
+                    .on('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        cancelarEdicion(elemento);
+                    })
+            );
+
+            contenedorEdicion.append(input, botonesAccion);
+            elemento.empty().append(contenedorEdicion).addClass('editing');
+            input.focus();
+            editingCell = elemento;
+        }
+
+        // Event listener para activar edición al hacer clic
+        $(document).on('click', '.editable', function(e) {
+            if (!$(this).hasClass('editing')) {
+                activarEdicion($(this));
+            }
+        });
+
+        // Funciones globales para los botones de acción
+        function editarDato(idEstudiante, campo, valorActual) {
+            $('#idEstudiante').val(idEstudiante);
+            $('#campoNombre').val(campo);
+            $('#campoEditar').val(valorActual);
+            $('#modalEditarDatoLabel').text(`Editar ${campo.charAt(0).toUpperCase() + campo.slice(1)}`);
+            $('#modalEditarDato').modal('show');
+        }
+        
+        function agregarCurso(idEstudiante) {
+            $('#idEstudianteSeleccionado').val(idEstudiante);
+            $('#filtroCurso').val('');
+            $('#inputPorcentaje').val('');
+            $('#modalAgregarCurso').modal('show');
+        }
+        
+        function agregarObservacion(idEstudiante) {
+            $('#idEstudianteSeleccionadoObservacion').val(idEstudiante);
+            $('#inputObservacion').val('');
+            $('#modalAgregarObservaciones').modal('show');
+        }
+        
+        function verObservaciones(idEstudiante) {
+            $.getJSON(`../../backend/estudiantes/get_observaciones.php?id=${idEstudiante}`)
+                .done(function(data) {
+                    const listaObservaciones = $('#listaObservaciones');
+                    listaObservaciones.empty();
+                    
+                    if (data.success && data.observaciones && data.observaciones.length > 0) {
+                        data.observaciones.forEach(obs => {
+                            const fecha = new Date(obs.fecha).toLocaleDateString();
+                            listaObservaciones.append(`
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-alt me-1"></i>${fecha}
+                                            ${obs.usuario_nombre ? `<span class="ms-2"><i class="fas fa-user me-1"></i>${obs.usuario_nombre}</span>` : ''}
+                                            ${obs.tipo ? `<span class="ms-2"><i class="fas fa-tag me-1"></i>${obs.tipo}</span>` : ''}
+                                        </small>
+                                    </div>
+                                    <p class="mb-0">${obs.observacion}</p>
+                                </li>
+                            `);
+                        });
+                    } else {
+                        listaObservaciones.append(`
+                            <li class="list-group-item text-center text-muted">
+                                <i class="fas fa-info-circle me-2"></i>No hay observaciones registradas
+                            </li>
+                        `);
+                    }
+                    
+                    $('#modalVerObservaciones').modal('show');
+                })
+                .fail(function(error) {
+                    console.error('Error al cargar las observaciones:', error);
+                });
+        }
+
+        // Event listeners para los botones de acción
+        $(document).on('click', '.agregar-curso', function() {
+            agregarCurso($(this).data('id'));
+        });
+        
+        $(document).on('click', '.agregar-observacion', function() {
+            agregarObservacion($(this).data('id'));
+        });
+        
+        $(document).on('click', '.ver-observaciones', function() {
+            verObservaciones($(this).data('id'));
+        });
+
+        // Validación del porcentaje antes de enviar
+        $('#btnAsignarCurso').on('click', function() {
+            const porcentaje = parseInt($('#inputPorcentaje').val());
+            const inputPorcentaje = $('#inputPorcentaje');
+            const cursoId = $('#idCursoSeleccionado').val();
+            const estudianteId = $('#idEstudianteSeleccionado').val();
+            
+            // Validación del porcentaje
+            if (!porcentaje || porcentaje < 1 || porcentaje > 100) {
+                inputPorcentaje.addClass('is-invalid');
+                return;
+            }
+            
+            // Validación del curso seleccionado
+            if (!cursoId) {
+                $('#filtroCurso').addClass('is-invalid');
+                return;
+            }
+
+            // Deshabilitar el botón mientras se procesa
+            const $btnAsignar = $(this);
+            $btnAsignar.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Asignando...');
+            
+            // Preparar los datos para enviar
+            const datos = {
+                id: estudianteId,
+                curso_id: cursoId,
+                porcentaje: porcentaje
+            };
+
+            // Realizar la petición al backend
+            $.ajax({
+                url: '../../backend/cursos/asignar_curso.php',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(datos),
+                success: function(response) {
+                    if (response.success) {
+                        // Mostrar mensaje de éxito
+                        showToast(response.message || 'Curso asignado exitosamente');
+                        // Cerrar el modal
+                        $('#modalAgregarCurso').modal('hide');
+                    } else {
+                        // Mostrar mensaje de error
+                        showToast('Error al asignar el curso: ' + (response.error || 'Error desconocido'), 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error en la petición:', error);
+                    showToast('Error al conectar con el servidor', 'error');
+                },
+                complete: function() {
+                    // Rehabilitar el botón
+                    $btnAsignar.prop('disabled', false).html('Asignar Curso');
                 }
             });
         });
-    
-        // Asignar curso al estudiante
-        $('#btnAsignarCurso').on('click', function () {
-            const idEstudiante = $('#idEstudianteSeleccionado').val();
-            const idCurso = $('#idCursoSeleccionado').val();
-            const porcentaje = $('#inputPorcentaje').val();
-    
-            if (!idCurso) {
-                alert('Por favor, selecciona un curso antes de asignar.');
-                return;
-            }
-    
-            if (!porcentaje || porcentaje < 0 || porcentaje > 100) {
-                alert('Por favor, ingresa un porcentaje válido entre 0 y 100.');
-                return;
-            }
-        
-            if (idCurso && porcentaje) {
-                $.ajax({
-                    url: '../../backend/cursos/asignar_curso.php',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    data: JSON.stringify({
-                        estudiante_id: idEstudiante,
-                        curso_id: idCurso,
-                        porcentaje: porcentaje
-                    }),
-                    success: function (data) {
-                        if (data.success) {
-                            alert('Curso asignado exitosamente.');
-                            $('#modalAgregarCurso').modal('hide');
-                        } else {
-                            alert(data.error || 'Error al asignar el curso.');
-                        }
-                    },
-                    error: function () {
-                        alert('Error en el servidor.');
-                    }
-                });
-            } else {
-                alert('Debes seleccionar un curso y especificar el porcentaje.');
-            }
+
+        // Remover la clase is-invalid cuando el usuario empiece a escribir
+        $('#inputPorcentaje, #filtroCurso').on('input', function() {
+            $(this).removeClass('is-invalid');
         });
-        
-        $('#btnGuardarObservacion').on('click', function () {
-            const idEstudiante = $('#idEstudianteSeleccionadoObservacion').val();
+
+        // Limpiar validaciones al abrir el modal
+        $('#modalAgregarCurso').on('show.bs.modal', function() {
+            $('#filtroCurso, #inputPorcentaje').removeClass('is-invalid');
+            $('#filtroCurso').val('');
+            $('#idCursoSeleccionado').val('');
+            $('#inputPorcentaje').val('');
+            $('#cursoSeleccionado').removeClass('show');
+            $('#dropdownCursos').hide();
+        });
+
+        // Event listener para guardar observación
+        $('#btnGuardarObservacion').on('click', function() {
             const observacion = $('#inputObservacion').val().trim();
-        
+            const estudianteId = $('#idEstudianteSeleccionadoObservacion').val();
+            
             if (!observacion) {
-                alert('La observación no puede estar vacía.');
+                $('#inputObservacion').addClass('is-invalid');
                 return;
             }
-        
+
+            // Deshabilitar el botón mientras se procesa
+            const $btnGuardar = $(this);
+            $btnGuardar.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
+            
+            // Preparar los datos para enviar
+            const datos = {
+                id: estudianteId,
+                observacion: observacion
+            };
+
+            // Realizar la petición al backend
             $.ajax({
                 url: '../../backend/estudiantes/crear_observaciones.php',
                 method: 'POST',
                 contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    estudiante_id: idEstudiante,
-                    observacion: observacion
-                }),
-                success: function (response) {
+                data: JSON.stringify(datos),
+                success: function(response) {
                     if (response.success) {
-                        alert('Observación agregada exitosamente.');
+                        // Mostrar mensaje de éxito
+                        showToast(response.message || 'Observación guardada exitosamente');
+                        // Cerrar el modal
                         $('#modalAgregarObservaciones').modal('hide');
-                        
-                        // Actualizar solo la fila del estudiante sin recargar la página
-                        cargarEstudiantes();
                     } else {
-                        console.error('Error del backend:', response);
-                        alert(response.error || 'Error al agregar la observación.');
+                        // Mostrar mensaje de error
+                        showToast('Error al guardar la observación: ' + (response.error || 'Error desconocido'), 'error');
                     }
                 },
-                error: function (xhr) {
-                    console.error('Error en la solicitud AJAX:', xhr.responseText);
-                    alert('Error en el servidor: ' + xhr.responseText);
+                error: function(xhr, status, error) {
+                    console.error('Error en la petición:', error);
+                    showToast('Error al conectar con el servidor', 'error');
+                },
+                complete: function() {
+                    // Rehabilitar el botón
+                    $btnGuardar.prop('disabled', false).html('Guardar Observación');
                 }
             });
         });
-    
-        // Cargar estudiantes al inicio
-        cargarEstudiantes();
-        
-        // Asegurar que solo el evento "keypress" con Enter esté registrado
-        $('#filter-global').off('input keyup keypress').on('keypress', function(event) {
-            if (event.key === 'Enter') { // Verifica si la tecla presionada es "Enter"
-                filtrarEstudiantes();
-            }
+
+        // Remover la clase is-invalid cuando el usuario empiece a escribir en la observación
+        $('#inputObservacion').on('input', function() {
+            $(this).removeClass('is-invalid');
         });
-        
-        $('#dropdownCursos').on('click', '.dropdown-item', function (e) {
-            e.preventDefault();
-            const idCurso = $(this).data('id');
-            const descripcion = $(this).text();
-    
-            $('#filtroCurso').val(descripcion).addClass('is-valid');
-            $('#idCursoSeleccionado').val(idCurso);
-            $('#dropdownCursos').hide();
+
+        // Limpiar validaciones al abrir el modal de observaciones
+        $('#modalAgregarObservaciones').on('show.bs.modal', function() {
+            $('#inputObservacion').removeClass('is-invalid').val('');
         });
-    
-        // Ocultar dropdown si se hace clic fuera de él
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('#filtroCurso, #dropdownCursos').length) {
-                $('#dropdownCursos').hide();
-            }
+
+        // Agregar después de los otros event listeners de botones
+        $(document).on('click', '.ver-detalles', function() {
+            const estudianteId = $(this).data('id');
+            $('#modalVistaRapida').modal('show');
+            cargarVistaRapida(estudianteId);
         });
-    
-        $('#modalAgregarCurso').on('show.bs.modal', function () {
-            cargarCursos();
-            $('#filtroCurso').val('').removeClass('is-valid');
-            $('#idCursoSeleccionado').val('');
-            $('#inputPorcentaje').val('');
-        });
-        
-        $('#filtroCurso').on('click', function () {
-            $('#dropdownCursos').toggle();
-        });
-        
-        $('#filtroCurso').on('keyup', function () {
-            const filtro = $(this).val().toLowerCase();
-            const cursosFiltrados = cursos.filter(curso => curso.descripcion.toLowerCase().includes(filtro));
-            actualizarDropdownCursos(cursosFiltrados);
+
+        // Función para cargar los datos de la vista rápida
+        function cargarVistaRapida(estudianteId) {
+            // Mostrar spinner y ocultar contenido
+            $('#vistaRapidaSpinner').removeClass('d-none');
+            $('#vistaRapidaContenido').addClass('d-none');
+
+            // Configurar el enlace al perfil completo
+            $('#vr-ver-completo').attr('href', `ver_detalle.php?id=${estudianteId}`);
+
+            // Cargar los datos
+            $.getJSON(`../../backend/estudiantes/get_vista_rapida.php?id=${estudianteId}`)
+                .done(function(data) {
+                    if (data.success) {
+                        // Información personal
+                        $('#vr-codigo').text(data.estudiante.codigo || 'No disponible');
+                        $('#vr-nombre').text(data.estudiante.nombre_completo || 'No disponible');
+                        $('#vr-documento').text(data.estudiante.documento || 'No disponible');
+                        $('#vr-email').text(data.estudiante.email || 'No disponible');
+                        $('#vr-celular').text(data.estudiante.celular || 'No disponible');
+                        $('#vr-ciudad').text(data.estudiante.ciudad || 'No disponible');
+                        $('#vr-iglesia').text(data.estudiante.iglesia || 'No disponible');
+
+                        // Información del contacto
+                        $('#vr-contacto-codigo').text(data.estudiante.contacto.codigo || 'No disponible');
+                        $('#vr-contacto-nombre').text(data.estudiante.contacto.nombre || 'No disponible');
+                        $('#vr-contacto-iglesia').text(data.estudiante.contacto.iglesia || 'No disponible');
+
+                        // Estadísticas
+                        $('#vr-total-cursos').text(data.estadisticas.total_cursos);
+                        $('#vr-promedio').text(data.estadisticas.promedio_porcentaje + '%');
+                        $('#vr-ultima-actividad').text(data.estadisticas.ultima_actividad ? 
+                            new Date(data.estadisticas.ultima_actividad).toLocaleDateString() : '-');
+
+                        // Último curso
+                        if (data.ultimo_curso) {
+                            $('#vr-ultimo-curso').html(`
+                                <div class="curso-info">
+                                    <div class="nivel">${data.ultimo_curso.nivel}</div>
+                                    <div class="nombre"><strong>${data.ultimo_curso.nombre}</strong></div>
+                                    <div class="descripcion">${data.ultimo_curso.descripcion}</div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="fecha">
+                                            <i class="fas fa-calendar-alt me-1"></i>${new Date(data.ultimo_curso.fecha).toLocaleDateString()}
+                                        </div>
+                                        <div class="porcentaje">${data.ultimo_curso.porcentaje}%</div>
+                                    </div>
+                                </div>
+                            `);
+                        }
+
+                        // Última observación
+                        if (data.ultima_observacion) {
+                            $('#vr-ultima-observacion').html(`
+                                <div class="observacion-info">
+                                    <div class="tipo">
+                                        <i class="fas fa-tag me-1"></i>${data.ultima_observacion.tipo || 'General'}
+                                    </div>
+                                    <div class="observacion">${data.ultima_observacion.observacion}</div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="fecha">
+                                            <i class="fas fa-calendar-alt me-1"></i>${new Date(data.ultima_observacion.fecha).toLocaleDateString()}
+                                        </div>
+                                        <div class="usuario">
+                                            <i class="fas fa-user me-1"></i>${data.ultima_observacion.usuario_nombre || 'Sistema'}
+                                        </div>
+                                    </div>
+                                </div>
+                            `);
+                        }
+
+                        // Mostrar contenido y ocultar spinner
+                        $('#vistaRapidaSpinner').addClass('d-none');
+                        $('#vistaRapidaContenido').removeClass('d-none');
+                    } else {
+                        mostrarError('Error al cargar los datos del estudiante');
+                    }
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    mostrarError('Error al conectar con el servidor');
+                    console.error('Error:', textStatus, errorThrown);
+                });
+        }
+
+        // Función para mostrar errores en el modal
+        function mostrarError(mensaje) {
+            $('#vistaRapidaSpinner').addClass('d-none');
+            $('#vistaRapidaContenido').removeClass('d-none').html(`
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>${mensaje}
+                </div>
+            `);
+        }
+
+        // Limpiar el modal al cerrarlo
+        $('#modalVistaRapida').on('hidden.bs.modal', function () {
+            $('#vistaRapidaSpinner').removeClass('d-none');
+            $('#vistaRapidaContenido').addClass('d-none');
         });
     });
     </script>
