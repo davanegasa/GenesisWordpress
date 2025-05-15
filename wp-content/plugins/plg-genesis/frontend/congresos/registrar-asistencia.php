@@ -7,13 +7,9 @@ if (!is_user_logged_in()) {
 }
 
 // Obtener parámetros de la URL
-$id_congreso = isset($_GET['id_congreso']) ? intval($_GET['id_congreso']) : 0;
-$nombre_congreso = isset($_GET['nombre']) ? sanitize_text_field($_GET['nombre']) : '';
+$id_congreso = isset($_GET['id_congreso']) ? intval($_GET['id_congreso']) : 4;
+$nombre_congreso = isset($_GET['nombre']) ? sanitize_text_field($_GET['nombre']) : 'Congreso';
 $tipo_registro = isset($_GET['tipo']) && in_array($_GET['tipo'], ['llegada', 'almuerzo']) ? $_GET['tipo'] : 'llegada';
-
-if ($id_congreso <= 0) {
-    wp_die('ID de congreso no válido');
-}
 
 $plugin_url = plugins_url('plg-genesis', dirname(dirname(dirname(__FILE__))));
 
@@ -109,6 +105,7 @@ function getTipoRegistroLabel($tipo) {
                                 <li class="list-group-item"><strong>Email:</strong> <span id="email-participante"></span></li>
                                 <li class="list-group-item"><strong>Celular:</strong> <span id="celular-participante"></span></li>
                                 <li class="list-group-item"><strong>Tipo de Asistente:</strong> <span id="tipo-participante" class="font-weight-bold"></span></li>
+                                <li class="list-group-item"><strong>Taller:</strong> <span id="taller-participante"></span></li>
                             </ul>
                         </div>
                         <div id="resultado-registro" class="alert mt-3" style="display: none;"></div>
@@ -138,26 +135,29 @@ function getTipoRegistroLabel($tipo) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     let participanteData = null;
+    let procesandoLectura = false;
+    
     jQuery(document).ready(function($) {
-        // Tabs de modo de búsqueda
-        $('#modoBusquedaTabs a').on('click', function (e) {
-            e.preventDefault();
-            $(this).tab('show');
-            $('#resultado-registro').hide();
-            $('#datos-participante').hide();
-            participanteData = null;
-            $('#barcode_input').val('');
-            $('#numero_boleta').val('');
-            $('#codigo_verificacion').val('');
+        // Prevenir el comportamiento por defecto del enter en el input del código de barras
+        $('#barcode_input').on('keydown', function(e) {
+            if (e.keyCode === 13) { // Enter key
+                e.preventDefault();
+                return false;
+            }
         });
 
         // Buscar por código de barras
         $('#barcode_input').on('input', function() {
             const val = $(this).val();
-            if (val.length === 7) {
+            if (val.length === 7 && !procesandoLectura) {
+                procesandoLectura = true;
                 const numero_boleta = val.substring(0,3);
                 const codigo_verificacion = val.substring(3,7);
                 buscarYRegistrar(numero_boleta, codigo_verificacion);
+                // Resetear el flag después de un breve delay
+                setTimeout(() => {
+                    procesandoLectura = false;
+                }, 1000);
             }
         });
 
@@ -172,6 +172,7 @@ function getTipoRegistroLabel($tipo) {
         function mostrarResultadoRegistro(response) {
             const resultado = $('#resultado-registro');
             resultado.show();
+            
             if (response.success) {
                 resultado.removeClass('alert-danger').addClass('alert-success');
                 let msg = '<i class="fas fa-check-circle mr-2"></i>Asistencia registrada correctamente.';
@@ -187,25 +188,47 @@ function getTipoRegistroLabel($tipo) {
                 }
                 resultado.html(msg);
             }
+
             // Mostrar datos del participante si existen
             if (response.participante) {
-                $('#nombre-participante').text(response.participante.nombre);
-                $('#email-participante').text(response.participante.email);
-                $('#celular-participante').text(response.participante.celular);
-                $('#tipo-participante').text(response.participante.tipo);
-                $('#datos-participante').show();
-            } else {
-                $('#datos-participante').hide();
+                $('#nombre-participante').text(response.participante.nombre || '');
+                $('#email-participante').text(response.participante.email || '');
+                $('#celular-participante').text(response.participante.celular || '');
+                $('#tipo-participante').text(response.participante.tipo || '');
+                $('#taller-participante').text(response.participante.taller || 'No asignado');
+                $('#datos-participante').fadeIn();
             }
+
+            // Solo limpiar el input, mantener los datos visibles
+            if (response.success) {
+                setTimeout(function() {
+                    $('#barcode_input').val('').focus();
+                }, 1000);
+            }
+        }
+
+        function limpiarFormulario() {
+            $('#resultado-registro').hide();
+            $('#datos-participante').hide();
             $('#buscar-barcode-form')[0].reset();
             $('#buscar-boleta-form')[0].reset();
-            participanteData = null;
+            $('#barcode_input').focus();
         }
 
         function buscarYRegistrar(numero_boleta, codigo_verificacion) {
-            const id_congreso = $('#id_congreso').val();
+            const id_congreso = parseInt($('#id_congreso').val());
             const tipo_registro = $('#tipo_registro').val();
-            if (!numero_boleta || !codigo_verificacion || !id_congreso) return;
+            
+            // Log para debug
+            console.log('ID del congreso:', id_congreso);
+            console.log('Tipo de registro:', tipo_registro);
+            console.log('Número de boleta:', numero_boleta);
+            console.log('Código de verificación:', codigo_verificacion);
+            
+            if (!numero_boleta || !codigo_verificacion || !id_congreso || isNaN(id_congreso)) {
+                console.log('Validación fallida:', { numero_boleta, codigo_verificacion, id_congreso, isNaN: isNaN(id_congreso) });
+                return;
+            }
             $.ajax({
                 url: '../../backend/congresos/registrar_asistencia.php',
                 type: 'POST',
@@ -267,6 +290,13 @@ function getTipoRegistroLabel($tipo) {
         }
         $(document).ready(function() {
             cargarEstadisticasCongreso();
+            $('.card-body').append(`
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="limpiarFormulario()">
+                        <i class="fas fa-eraser mr-1"></i> Limpiar
+                    </button>
+                </div>
+            `);
         });
     });
     </script>

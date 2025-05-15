@@ -223,6 +223,20 @@ $eliminar_curso_url = plugins_url('plg-genesis/backend/cursos/eliminar_curso.php
             transform: scale(1.1);
         }
 
+        .btn-certificado {
+            position: absolute;
+            top: 15px;
+            right: 45px;
+            color: #059669;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-certificado:hover {
+            color: #047857;
+            transform: scale(1.1);
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -259,6 +273,36 @@ $eliminar_curso_url = plugins_url('plg-genesis/backend/cursos/eliminar_curso.php
             .modal-dialog {
                 margin: 10px;
             }
+        }
+
+        #btnGenerarTodosCertificados:hover {
+            background-color: #146c43 !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+        }
+
+        #btnGenerarTodosCertificados:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            align-items: stretch;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #212529;
+            margin: 0;
+        }
+
+        .modal-header .btn-close {
+            padding: calc(1.5rem * .5);
+            margin: calc(-.5 * 1.5rem) calc(-.5 * 1.5rem) calc(-.5 * 1.5rem) auto;
         }
     </style>
 </head>
@@ -316,9 +360,15 @@ $eliminar_curso_url = plugins_url('plg-genesis/backend/cursos/eliminar_curso.php
     <div class="modal fade" id="modalDetallesCursos" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalDetallesCursosLabel">Detalles de Cursos</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header flex-column">
+                    <div class="w-100 d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="modal-title" id="modalDetallesCursosLabel">Detalles de Cursos</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <button type="button" class="btn btn-success w-100 d-flex align-items-center justify-content-center" id="btnGenerarTodosCertificados" style="background-color: #198754; border: none; padding: 10px; font-size: 0.95rem; font-weight: 500; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                        <i class="bi bi-file-earmark-pdf me-2" style="font-size: 1.1rem;"></i>
+                        <span>Generar Certificados</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <div id="detalles-cursos-container"></div>
@@ -375,6 +425,11 @@ $eliminar_curso_url = plugins_url('plg-genesis/backend/cursos/eliminar_curso.php
             const modal = new bootstrap.Modal(document.getElementById('modalDetallesCursos'));
             const container = document.getElementById('detalles-cursos-container');
             
+            // Guardar la fecha para el botón de generar todos los certificados
+            container.dataset.dia = dia;
+            container.dataset.mes = mes;
+            container.dataset.anio = anio;
+            
             container.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-primary"></div></div>';
             modal.show();
             
@@ -385,11 +440,13 @@ $eliminar_curso_url = plugins_url('plg-genesis/backend/cursos/eliminar_curso.php
                         container.innerHTML = data.cursos.map(curso => `
                             <div class="curso-card">
                                 <h5>${curso.nombre_curso}</h5>
+                                <div class="curso-info"><strong>ID Estudiante:</strong> ${curso.estudiante_id || 'No disponible'}</div>
                                 <div class="curso-info"><strong>Estudiante:</strong> ${curso.nombre_estudiante}</div>
                                 <div class="curso-info"><strong>Celular:</strong> ${curso.celular || 'No disponible'}</div>
                                 <div class="curso-info"><strong>Contacto:</strong> ${curso.nombre_contacto || 'No disponible'}</div>
                                 <div class="curso-info"><strong>Nota:</strong> ${curso.nota || 'No disponible'}</div>
                                 <i class="bi bi-trash btn-eliminar" data-id="${curso.estudiante_curso_id}"></i>
+                                <i class="bi bi-file-earmark-pdf btn-certificado" data-id="${curso.estudiante_curso_id}" title="Generar Certificado"></i>
                             </div>
                         `).join('');
                     } else {
@@ -451,9 +508,25 @@ $eliminar_curso_url = plugins_url('plg-genesis/backend/cursos/eliminar_curso.php
                 if (e.target.classList.contains('btn-eliminar')) {
                     eliminarCurso(e.target.getAttribute('data-id'));
                 }
+
+                if (e.target.classList.contains('btn-certificado')) {
+                    const id = e.target.getAttribute('data-id');
+                    window.open('../../backend/certificados/generar_certificado.php?id=' + id, '_blank');
+                }
             });
 
             document.getElementById('btnConfirmarEliminacion').addEventListener('click', confirmarEliminacion);
+
+            document.getElementById('btnGenerarTodosCertificados').addEventListener('click', function() {
+                const container = document.getElementById('detalles-cursos-container');
+                const dia = container.dataset.dia;
+                const mes = container.dataset.mes;
+                const anio = container.dataset.anio;
+                
+                if (dia && mes && anio) {
+                    window.open(`../../backend/certificados/generar_certificados_dia.php?dia=${dia}&mes=${mes}&anio=${anio}`, '_blank');
+                }
+            });
         });
     </script>
 </body>

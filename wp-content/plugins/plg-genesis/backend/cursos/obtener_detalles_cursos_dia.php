@@ -20,7 +20,8 @@ $fecha = sprintf('%04d-%02d-%02d', $anio, $mes, $dia);
 // Obtener los cursos del día
 $query = "SELECT 
     ec.id as estudiante_curso_id,
-    c.nombre as nombre_curso,
+    COALESCE(e.id_estudiante, e.id::text) as estudiante_id,
+    c.descripcion as nombre_curso,
     CONCAT(e.nombre1, ' ', COALESCE(e.nombre2, ''), ' ', e.apellido1, ' ', COALESCE(e.apellido2, '')) as nombre_estudiante,
     e.celular,
     cont.nombre as nombre_contacto,

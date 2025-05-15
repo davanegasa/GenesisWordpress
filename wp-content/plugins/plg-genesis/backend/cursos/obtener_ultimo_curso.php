@@ -26,7 +26,6 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 }
 
 $estudiante_id = intval($_GET['id']);
-$limite = isset($_GET['limite']) && is_numeric($_GET['limite']) ? intval($_GET['limite']) : null;
 
 // Verificar la conexión a la base de datos
 if (!$conexion) {
@@ -55,59 +54,38 @@ if (pg_num_rows($result_check) === 0) {
     exit;
 }
 
+// Obtener el último curso del estudiante
 $query = "
     SELECT 
-        id,
-        observacion,
-        fecha,
-        tipo,
-        usuario_id
-    FROM observaciones_estudiantes
-    WHERE estudiante_id = $1 
-    ORDER BY fecha DESC
+        c.nombre,
+        c.descripcion,
+        ec.porcentaje,
+        ec.fecha
+    FROM estudiantes_cursos ec
+    JOIN cursos c ON c.id = ec.curso_id
+    WHERE ec.estudiante_id = $1
+    ORDER BY ec.fecha DESC
+    LIMIT 1
 ";
 
-if ($limite !== null) {
-    $query .= " LIMIT $2";
-    $params = [$estudiante_id, $limite];
-} else {
-    $params = [$estudiante_id];
-}
-
-$result = pg_query_params($conexion, $query, $params);
+$result = pg_query_params($conexion, $query, [$estudiante_id]);
 
 if (!$result) {
     http_response_code(500);
     echo json_encode([
         'success' => false, 
-        'error' => 'Error al consultar las observaciones',
-        'db_error' => pg_last_error($conexion),
-        'query' => $query,
-        'params' => $params
+        'error' => 'Error al consultar el último curso',
+        'db_error' => pg_last_error($conexion)
     ]);
     exit;
 }
 
-$observaciones = pg_fetch_all($result);
-
-// Si hay observaciones, obtener los nombres de usuario de WordPress
-if ($observaciones) {
-    foreach ($observaciones as &$obs) {
-        if (!empty($obs['usuario_id'])) {
-            $user_info = get_userdata($obs['usuario_id']);
-            $obs['usuario_nombre'] = $user_info ? $user_info->display_name : 'Usuario ' . $obs['usuario_id'];
-        } else {
-            $obs['usuario_nombre'] = 'Sistema';
-        }
-    }
-    unset($obs); // Romper la referencia
-}
+$curso = pg_fetch_assoc($result);
 
 echo json_encode([
-    'success' => true, 
-    'observaciones' => $observaciones ?? [],
-    'estudiante_id' => $estudiante_id
+    'success' => true,
+    'curso' => $curso
 ]);
 
 pg_close($conexion);
-?>
+?> 
