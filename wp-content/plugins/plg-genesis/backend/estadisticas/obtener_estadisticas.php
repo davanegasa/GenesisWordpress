@@ -111,7 +111,8 @@ try {
     ]);
 
 } catch (Exception $e) {
-    error_log("Error en obtener_estadisticas.php: " . $e->getMessage() . "\n", 3, __DIR__ . "/error.log");
+    require_once __DIR__ . '/../utils/logger.php';
+    genesis_log("Error en obtener_estadisticas.php: " . $e->getMessage(), 'ERROR');
     wp_send_json([
         'success' => false,
         'error' => 'Error al obtener las estadísticas'

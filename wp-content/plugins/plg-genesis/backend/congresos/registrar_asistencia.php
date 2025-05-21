@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . '/../../../../../wp-load.php');
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php');
+require_once __DIR__ . '/../utils/logger.php';
 
 // Verificar autenticación
 if (!is_user_logged_in()) {
@@ -21,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_SERVER['CONTENT_TYPE']) || 
 $data = json_decode(file_get_contents('php://input'), true);
 
 // Log para debug
-error_log('Datos recibidos: ' . print_r($data, true));
+genesis_log('Datos recibidos: ' . print_r($data, true), 'DEBUG');
 
 // Validar datos obligatorios
 if (!isset($data['numero_boleta'])) {
@@ -39,17 +40,17 @@ if (strlen($codigo_barras) == 7) {
     $codigo_verificacion = isset($data['codigo_verificacion']) ? $data['codigo_verificacion'] : '';
 }
 
-error_log('Procesando boleta - Número: ' . $numero_boleta . ', Código: ' . $codigo_verificacion);
+genesis_log('Procesando boleta - Número: ' . $numero_boleta . ', Código: ' . $codigo_verificacion, 'DEBUG');
 
 $tipo_registro = $data['tipo_registro']; // 'llegada' o 'almuerzo'
 $id_congreso = isset($data['id_congreso']) ? intval($data['id_congreso']) : 4; // Usar 4 como valor por defecto
 
 // Log para debug
-error_log('ID del congreso procesado: ' . $id_congreso);
+genesis_log('ID del congreso procesado: ' . $id_congreso, 'DEBUG');
 
 // Validar que el ID del congreso sea válido
 if ($id_congreso <= 0) {
-    error_log('ID del congreso inválido: ' . $id_congreso);
+    genesis_log('ID del congreso inválido: ' . $id_congreso);
     echo json_encode(['success' => false, 'error' => 'ID de congreso no válido']);
     exit;
 }
@@ -59,14 +60,14 @@ $query_congreso = "SELECT id FROM congresos WHERE id = $1";
 $result_congreso = pg_query_params($conexion, $query_congreso, [$id_congreso]);
 
 if (!$result_congreso || pg_num_rows($result_congreso) === 0) {
-    error_log('Congreso no encontrado en la base de datos: ' . $id_congreso);
+    genesis_log('Congreso no encontrado en la base de datos: ' . $id_congreso);
     echo json_encode(['success' => false, 'error' => 'Congreso no encontrado']);
     exit;
 }
 
 // Buscar la boleta y obtener datos relevantes
 if ($numero_boleta === '518') {
-    error_log('Debug - Consultando boleta 518');
+    genesis_log('Debug - Consultando boleta 518');
     $debug_query = "
         SELECT 
             bc.id as boleta_id,
@@ -97,7 +98,7 @@ if ($numero_boleta === '518') {
         AND bc.id_congreso = $3";
     $debug_result = pg_query_params($conexion, $debug_query, [$numero_boleta, $codigo_verificacion, $id_congreso]);
     if ($debug_result) {
-        error_log('Debug - Datos completos de la boleta 518: ' . print_r(pg_fetch_assoc($debug_result), true));
+        genesis_log('Debug - Datos completos de la boleta 518: ' . print_r(pg_fetch_assoc($debug_result), true));
     }
 }
 
@@ -141,7 +142,7 @@ $campo_fecha = ($tipo_registro === 'llegada') ? 'fecha_llegada' : 'fecha_almuerz
 if (!empty($boleta[$campo_fecha])) {
     // Obtener datos del participante
     if ($boleta['id_estudiante']) {
-        error_log('Debug - id_estudiante: ' . $boleta['id_estudiante'] . ', id_asistencia: ' . $boleta['id_asistencia']);
+        genesis_log('Debug - id_estudiante: ' . $boleta['id_estudiante'] . ', id_asistencia: ' . $boleta['id_asistencia']);
         
         $query = "SELECT 
             e.nombre1 || ' ' || e.nombre2 || ' ' || e.apellido1 || ' ' || e.apellido2 AS nombre, 
@@ -155,9 +156,9 @@ if (!empty($boleta[$campo_fecha])) {
         
         $res = pg_query_params($conexion, $query, [$boleta['id_estudiante'], $boleta['id_asistencia']]);
         $datos = pg_fetch_assoc($res);
-        error_log('Debug - Query estudiante: ' . $query);
-        error_log('Debug - Params: id_estudiante=' . $boleta['id_estudiante'] . ', id_asistencia=' . $boleta['id_asistencia']);
-        error_log('Debug - Datos estudiante: ' . print_r($datos, true));
+        genesis_log('Debug - Query estudiante: ' . $query);
+        genesis_log('Debug - Params: id_estudiante=' . $boleta['id_estudiante'] . ', id_asistencia=' . $boleta['id_asistencia']);
+        genesis_log('Debug - Datos estudiante: ' . print_r($datos, true));
     } else if ($boleta['id_asistente']) {
         $query = "SELECT 
             ae.nombre, 
@@ -192,7 +193,7 @@ $updated = pg_fetch_assoc($result);
 
 // Obtener datos del participante
 if ($boleta['id_estudiante']) {
-    error_log('Debug - id_estudiante: ' . $boleta['id_estudiante'] . ', id_asistencia: ' . $boleta['id_asistencia']);
+    genesis_log('Debug - id_estudiante: ' . $boleta['id_estudiante'] . ', id_asistencia: ' . $boleta['id_asistencia']);
     
     $query = "SELECT 
         e.nombre1 || ' ' || e.nombre2 || ' ' || e.apellido1 || ' ' || e.apellido2 AS nombre, 
@@ -206,9 +207,9 @@ if ($boleta['id_estudiante']) {
     
     $res = pg_query_params($conexion, $query, [$boleta['id_estudiante'], $boleta['id_asistencia']]);
     $datos = pg_fetch_assoc($res);
-    error_log('Debug - Query estudiante: ' . $query);
-    error_log('Debug - Params: id_estudiante=' . $boleta['id_estudiante'] . ', id_asistencia=' . $boleta['id_asistencia']);
-    error_log('Debug - Datos estudiante: ' . print_r($datos, true));
+    genesis_log('Debug - Query estudiante: ' . $query);
+    genesis_log('Debug - Params: id_estudiante=' . $boleta['id_estudiante'] . ', id_asistencia=' . $boleta['id_asistencia']);
+    genesis_log('Debug - Datos estudiante: ' . print_r($datos, true));
 } else if ($boleta['id_asistente']) {
     $query = "SELECT 
         ae.nombre, 

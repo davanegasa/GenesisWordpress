@@ -114,6 +114,8 @@ ORDER BY
 $result = pg_query($conexion, $query);
 
 if (!$result) {
+    require_once __DIR__ . '/../utils/logger.php';
+    genesis_log('Error al ejecutar la consulta: ' . pg_last_error($conexion), 'ERROR');
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Error al ejecutar la consulta: ' . pg_last_error($conexion)]);
     exit;

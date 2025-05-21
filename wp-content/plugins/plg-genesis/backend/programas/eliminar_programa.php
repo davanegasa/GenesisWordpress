@@ -73,6 +73,8 @@ try {
     // Respuesta exitosa
     echo json_encode(['success' => true, 'message' => 'Programa eliminado exitosamente.']);
 } catch (Exception $e) {
+    require_once __DIR__ . '/../utils/logger.php';
+    genesis_log('Error al eliminar el programa: ' . $e->getMessage(), 'ERROR');
     // Revertir la transacción en caso de error
     pg_query($conexion, 'ROLLBACK');
     http_response_code(500); // Error interno del servidor

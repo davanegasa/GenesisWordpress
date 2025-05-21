@@ -1,13 +1,14 @@
 <?php
-require_once(__DIR__ . '/../../../../../wp-load.php');  // Ajusta la ruta según tu estructura de directorios
+require_once(__DIR__ . '/../../../../../wp-load.php');  // Ajusta la ruta seg煤n tu estructura de directorios
 
-// Verificar si el usuario no está autenticado en WordPress
+// Verificar si el usuario no est谩 autenticado en WordPress
 if (!is_user_logged_in()) {
-    wp_redirect(wp_login_url());  // Redirigir a la página de login de WordPress
+    wp_redirect(wp_login_url());  // Redirigir a la p谩gina de login de WordPress
     exit;
 }
 
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php');
+require_once(dirname(__FILE__) . '/../utils/logger.php');
 
 // Verificar si se proporcion贸 el ID del estudiante
 if (isset($_GET['id'])) {
@@ -72,4 +73,17 @@ if (isset($_GET['id'])) {
 
 // Cerrar la conexi贸n a la base de datos
 pg_close($conexion);
+
+if (!$conexion) {
+    genesis_frontend_log('Error en la conexi贸n a la base de datos', 'ERROR');
+    die('Error en la conexi贸n a la base de datos.');
+}
+
+if (!$resultado_detalle) {
+    genesis_frontend_log('Error al obtener detalles del estudiante', 'ERROR');
+}
+
+if (!$resultado_cursos) {
+    genesis_frontend_log('Error al obtener cursos del estudiante', 'ERROR');
+}
 ?>

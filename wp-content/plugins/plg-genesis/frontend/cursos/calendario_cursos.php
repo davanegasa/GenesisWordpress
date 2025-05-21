@@ -362,8 +362,8 @@ $eliminar_curso_url = plugins_url('plg-genesis/backend/cursos/eliminar_curso.php
             <div class="modal-content">
                 <div class="modal-header flex-column">
                     <div class="w-100 d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="modal-title" id="modalDetallesCursosLabel">Detalles de Cursos</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="modalDetallesCursosLabel">Detalles de Cursos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <button type="button" class="btn btn-success w-100 d-flex align-items-center justify-content-center" id="btnGenerarTodosCertificados" style="background-color: #198754; border: none; padding: 10px; font-size: 0.95rem; font-weight: 500; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s ease;">
                         <i class="bi bi-file-earmark-pdf me-2" style="font-size: 1.1rem;"></i>

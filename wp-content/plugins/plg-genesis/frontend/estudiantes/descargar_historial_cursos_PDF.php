@@ -4,10 +4,11 @@ require_once(__DIR__ . '/../../../../../wp-load.php');
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php');
 require_once(plugin_dir_path(__FILE__) . '/../../libs/TCPDF/tcpdf.php'); 
 require_once(plugin_dir_path(__FILE__) . '/../../libs/TCPDF/templates/informes_emmaus.php'); 
+require_once(dirname(__FILE__) . '/../utils/logger.php');
 
-// Verificar si el usuario no est¨¢ autenticado en WordPress
+// Verificar si el usuario no est autenticado en WordPress
 if (!is_user_logged_in()) {
-    wp_redirect(wp_login_url());  // Redirigir a la p¨¢gina de login de WordPress
+    wp_redirect(wp_login_url());  // Redirigir a la pï¿½ï¿½gina de login de WordPress
     exit;
 }
 
@@ -37,6 +38,7 @@ if ($id_estudiante) {
 $result_estudiantes = pg_query($conexion, $query_estudiantes);
 
 if (!$result_estudiantes) {
+    genesis_frontend_log('Error en la consulta de estudiantes: ' . pg_last_error($conexion), 'ERROR');
     die('Error en la consulta de estudiantes: ' . pg_last_error($conexion));
 }
 
@@ -64,7 +66,7 @@ if ($result_estudiantes && pg_num_rows($result_estudiantes) > 0) {
 
     do {
         $pdf->SetFont('helvetica', 'B', 12);
-        $pdf->Cell(0, 10, "C¨®digo: " . $contacto['id_estudiante'], 0, 1);
+        $pdf->Cell(0, 10, "Cï¿½ï¿½digo: " . $contacto['id_estudiante'], 0, 1);
         $pdf->Cell(0, 10, "Estudiante: " . $contacto['nombre1'] . ' ' . $contacto['apellido1'], 0, 1);
         $pdf->SetFont('helvetica', '', 10);
         $pdf->Cell(0, 10, "Email: " . $contacto['email'], 0, 1);

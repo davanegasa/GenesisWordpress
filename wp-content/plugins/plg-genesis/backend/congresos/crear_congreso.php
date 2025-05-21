@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . '/../../../../../wp-load.php');  // Cargar WordPress
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php'); // Conexión a PostgreSQL
+require_once __DIR__ . '/../utils/logger.php';
 
 // Verificar autenticación del usuario en WordPress
 if (!is_user_logged_in()) {
@@ -20,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_SERVER['CONTENT_TYPE']) || 
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (!$data || !isset($data['nombre'], $data['fecha'], $data['ubicacion'], $data['estado'])) {
+    genesis_log('Datos incompletos para crear congreso', 'ERROR');
     http_response_code(400);
     echo json_encode(['error' => 'Datos incompletos']);
     exit;
@@ -33,6 +35,7 @@ $estado = $data['estado'];
 // Validar que el estado sea uno de los permitidos
 $estados_permitidos = ['PLANEACION', 'REGISTRO', 'EN_CURSO', 'FINALIZADO', 'CANCELADO'];
 if (!in_array($estado, $estados_permitidos)) {
+    genesis_log('Estado no válido para congreso', 'ERROR');
     http_response_code(400);
     echo json_encode(['error' => 'Estado no válido']);
     exit;
@@ -42,9 +45,11 @@ $query = "INSERT INTO congresos (nombre, fecha, ubicacion, estado) VALUES ($1, $
 $result = pg_query_params($conexion, $query, [$nombre, $fecha, $ubicacion, $estado]);
 
 if ($result) {
+    genesis_log('Congreso creado exitosamente', 'INFO');
     $row = pg_fetch_assoc($result);
     echo json_encode(['success' => true, 'id' => $row['id'], 'message' => 'Congreso creado exitosamente.']);
 } else {
+    genesis_log('Error al crear el congreso', 'ERROR');
     http_response_code(500);
     echo json_encode(['error' => 'Error al crear el congreso.']);
 }

@@ -4,6 +4,10 @@ ini_set('display_errors', 1);
 
 require_once(__DIR__ . '/../../../../../wp-load.php');
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php');
+require_once __DIR__ . '/../utils/logger.php';
+genesis_log('Test log: Verificando escritura en genesis.log', 'INFO');
+
+genesis_log('Prueba de log INFO: Endpoint get_vista_rapida.php accedido', 'INFO');
 
 header('Content-Type: application/json');
 
@@ -20,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    genesis_log('Prueba de log WARNING: ID de estudiante no proporcionado o inválido', 'WARNING');
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => 'ID de estudiante no proporcionado o inválido']);
     exit;
@@ -150,6 +155,9 @@ try {
     echo json_encode($response);
 
 } catch (Exception $e) {
+    genesis_log('Prueba de log ERROR: ' . $e->getMessage(), 'ERROR');
+    require_once __DIR__ . '/../utils/logger.php';
+    genesis_log('Error en get_vista_rapida: ' . $e->getMessage(), 'ERROR');
     http_response_code(500);
     echo json_encode([
         'success' => false,

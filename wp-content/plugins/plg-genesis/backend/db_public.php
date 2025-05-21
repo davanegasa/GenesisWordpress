@@ -19,7 +19,8 @@ $conexion = conectar_a_base_de_datos_publica();
 
 // Validar la conexión
 if (!$conexion || (!is_resource($conexion) && !($conexion instanceof \PgSql\Connection))) {
-    error_log("Error en la conexión pública a la base de datos: " . pg_last_error() . "\n", 3, __DIR__ . "/error_log.txt");
+    require_once __DIR__ . '/utils/logger.php';
+    genesis_log("Error en la conexión pública a la base de datos: " . pg_last_error(), 'ERROR');
     die("Error en la conexión a la base de datos pública.");
 }
 ?>

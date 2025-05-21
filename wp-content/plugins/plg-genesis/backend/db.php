@@ -1,6 +1,7 @@
 <?php
 // Cargar el entorno de WordPress
 require_once(__DIR__ . '/../../../../wp-load.php');
+require_once __DIR__ . '/utils/logger.php';
 
 // Verificar si el usuario está autenticado
 if (!is_user_logged_in()) {
@@ -69,7 +70,8 @@ function conectar_a_base_de_datos_oficina($oficina) {
 
     // Verificar que tengamos todos los valores necesarios
     if (empty($config['host']) || empty($config['dbname']) || empty($config['user']) || empty($config['password'])) {
-        error_log("Error: Faltan credenciales de base de datos para la oficina $oficina", 3, __DIR__ . "/error_log.txt");
+        require_once __DIR__ . '/utils/logger.php';
+        genesis_log("Faltan credenciales de base de datos para la oficina $oficina", 'ERROR');
         die("Error: Configuración de base de datos incompleta para la oficina $oficina");
     }
     
@@ -97,11 +99,11 @@ $conexion = conectar_a_base_de_datos_oficina($oficina);
 
 // Validar la conexión
 if (!$conexion || (!is_resource($conexion) && !($conexion instanceof \PgSql\Connection))) {
-    // Loguear el error si la conexión falla
-    error_log("Error en la conexión a la base de datos para la oficina $oficina: " . pg_last_error() . "\n", 3, __DIR__ . "/error_log.txt");
+    require_once __DIR__ . '/utils/logger.php';
+    genesis_log("Error en la conexión a la base de datos para la oficina $oficina: " . pg_last_error(), 'ERROR');
     die("Error en la conexión a la base de datos.");
 }
 
 // Loguear usuario y oficina
-error_log("Usuario: " . $current_user->user_login . " se conectará a la oficina: " . $oficina . "\n", 3, __DIR__ . "/usuario_oficina_log.txt");
+genesis_log("Usuario: " . $current_user->user_login . " se conectará a la oficina: " . $oficina, 'INFO');
 ?>

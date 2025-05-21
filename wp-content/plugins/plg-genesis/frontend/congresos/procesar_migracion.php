@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . '/../../../../../wp-load.php'); // Cargar WordPress
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php'); // Conexión a PostgreSQL
+require_once(dirname(__FILE__) . '/../utils/logger.php');
 
 global $wpdb;
 
@@ -22,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_SERVER['CONTENT_TYPE']) || 
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (!$data || !isset($data['id_congreso'], $data['asistentes'])) {
+    genesis_frontend_log('Datos incompletos en migración de asistentes', 'ERROR');
     http_response_code(400);
     echo json_encode(['error' => 'Datos incompletos']);
     exit;
@@ -59,6 +61,7 @@ foreach ($asistentes as $asistente) {
                 WHERE ident = %s", $identificacion));
 
             if (!$asistente_wp) {
+                genesis_frontend_log("No se encontró el asistente con identificación: $identificacion", 'ERROR');
                 $errors[] = "No se encontró el asistente con identificación: $identificacion";
                 continue;
             }
@@ -77,6 +80,7 @@ foreach ($asistentes as $asistente) {
                 $row = pg_fetch_assoc($result);
                 $id_asistente = $row['id'];
             } else {
+                genesis_frontend_log("Error al insertar nuevo asistente con identificación: $identificacion", 'ERROR');
                 $errors[] = "Error al insertar nuevo asistente con identificación: $identificacion";
                 continue;
             }
@@ -99,6 +103,7 @@ foreach ($asistentes as $asistente) {
         
         $success[] = "Migración actualizada para identificación: $identificacion";
     } else {
+        genesis_frontend_log("Error al registrar asistencia para identificación: $identificacion", 'ERROR');
         $errors[] = "Error al registrar asistencia para identificación: $identificacion";
     }
 }

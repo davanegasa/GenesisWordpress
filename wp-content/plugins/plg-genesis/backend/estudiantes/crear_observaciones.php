@@ -4,6 +4,7 @@ ini_set('display_errors', 1);
 
 require_once(__DIR__ . '/../../../../../wp-load.php');
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php');
+require_once __DIR__ . '/../utils/logger.php';
 
 header('Content-Type: application/json; charset=UTF-8');
 
@@ -23,18 +24,21 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Obtener datos del cuerpo de la solicitud
 $data = json_decode(file_get_contents("php://input"), true);
 if (json_last_error() !== JSON_ERROR_NONE) {
+    genesis_log('Error en la estructura JSON recibida', 'ERROR');
     http_response_code(400);
     echo json_encode(['error' => 'Error en la estructura JSON recibida']);
     exit;
 }
 
 if (!isset($data['id']) || !is_numeric($data['id'])) {
+    genesis_log('ID de estudiante no válido', 'ERROR');
     http_response_code(400);
     echo json_encode(['error' => 'ID de estudiante no válido']);
     exit;
 }
 
 if (!isset($data['observacion']) || empty(trim($data['observacion']))) {
+    genesis_log('La observación es obligatoria', 'ERROR');
     http_response_code(400);
     echo json_encode(['error' => 'La observación es obligatoria']);
     exit;
@@ -45,6 +49,7 @@ $observacion = trim($data['observacion']);
 $usuario_id = get_current_user_id(); // Usuario autenticado en WordPress
 
 if (!$usuario_id) {
+    genesis_log('No se pudo obtener el usuario autenticado', 'ERROR');
     http_response_code(403);
     echo json_encode(['error' => 'No se pudo obtener el usuario autenticado']);
     exit;
@@ -54,6 +59,7 @@ $tipo = isset($data['tipo']) ? trim($data['tipo']) : 'General';
 
 // Validar conexión a la base de datos
 if (!$conexion) {
+    genesis_log('Error en la conexión a la base de datos', 'ERROR');
     http_response_code(500);
     echo json_encode(['error' => 'Error en la conexión a la base de datos']);
     exit;

@@ -8,6 +8,7 @@ if (!is_user_logged_in()) {
 }
 
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php');
+require_once(dirname(__FILE__) . '/../utils/logger.php');
 
 // Definir la consulta SQL para obtener solo los registros del d赤a actual con los datos de los estudiantes y cursos
 $query = '
@@ -31,8 +32,14 @@ ORDER BY
 // Ejecutar la consulta
 $result = pg_query($conexion, $query);
 
+if (!$conexion) {
+    genesis_frontend_log('Error en la conexión a la base de datos', 'ERROR');
+    die('Error en la conexión a la base de datos.');
+}
+
 // Verificar si la consulta se ejecut車 correctamente
 if (!$result) {
+    genesis_frontend_log('Error al ejecutar la consulta para exportar CSV', 'ERROR');
     echo "Error al ejecutar la consulta.";
     exit;
 }

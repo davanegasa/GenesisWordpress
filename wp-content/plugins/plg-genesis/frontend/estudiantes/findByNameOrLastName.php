@@ -8,8 +8,9 @@ if (!is_user_logged_in()) {
 }
 
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php');
+require_once(dirname(__FILE__) . '/../utils/logger.php');
 if (!$conexion) {
-    error_log("Error en la conexión: " . pg_last_error(), 3, __DIR__ . "/error_log.txt");
+    genesis_frontend_log("Error en la conexión: " . pg_last_error(), 'ERROR');
     die("Error en la conexión a la base de datos.");
 }
 

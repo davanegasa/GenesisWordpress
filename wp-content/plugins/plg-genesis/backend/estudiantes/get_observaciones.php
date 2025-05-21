@@ -71,7 +71,7 @@ if ($limite !== null) {
     $query .= " LIMIT $2";
     $params = [$estudiante_id, $limite];
 } else {
-    $params = [$estudiante_id];
+$params = [$estudiante_id];
 }
 
 $result = pg_query_params($conexion, $query, $params);

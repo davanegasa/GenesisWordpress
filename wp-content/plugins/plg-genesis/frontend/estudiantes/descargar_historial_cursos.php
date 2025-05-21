@@ -3,6 +3,7 @@ require_once(__DIR__ . '/../../../../../wp-load.php');
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php');
 require_once(plugin_dir_path(__FILE__) . '/../../libs/TCPDF/tcpdf.php'); 
 require_once(plugin_dir_path(__FILE__) . '/../../libs/TCPDF/templates/informes_emmaus.php'); 
+require_once(dirname(__FILE__) . '/../utils/logger.php');
 
 // Verificar si se ha proporcionado el ID del estudiante
 if (isset($_GET['id'])) {
@@ -64,5 +65,14 @@ if (isset($_GET['id'])) {
     }
 } else {
     echo "ID de estudiante no proporcionado.";
+}
+
+if (!$conexion) {
+    genesis_frontend_log('Error en la conexión a la base de datos', 'ERROR');
+    die('Error en la conexión a la base de datos.');
+}
+
+if (!$resultado) {
+    genesis_frontend_log('Error en la consulta de cursos', 'ERROR');
 }
 ?>

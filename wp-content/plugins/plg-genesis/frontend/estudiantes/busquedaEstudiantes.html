@@ -284,7 +284,7 @@
             border-radius: 4px 0 0 4px;
             outline: none;
         }
-
+    
         .editing-actions {
             display: flex;
             border: 2px solid var(--primary-color);
@@ -562,10 +562,10 @@
         <div class="search-container">
             <div class="search-input">
                 <i class="fas fa-search"></i>
-                <input type="text" id="filter-global" class="form-control" placeholder="Buscar por nombre, documento, celular o correo">
+            <input type="text" id="filter-global" class="form-control" placeholder="Buscar por nombre, documento, celular o correo">
             </div>
         </div>
-
+    
         <table class="table">
             <thead>
                 <tr>
@@ -605,7 +605,7 @@
                                 <div id="cursoSeleccionado" class="curso-selected">
                                     <i class="fas fa-book me-2"></i>
                                     <span></span>
-                                </div>
+                            </div>
                                 <ul id="dropdownCursos" class="dropdown-menu"></ul>
                             </div>
                             <input type="hidden" id="idCursoSeleccionado" name="idCursoSeleccionado">
@@ -908,24 +908,24 @@
         function cargarEstudiantes() {
             $.getJSON('../../backend/estudiantes/get_estudiantes.php?pagina=1&limite=5000')
                 .done(function (data) {
-                    if (Array.isArray(data) && data.length > 0) {
-                        estudiantes = data;
+                if (Array.isArray(data) && data.length > 0) {
+                    estudiantes = data;
                         mostrarEstudiantes(estudiantes.slice(0, 20));
                         $('#mensaje-error').addClass('d-none');
-                    } else {
-                        mostrarError('No se encontraron estudiantes disponibles.');
-                    }
+                } else {
+                    mostrarError('No se encontraron estudiantes disponibles.');
+                }
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {
-                    console.error("Error al conectar con el servidor:", textStatus, errorThrown);
-                    mostrarError('Error al conectar con el servidor.');
-                });
+                console.error("Error al conectar con el servidor:", textStatus, errorThrown);
+                mostrarError('Error al conectar con el servidor.');
+            });
         }
         
         function mostrarEstudiantes(estudiantesFiltrados) {
             const cuerpoTabla = $('#tabla-cuerpo');
             cuerpoTabla.empty();
-        
+    
             estudiantesFiltrados.forEach(estudiante => {
                 const nombreCompleto = [
                     estudiante.nombre1 || '',
@@ -979,12 +979,12 @@
         function cargarCursos() {
             $.getJSON('../../backend/cursos/obtener_cursos.php')
                 .done(function (data) {
-                    if (data.success && data.cursos) {
-                        cursos = data.cursos;
-                        actualizarDropdownCursos(cursos);
-                    } else {
+                if (data.success && data.cursos) {
+                    cursos = data.cursos;
+                    actualizarDropdownCursos(cursos);
+                } else {
                         console.error('Error al cargar los cursos.');
-                    }
+                }
                 })
                 .fail(function (error) {
                     console.error('Error al cargar los cursos:', error);
@@ -998,16 +998,16 @@
             if (listaCursos.length > 0) {
                 listaCursos.forEach(curso => {
                     const item = $(`
-                        <li>
+                                    <li>
                             <a class="dropdown-item" href="#" data-id="${curso.id}">
                                 <i class="fas fa-book me-2"></i>
                                 ${curso.descripcion}
-                            </a>
-                        </li>
+                                        </a>
+                                    </li>
                     `);
                     dropdown.append(item);
                 });
-            } else {
+                } else {
                 dropdown.append('<li><a class="dropdown-item disabled" href="#"><i class="fas fa-info-circle me-2"></i>No se encontraron cursos</a></li>');
             }
             
@@ -1020,8 +1020,8 @@
         // Event Listeners para el modal de cursos
         $('#filtroCurso').on('focus', function() {
             $('#dropdownCursos').show();
-        });
-
+            });
+        
         $('#filtroCurso').on('input', function() {
             const filtro = $(this).val().toLowerCase();
             const cursosFiltrados = cursos.filter(curso => 
@@ -1030,8 +1030,8 @@
             actualizarDropdownCursos(cursosFiltrados);
             $('#cursoSeleccionado').removeClass('show');
             $('#dropdownCursos').show();
-        });
-        
+            });
+            
         $('#dropdownCursos').on('click', '.dropdown-item', function(e) {
             e.preventDefault();
             const cursoId = $(this).data('id');
@@ -1040,14 +1040,14 @@
             $('#idCursoSeleccionado').val(cursoId);
             $('#cursoSeleccionado').addClass('show').find('span').text(cursoDescripcion);
             $('#dropdownCursos').hide();
-        });
+                        });
 
         $(document).on('click', function(e) {
             if (!$(e.target).closest('.curso-search-container').length) {
                 $('#dropdownCursos').hide();
             }
-        });
-
+            });
+    
         $('#modalAgregarCurso').on('show.bs.modal', function() {
             $('#filtroCurso').val('');
             $('#idCursoSeleccionado').val('');
@@ -1055,7 +1055,7 @@
             $('#cursoSeleccionado').removeClass('show');
             $('#dropdownCursos').hide();
         });
-        
+    
         // Inicialización
         cargarEstudiantes();
         cargarCursos();
@@ -1065,7 +1065,7 @@
             const id = $('#idEstudiante').val();
             const campo = $('#campoNombre').val();
             const valor = $('#campoEditar').val();
-            
+    
             guardarValorEditado(id, campo, valor, editingCell);
         });
 
@@ -1258,13 +1258,13 @@
                 inputPorcentaje.addClass('is-invalid');
                 return;
             }
-            
+    
             // Validación del curso seleccionado
             if (!cursoId) {
                 $('#filtroCurso').addClass('is-invalid');
                 return;
             }
-
+        
             // Deshabilitar el botón mientras se procesa
             const $btnAsignar = $(this);
             $btnAsignar.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Asignando...');
@@ -1277,22 +1277,22 @@
             };
 
             // Realizar la petición al backend
-            $.ajax({
-                url: '../../backend/cursos/asignar_curso.php',
-                method: 'POST',
-                contentType: 'application/json',
+                $.ajax({
+                    url: '../../backend/cursos/asignar_curso.php',
+                    method: 'POST',
+                    contentType: 'application/json',
                 data: JSON.stringify(datos),
                 success: function(response) {
                     if (response.success) {
                         // Mostrar mensaje de éxito
                         showToast(response.message || 'Curso asignado exitosamente');
                         // Cerrar el modal
-                        $('#modalAgregarCurso').modal('hide');
-                    } else {
+                            $('#modalAgregarCurso').modal('hide');
+                        } else {
                         // Mostrar mensaje de error
                         showToast('Error al asignar el curso: ' + (response.error || 'Error desconocido'), 'error');
-                    }
-                },
+                        }
+                    },
                 error: function(xhr, status, error) {
                     console.error('Error en la petición:', error);
                     showToast('Error al conectar con el servidor', 'error');
@@ -1323,12 +1323,12 @@
         $('#btnGuardarObservacion').on('click', function() {
             const observacion = $('#inputObservacion').val().trim();
             const estudianteId = $('#idEstudianteSeleccionadoObservacion').val();
-            
+        
             if (!observacion) {
                 $('#inputObservacion').addClass('is-invalid');
                 return;
             }
-
+        
             // Deshabilitar el botón mientras se procesa
             const $btnGuardar = $(this);
             $btnGuardar.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
@@ -1366,12 +1366,12 @@
                 }
             });
         });
-
+    
         // Remover la clase is-invalid cuando el usuario empiece a escribir en la observación
         $('#inputObservacion').on('input', function() {
             $(this).removeClass('is-invalid');
         });
-
+        
         // Limpiar validaciones al abrir el modal de observaciones
         $('#modalAgregarObservaciones').on('show.bs.modal', function() {
             $('#inputObservacion').removeClass('is-invalid').val('');
@@ -1410,7 +1410,7 @@
                         $('#vr-contacto-codigo').text(data.estudiante.contacto.codigo || 'No disponible');
                         $('#vr-contacto-nombre').text(data.estudiante.contacto.nombre || 'No disponible');
                         $('#vr-contacto-iglesia').text(data.estudiante.contacto.iglesia || 'No disponible');
-
+    
                         // Estadísticas
                         $('#vr-total-cursos').text(data.estadisticas.total_cursos);
                         $('#vr-promedio').text(data.estadisticas.promedio_porcentaje + '%');
@@ -1464,7 +1464,7 @@
                 .fail(function(jqXHR, textStatus, errorThrown) {
                     mostrarError('Error al conectar con el servidor');
                     console.error('Error:', textStatus, errorThrown);
-                });
+        });
         }
 
         // Función para mostrar errores en el modal

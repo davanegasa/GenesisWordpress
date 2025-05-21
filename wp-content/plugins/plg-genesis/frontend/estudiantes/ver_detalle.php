@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__ . '/../../../../../wp-load.php');  // Ajusta la ruta según tu estructura de directorios
+require_once(dirname(__FILE__) . '/../utils/logger.php');
 
 // Verificar si el usuario no está autenticado en WordPress
 if (!is_user_logged_in()) {

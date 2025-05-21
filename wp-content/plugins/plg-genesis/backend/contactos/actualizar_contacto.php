@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . '/../../../../../wp-load.php');
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php');
+require_once __DIR__ . '/../utils/logger.php';
 
 header('Content-Type: application/json');
 
@@ -16,6 +17,7 @@ $data = json_decode($input, true);
 
 // Validar que se envíe el ID del contacto
 if (!isset($data['id']) || empty($data['id'])) {
+    genesis_log('ID del contacto es requerido', 'ERROR');
     http_response_code(400); // Solicitud incorrecta
     echo json_encode(['error' => 'ID del contacto es requerido']);
     exit;
@@ -29,6 +31,7 @@ $query = "SELECT * FROM contactos WHERE id = $1";
 $result = pg_query_params($conexion, $query, [$id]);
 
 if (!$result || pg_num_rows($result) === 0) {
+    genesis_log('Contacto no encontrado', 'ERROR');
     http_response_code(404); // No encontrado
     echo json_encode(['error' => 'Contacto no encontrado']);
     exit;
@@ -56,8 +59,10 @@ $updateResult = pg_query_params($conexion, $updateQuery, [
 ]);
 
 if ($updateResult) {
+    genesis_log('Contacto actualizado exitosamente', 'INFO');
     echo json_encode(['success' => true, 'message' => 'Contacto actualizado exitosamente']);
 } else {
+    genesis_log('Error al actualizar el contacto', 'ERROR');
     http_response_code(500); // Error interno del servidor
     echo json_encode(['error' => 'Error al actualizar el contacto']);
 }

@@ -1,10 +1,23 @@
 <?php
 /*
 Plugin Name: Registro de Estudiantes
-Description: Plugin personalizado para registrar estudiantes desde un formulario en PostgreSQL.
-Version: 1.0
+Description: Plugin personalizado para registrar estudiantes desde un formulario en PostgreSQL y administración Genesis.
+Version: 1.1
 Author: Daniel
+
+// NOTA: Este archivo implementa tanto el dashboard del FRONTEND (página /dashboard/) como el dashboard administrativo de WordPress.
+// El dashboard administrativo se encuentra en: wp-content/plugins/plg-genesis/admin/dashboard.php
 */
+
+// Incluir el dashboard administrativo
+require_once plugin_dir_path(__FILE__) . 'admin/dashboard.php';
+
+// Menú de prueba para verificar carga de menús personalizados
+add_action('admin_menu', function() {
+    add_menu_page('Prueba', 'Prueba', 'manage_options', 'prueba', function() {
+        echo '<h1>¡Funciona el menú de prueba!</h1>';
+    });
+});
 
 // Ocultar la barra de administración para todos los usuarios excepto administradores
 add_filter('show_admin_bar', function($show) {

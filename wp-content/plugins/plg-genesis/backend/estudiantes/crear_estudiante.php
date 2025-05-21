@@ -224,6 +224,8 @@ try {
     ]);
 
 } catch (Exception $e) {
+    require_once __DIR__ . '/../utils/logger.php';
+    genesis_log('Error al crear estudiante: ' . $e->getMessage(), 'ERROR');
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 }

@@ -29,7 +29,8 @@ $params = [$codigoIngresado];
 $result = pg_query_params($conexion, $query, $params);
 
 if (!$result) {
-    error_log("Error en la consulta: " . pg_last_error($conexion));
+    require_once __DIR__ . '/../utils/logger.php';
+    genesis_log('Error en la consulta de validar_codigo: ' . pg_last_error($conexion), 'ERROR');
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Error en la base de datos']);
     exit;

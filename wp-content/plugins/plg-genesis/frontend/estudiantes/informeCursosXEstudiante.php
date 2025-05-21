@@ -8,6 +8,7 @@ if (!is_user_logged_in()) {
 }
 
 require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php');
+require_once(dirname(__FILE__) . '/../utils/logger.php');
 
 // Definir el valor predeterminado del filtro de contacto
 $filtro_id_contacto = '';
@@ -24,6 +25,15 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 // Consulta SQL para obtener todos los IDs de contacto
 $query_contactos = "SELECT id, code, iglesia FROM contactos";
 $resultado_contactos = pg_query($conexion, $query_contactos);
+
+if (!$conexion) {
+    genesis_frontend_log('Error en la conexión a la base de datos', 'ERROR');
+    die('Error en la conexión a la base de datos.');
+}
+
+if (!$resultado_contactos) {
+    genesis_frontend_log('Error al obtener contactos', 'ERROR');
+}
 
 // Si se ha seleccionado un filtro de contacto, generar el CSV
 if (!empty($filtro_id_contacto)) {
@@ -70,7 +80,10 @@ if (!empty($filtro_id_contacto)) {
 
     $resultado_estudiantes_cursos = pg_query($conexion, $query_estudiantes_cursos);
     
-    if ($resultado_estudiantes_cursos) {
+    if (!$resultado_estudiantes_cursos) {
+        genesis_frontend_log('Error al obtener estudiantes y cursos', 'ERROR');
+        echo '<p class="text-danger">Error al obtener los estudiantes y cursos.</p>';
+    } else {
         // Crear un archivo CSV y descargarlo
         $fecha_actual = date("Y-m-d_H-i-s");
         header('Content-Type: text/csv');
@@ -93,8 +106,6 @@ if (!empty($filtro_id_contacto)) {
 
         fclose($output);
         exit;
-    } else {
-        echo '<p class="text-danger">Error al obtener los estudiantes y cursos.</p>';
     }
 }
 ?>

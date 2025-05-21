@@ -170,6 +170,8 @@ try {
     $pdf->Output('certificados_' . $dia . '_' . $mes . '_' . $anio . '.pdf', 'I');
 
 } catch (Exception $e) {
+    require_once __DIR__ . '/../utils/logger.php';
+    genesis_log('Error al generar los certificados: ' . $e->getMessage(), 'ERROR');
     header('Content-Type: text/html; charset=utf-8');
     echo '<div style="color: red; font-family: Arial, sans-serif; padding: 20px;">';
     echo '<h2>Error al generar los certificados:</h2>';

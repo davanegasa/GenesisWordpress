@@ -4,10 +4,10 @@ require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php');
 
 header('Content-Type: application/json');
 
-// Verificar m®¶todo HTTP
+// Verificar m√©todo HTTP
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'M®¶todo no permitido']);
+    echo json_encode(['error' => 'M√©todo no permitido']);
     exit;
 }
 
@@ -33,7 +33,7 @@ if ((!$estudianteId && !$contactoId) || ($estudianteId && $contactoId)) {
     exit;
 }
 
-// Iniciar transacci®Æn
+// Iniciar transacci√≥n
 pg_query($conexion, 'BEGIN');
 
 try {
@@ -65,13 +65,15 @@ try {
         }
     }
 
-    // Finalizar transacci®Æn
+    // Finalizar transacci√≥n
     pg_query($conexion, 'COMMIT');
     pg_close($conexion);
 
     echo json_encode(['success' => true, 'message' => 'Programas asignados exitosamente.']);
 } catch (Exception $e) {
-    // Revertir transacci®Æn en caso de error
+    require_once __DIR__ . '/../utils/logger.php';
+    genesis_log('Error al asignar el programa: ' . $e->getMessage(), 'ERROR');
+    // Revertir transacci√≥n en caso de error
     pg_query($conexion, 'ROLLBACK');
     pg_close($conexion);
     http_response_code(500);

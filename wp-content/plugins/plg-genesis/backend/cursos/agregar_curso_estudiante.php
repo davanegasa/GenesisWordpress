@@ -61,6 +61,8 @@ $result_insert = pg_query_params($conexion, $query_insert, [$estudiante_id, $cur
 if ($result_insert) {
     echo json_encode(['success' => true, 'message' => 'Curso asignado exitosamente']);
 } else {
+    require_once __DIR__ . '/../utils/logger.php';
+    genesis_log('Error al asignar el curso: ' . pg_last_error($conexion), 'ERROR');
     http_response_code(500); // Error del servidor
     echo json_encode(['error' => 'Error al asignar el curso']);
 }

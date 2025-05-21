@@ -20,7 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT
     }
 
     // Log para debugging
-    error_log("Datos recibidos: " . print_r($input, true));
+    require_once __DIR__ . '/../utils/logger.php';
+    genesis_log("Datos recibidos: " . print_r($input, true), 'DEBUG');
 
     // Validar los datos recibidos
     $id = $input['id'] ?? null;
@@ -29,14 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT
 
     // Validar los campos
     if (!$id || !$campo || !$valor) {
-        error_log("Datos inválidos: ID: $id, Campo: $campo, Valor: $valor");
+        genesis_log("Datos inválidos: ID: $id, Campo: $campo, Valor: $valor", 'ERROR');
         echo json_encode(['success' => false, 'error' => 'Datos inválidos.']);
         exit;
     }
 
     // Validar conexión
     if (!$conexion) {
-        error_log("Conexión a la base de datos fallida.");
+        genesis_log("Conexión a la base de datos fallida.", 'ERROR');
         echo json_encode(['success' => false, 'error' => 'Error al conectar con la base de datos.']);
         exit;
     }
@@ -64,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT
             throw new Exception(pg_last_error($conexion));
         }
     } catch (Exception $e) {
-        error_log("Error en la base de datos: " . $e->getMessage());
+        genesis_log("Error en la base de datos: " . $e->getMessage(), 'ERROR');
         echo json_encode(['success' => false, 'error' => 'Error en la base de datos: ' . $e->getMessage()]);
     }
 
