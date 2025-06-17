@@ -245,7 +245,42 @@
         .select2-container--default .select2-results__option--highlighted[aria-selected] {
             background-color: var(--primary-color);
         }
+
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+        .fade-out {
+            opacity: 1;
+            transition: opacity 1s ease-out;
+        }
+
+        .alert-custom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #1a3b89;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .alert-custom.show {
+            display: block;
+            opacity: 1;
+        }
     </style>
+    <link rel="stylesheet" href="/wp-content/plugins/plg-genesis/assets/common.css">
 </head>
 <body class="bg-light">
     <div class="container-fluid py-3">
@@ -398,14 +433,31 @@
                     </div>
                 </div>
                 
+                <!-- Sección: Contacto -->
+                <div class="section-container">
+                    <h3 class="section-header">Iglesia o Contacto Asignado</h3>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <select id="contacto" class="form-select" required tabindex="15">
+                                    <option value="" disabled selected>Seleccione un contacto</option>
+                                </select>
+                                <div class="error-message"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Botón de envío -->
                 <div class="text-end mt-3">
-                    <button type="submit" class="btn btn-primary" tabindex="15">Crear Estudiante</button>
+                    <button type="submit" class="btn btn-primary" tabindex="16">Crear Estudiante</button>
                 </div>
             </form>
             <div id="responseMessage" class="mt-3"></div>
         </div>
     </div>
+    <div class="loading-spinner" id="loadingSpinner">⏳</div>
+    <script src="/wp-content/plugins/plg-genesis/assets/common.js"></script>
     <script>
     $(document).ready(function () {
         // Funciones de validación
@@ -513,38 +565,20 @@
         selectContacto.select2({
             placeholder: 'Seleccione un contacto',
             allowClear: true,
-            width: 'resolve', // Ajustar al ancho del contenedor padre
-            dropdownCssClass: 'custom-select-dropdown', // Clase CSS personalizada para el dropdown
-            selectionCssClass: 'form-select', // Clase CSS personalizada para el input seleccionado
+            width: 'resolve',
         });
         
         // Cargar contactos en el select
         $.getJSON('../../backend/contactos/obtener_contactos.php', function (data) {
             if (data.success && data.contactos) {
-                const selectContacto = $('#contacto');
                 selectContacto.empty();
                 selectContacto.append('<option value="" disabled selected>Seleccione un contacto</option>');
-    
-                // Ordenar contactos por código
-                const contactosOrdenados = data.contactos.sort((a, b) => {
-                    const codeA = parseInt(a.code, 10) || a.code;
-                    const codeB = parseInt(b.code, 10) || b.code;
-                    return typeof codeA === 'number' && typeof codeB === 'number'
-                        ? codeA - codeB
-                        : String(codeA).localeCompare(String(codeB));
+
+                data.contactos.forEach(contacto => {
+                    selectContacto.append(`<option value="${contacto.id}">${contacto.code} - ${contacto.iglesia}</option>`);
                 });
-    
-                // Añadir opciones al select
-                contactosOrdenados.forEach(contacto => {
-                    selectContacto.append(`<option value="${contacto.id}">${contacto.code}- ${contacto.iglesia}</option>`);
-                });
-    
-                // Inicializar Select2
-                selectContacto.select2({
-                    placeholder: 'Seleccione un contacto',
-                    allowClear: true,
-                    width: 'resolve',
-                });
+
+                selectContacto.trigger('change');
             } else {
                 alert('Error al cargar los contactos.');
             }
@@ -557,6 +591,9 @@
             e.preventDefault();
             let tieneErrores = false;
 
+            // Mostrar el spinner de carga
+            $('#loadingSpinner').show();
+
             // Validar campos requeridos
             $(this).find('[required]').each(function() {
                 if (!$(this).val()) {
@@ -566,6 +603,7 @@
             });
 
             if (tieneErrores) {
+                $('#loadingSpinner').hide();
                 return false;
             }
 
@@ -596,17 +634,24 @@
                 dataType: 'json',
                 data: JSON.stringify(estudianteData),
                 success: function (response) {
+                    $('#loadingSpinner').hide();
                     const messageDiv = $('#responseMessage');
                     if (response.success) {
                         messageDiv
                             .html(`Estudiante creado exitosamente. ID: <strong>${response.estudiante_id}</strong>`)
                             .removeClass('alert-danger')
-                            .addClass('alert alert-success');
+                            .addClass('alert alert-success fade-out');
                         
                         // Limpiar formulario
                         $('#formCrearEstudiante')[0].reset();
                         $('#contacto').val(null).trigger('change');
                         
+                        // Desvanecer el mensaje después de 5 segundos
+                        setTimeout(() => {
+                            messageDiv.fadeOut('slow', function() {
+                                $(this).removeClass('fade-out').html('').show();
+                            });
+                        }, 5000);
                     } else {
                         let errorMsg = 'Error al crear el estudiante: ';
                         if (response.errors) {
@@ -627,6 +672,7 @@
                     }
                 },
                 error: function () {
+                    $('#loadingSpinner').hide();
                     $('#responseMessage')
                         .html('Error de conexión con el servidor')
                         .removeClass('alert-success')
@@ -634,6 +680,17 @@
                 }
             });
         });
+
+        function showAlert(message, duration = 5000) {
+            const alertDiv = $('<div class="alert-custom"></div>').text(message);
+            $('body').append(alertDiv);
+            alertDiv.addClass('show');
+
+            setTimeout(() => {
+                alertDiv.removeClass('show');
+                setTimeout(() => alertDiv.remove(), 500);
+            }, duration);
+        }
     });
     </script>
 

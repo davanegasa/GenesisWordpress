@@ -1,0 +1,21 @@
+.alert-custom {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 80%;
+    text-align: center;
+    background-color: #1a3b89;
+    color: white;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.alert-custom.show {
+    display: block;
+    opacity: 1;
+} 
