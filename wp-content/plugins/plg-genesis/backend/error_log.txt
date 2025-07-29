@@ -1,0 +1,3 @@
+Error en la consulta: ERROR:  column "estado_civil" does not exist
+LINE 1: ...llido1, apellido2, email, celular, doc_identidad, estado_civ...
+                                                             ^
