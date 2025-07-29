@@ -91,8 +91,6 @@ wp-content/wp-cache-config.php
 wp-content/plugins/hello.php
 
 # Archivos de base de datos
-*.sql
-*.sqlite
 
 # Exclusiones adicionales
 .git/

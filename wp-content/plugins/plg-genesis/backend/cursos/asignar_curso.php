@@ -60,13 +60,46 @@ if (!$result_curso || pg_num_rows($result_curso) === 0) {
 $query_existente = "SELECT id FROM estudiantes_cursos WHERE estudiante_id = $1 AND curso_id = $2";
 $result_existente = pg_query_params($conexion, $query_existente, [$estudiante_id, $curso_id]);
 
+$forzar = isset($data['forzar']) ? (bool)$data['forzar'] : false;
+
 if ($result_existente && pg_num_rows($result_existente) > 0) {
-    http_response_code(409);
-    echo json_encode(['success' => false, 'error' => 'El estudiante ya tiene asignado este curso']);
-    exit;
+    if (!$forzar) {
+        // Obtener información del curso anterior
+        $query_curso_anterior = "
+            SELECT ec.porcentaje, ec.fecha, c.nombre as curso_nombre
+            FROM estudiantes_cursos ec
+            JOIN cursos c ON ec.curso_id = c.id
+            WHERE ec.estudiante_id = $1 AND ec.curso_id = $2
+            ORDER BY ec.fecha DESC
+            LIMIT 1
+        ";
+        $result_curso_anterior = pg_query_params($conexion, $query_curso_anterior, [$estudiante_id, $curso_id]);
+        
+        $curso_anterior = null;
+        if ($result_curso_anterior && pg_num_rows($result_curso_anterior) > 0) {
+            $row = pg_fetch_assoc($result_curso_anterior);
+            $curso_anterior = [
+                'porcentaje' => $row['porcentaje'],
+                'fecha' => $row['fecha'],
+                'curso_nombre' => $row['curso_nombre']
+            ];
+        }
+        
+        http_response_code(409);
+        echo json_encode([
+            'success' => false, 
+            'error' => 'El estudiante ya tiene asignado este curso',
+            'suggestion' => 'Use el parámetro "forzar": true para permitir repetir el curso',
+            'curso_anterior' => $curso_anterior
+        ]);
+        exit;
+    } else {
+        // Si se fuerza, permitir crear un nuevo registro (repetir curso)
+        // Continuar con el INSERT normal
+    }
 }
 
-// Insertar en la tabla estudiantes_cursos
+// Insertar en la tabla estudiantes_cursos (solo si no existe)
 $query = "
     INSERT INTO estudiantes_cursos (estudiante_id, curso_id, porcentaje, fecha)
     VALUES ($1, $2, $3, NOW())

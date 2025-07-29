@@ -681,6 +681,54 @@
         </div>
     </div>
     
+    <!-- Modal para confirmar repetir curso -->
+    <div class="modal fade" id="modalConfirmarRepetirCurso" tabindex="-1" aria-labelledby="modalConfirmarRepetirCursoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalConfirmarRepetirCursoLabel">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Curso ya asignado
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <strong>¡Atención!</strong> Este estudiante ya tiene asignado el curso seleccionado.
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Curso:</strong> <span id="cursoRepetirNombre"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Nota anterior:</strong> <span id="notaAnterior"></span>%
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <strong>Nueva nota:</strong> <span id="nuevaNota"></span>%
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Fecha anterior:</strong> <span id="fechaAnterior"></span>
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Al confirmar, se creará un nuevo registro para este intento del curso.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning" id="btnConfirmarRepetir">
+                        <i class="fas fa-redo me-1"></i>
+                        Repetir Curso
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal para ver observaciones -->
     <div class="modal fade" id="modalVerObservaciones" tabindex="-1" aria-labelledby="modalVerObservacionesLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -876,6 +924,64 @@
                     toast.remove();
                 }, 500);
             }, 4500);
+        }
+
+        // Función para mostrar modal de confirmación de repetir curso
+        function mostrarModalConfirmarRepetir(response, datosOriginales) {
+            // Obtener información del curso seleccionado
+            const cursoSeleccionado = cursos.find(curso => curso.id == datosOriginales.curso_id);
+            const cursoNombre = cursoSeleccionado ? cursoSeleccionado.nombre : 'Curso desconocido';
+            
+            // Llenar información en el modal
+            $('#cursoRepetirNombre').text(cursoNombre);
+            $('#nuevaNota').text(datosOriginales.porcentaje);
+            
+            // Obtener información del curso anterior (si está disponible en la respuesta)
+            if (response.curso_anterior) {
+                $('#notaAnterior').text(response.curso_anterior.porcentaje || 'N/A');
+                $('#fechaAnterior').text(response.curso_anterior.fecha || 'N/A');
+            } else {
+                $('#notaAnterior').text('N/A');
+                $('#fechaAnterior').text('N/A');
+            }
+            
+            // Guardar datos originales para usar en la confirmación
+            $('#modalConfirmarRepetirCurso').data('datosOriginales', datosOriginales);
+            
+            // Cerrar modal de asignar curso y mostrar modal de confirmación
+            $('#modalAgregarCurso').modal('hide');
+            $('#modalConfirmarRepetirCurso').modal('show');
+        }
+
+        // Función para ejecutar la asignación forzada
+        function ejecutarAsignacionForzada(datos) {
+            // Agregar parámetro forzar
+            datos.forzar = true;
+            
+            const $btnConfirmar = $('#btnConfirmarRepetir');
+            $btnConfirmar.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Procesando...');
+            
+            $.ajax({
+                url: '../../backend/cursos/asignar_curso.php',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(datos),
+                success: function(response) {
+                    if (response.success) {
+                        showToast(response.message || 'Curso repetido exitosamente', 'success');
+                        $('#modalConfirmarRepetirCurso').modal('hide');
+                    } else {
+                        showToast('Error al repetir el curso: ' + (response.error || 'Error desconocido'), 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error en la petición forzada:', error);
+                    showToast('Error al conectar con el servidor', 'error');
+                },
+                complete: function() {
+                    $btnConfirmar.prop('disabled', false).html('<i class="fas fa-redo me-1"></i> Repetir Curso');
+                }
+            });
         }
     
         function filtrarEstudiantes() {
@@ -1295,13 +1401,32 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Error en la petición:', error);
-                    showToast('Error al conectar con el servidor', 'error');
+                    
+                    // Manejar error 409 (curso ya asignado)
+                    if (xhr.status === 409) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            mostrarModalConfirmarRepetir(response, datos);
+                        } catch (e) {
+                            showToast('Error al procesar la respuesta del servidor', 'error');
+                        }
+                    } else {
+                        showToast('Error al conectar con el servidor', 'error');
+                    }
                 },
                 complete: function() {
                     // Rehabilitar el botón
                     $btnAsignar.prop('disabled', false).html('Asignar Curso');
                 }
             });
+        });
+
+        // Event listener para confirmar repetir curso
+        $('#btnConfirmarRepetir').on('click', function() {
+            const datosOriginales = $('#modalConfirmarRepetirCurso').data('datosOriginales');
+            if (datosOriginales) {
+                ejecutarAsignacionForzada(datosOriginales);
+            }
         });
 
         // Remover la clase is-invalid cuando el usuario empiece a escribir
