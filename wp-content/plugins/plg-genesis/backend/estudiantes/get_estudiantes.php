@@ -1,6 +1,6 @@
 <?php
 // Incluir el archivo de conexión a PostgreSQL para Docker
-include '../db_docker.php';
+include '../db.php';
 
 // Consulta para obtener todos los datos (ejemplo con estudiantes)
 $query = "SELECT id, id_estudiante, nombre1, nombre2, apellido1, apellido2, email, celular, doc_identidad, estado_civil, escolaridad, ocupacion FROM estudiantes";
