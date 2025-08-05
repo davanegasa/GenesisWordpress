@@ -21,7 +21,7 @@ function get_db_config($prefix) {
                     defined($prefix . '_DB_PASSWORD');
 
     // Si las constantes están definidas y no estamos en Docker, usar las constantes
-    if ($const_defined && getenv('WORDPRESS_DB_HOST') !== 'mariadb:3306') {
+    if ($const_defined && getenv('WORDPRESS_DB_HOST') !== 'mariadb') {
         return [
             'host' => constant($prefix . '_DB_HOST'),
             'dbname' => constant($prefix . '_DB_NAME'),
@@ -30,7 +30,17 @@ function get_db_config($prefix) {
         ];
     }
     
-    // Si no hay constantes o estamos en Docker, usar variables de entorno
+    // Si estamos en Docker, usar configuración específica de Docker
+    if (getenv('WORDPRESS_DB_HOST') === 'mariadb') {
+        return [
+            'host' => 'postgres',
+            'dbname' => 'emmaus_estudiantes',
+            'user' => 'emmaus_admin',
+            'password' => 'emmaus1234+'
+        ];
+    }
+    
+    // Si no hay constantes, usar variables de entorno
     return [
         'host' => getenv($prefix . '_DB_HOST'),
         'dbname' => getenv($prefix . '_DB_NAME'),

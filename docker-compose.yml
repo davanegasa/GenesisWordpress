@@ -55,7 +55,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./wp-content/plugins/plg-genesis/migration/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./wp-content/plugins/plg-genesis/migration/dump17062026.sql:/docker-entrypoint-initdb.d/migrations/dump17062026.sql
+      - ./wp-content/plugins/plg-genesis/migration/dump20250805.sql:/docker-entrypoint-initdb.d/migrations/dump20250805.sql
 
 volumes:
   mysql_data:
