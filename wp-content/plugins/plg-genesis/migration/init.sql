@@ -15,4 +15,4 @@ GRANT ALL PRIVILEGES ON DATABASE emmaus_estudiantes TO emmaus;
 ALTER USER emmaus WITH SUPERUSER;
 
 -- Ejecutar el archivo con el esquema y datos de producción
-\i /docker-entrypoint-initdb.d/migrations/datos270420251117.sql; 
+\i /docker-entrypoint-initdb.d/migrations/dump20250805.sql; 
