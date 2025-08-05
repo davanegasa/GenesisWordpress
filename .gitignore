@@ -7,6 +7,11 @@ docker-compose.override.yml
 Thumbs.db
 *.log
 
+# Logs específicos del plugin
+wp-content/plugins/plg-genesis/backend/*.log
+wp-content/plugins/plg-genesis/backend/connection_log.txt
+wp-content/plugins/plg-genesis/backend/usuario_oficina_log.txt
+
 # IDE y editores
 .idea/
 .vscode/
