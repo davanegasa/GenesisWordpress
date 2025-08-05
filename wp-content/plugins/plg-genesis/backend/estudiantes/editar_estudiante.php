@@ -8,8 +8,8 @@ ini_set('display_errors', 1);
 
 // Verificar el método de la solicitud
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT') {
-    // Incluir el archivo de conexión a la base de datos
-    include '../db.php';
+    // Incluir el archivo de conexión a PostgreSQL para Docker
+    include '../db_docker.php';
 
     // Leer el cuerpo de la solicitud
     $input = json_decode(file_get_contents('php://input'), true);

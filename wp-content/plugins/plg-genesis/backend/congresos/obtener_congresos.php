@@ -1,6 +1,6 @@
 <?php
 require_once(__DIR__ . '/../../../../../wp-load.php');  // Cargar WordPress
-require_once(plugin_dir_path(__FILE__) . '/../../backend/db.php'); // Conexi��n a PostgreSQL
+require_once(plugin_dir_path(__FILE__) . '/../../backend/db_docker.php'); // Conexión a PostgreSQL para Docker
 
 header('Content-Type: application/json');
 
