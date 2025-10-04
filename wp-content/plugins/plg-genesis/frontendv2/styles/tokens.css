@@ -1,0 +1,19 @@
+:root{
+    /* Paleta basada en Emmaus (Brand Assets) */
+    --plg-bg:#f5f7fb;
+    --plg-cardBg:#ffffff;
+    --plg-text:#0f172a;
+    --plg-mutedText:#6b7280;
+    --plg-border:#d7dfeb;
+
+    --plg-accent:#0c497a;   /* BLUE */
+    --plg-success:#3fab49;  /* GREEN */
+    --plg-warning:#fff100;  /* YELLOW */
+    --plg-danger:#e11d48;   /* Danger UI */
+    --plg-info:#3b82f6;     /* Info UI */
+
+    /* escalas */
+    --plg-radius:12px;
+    --plg-shadow:0 4px 12px rgba(13,73,122,0.08);
+    --plg-gap:12px;
+}

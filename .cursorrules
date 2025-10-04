@@ -1,0 +1,68 @@
+Cursor Rules para GenesisWordpress
+
+Idioma y comunicación
+- Predeterminado: es-ES
+- Responder siempre en español
+- Mensajes concisos en chat; detallados en PRs
+
+Estilo de código
+- PHP: WordPress Coding Standards (WPCS), PHP 8.2, sangría con tabulaciones, ancho 120
+- SQL: modo seguro, preferir sentencias idempotentes
+- JS: Prettier + ESLint cuando aplique
+
+Reglas de edición
+- No reformatear código fuera del diff
+- Preservar sangría y estilo existentes
+- Evitar comentarios de ruido; usar nombres descriptivos
+- Manejar errores explícitamente; evitar capturas vacías
+
+Flujo de trabajo Git
+- Ramas: feature/<descripcion-kebab>, fix/<descripcion-kebab>, chore/<descripcion>
+- Commits: Conventional Commits (feat, fix, chore, docs, refactor, test)
+- PRs: incluir resumen, cambios, pasos de prueba, y notas de migración
+
+Docker y entorno
+- WordPress en http://localhost:8080
+- Variables WordPress: WORDPRESS_DB_HOST=mariadb, WORDPRESS_DB_USER=emmaus_wpgenesis, WORDPRESS_DB_PASSWORD=emmaus_wpgenesis, WORDPRESS_DB_NAME=emmaus_wpgenesis, WORDPRESS_TABLE_PREFIX=edgen_
+- PostgreSQL (plugin): host=postgres, db=emmaus_estudiantes, user=emmaus_admin, password=(usar secretos)
+- Seguridad: no commitear credenciales sensibles; preferir .env y secretos en producción
+
+Bases de datos y migraciones
+- MariaDB init: migration/emmaus_wpgenesis (2).sql, migration/update_urls.sql
+- PostgreSQL init: wp-content/plugins/plg-genesis/migration/init.sql, wp-content/plugins/plg-genesis/migration/dump20250805.sql
+
+Reglas para IA (Cursor)
+- Antes de editar: leer archivos relacionados; citar código existente con referencias
+- Al editar: preservar estilo; no introducir errores de linter
+- Después de editar: ejecutar linter si está disponible; actualizar documentación si cambia el comportamiento
+
+Documentación
+- README.md es la fuente de verdad para instalación, uso, variables y migraciones
+- Mantener esta info actualizada con cada cambio relevante
+
+Reglas específicas del plugin plg-genesis (API-first)
+- Arquitectura Backend:
+  - Exponer API vía WordPress REST API bajo namespace `plg-genesis/v1` (usar `register_rest_route`).
+  - Capas: `api/controllers` (HTTP y mapping), `services` (negocio), `repositories` (SQL parametrizado), `models` (DTO/entidades), `validation`, `security`, `infrastructure` (ConnectionProvider/OfficeResolver/Logger), `errors`.
+  - Repositorios: usar exclusivamente `pg_query_params`; prohibido concatenar SQL con variables de usuario.
+  - ConnectionProvider: resolver credenciales por oficina desde entorno/ajustes; prohibido secretos hardcodeados.
+  - Respuestas JSON estandarizadas: `{ success: true, data }` o `{ success: false, error: { code, message, details } }`.
+  - Códigos HTTP coherentes: 200/201, 400/401/403/404/409/422, 500.
+  - Logging centralizado con contexto (usuario, oficina, endpoint).
+- Seguridad:
+  - Eliminar o reemplazar `backend/db_public.php`; endpoints públicos solo de lectura, sin secretos, con rate limiting.
+  - `permission_callback` por endpoint (roles/capabilities) y verificación de oficina.
+  - Nonces obligatorios para mutaciones desde el frontend (`X-WP-Nonce`).
+  - Validación y sanitización estricta de entrada; escapar salida según contexto.
+- Frontend:
+  - Prohibido acceso directo a DB o lógica de negocio desde `frontend/`.
+  - Consumir únicamente `wp-json/plg-genesis/v1/...` mediante un cliente central `frontend/js/api/client.js` (agrega nonce, maneja errores/timeouts).
+  - Servicios por dominio en `frontend/js/services/*`; vistas/componentes renderizan datos de la API.
+  - Evitar cargar `.php` que ejecuten lógica en iframes; migrar a vistas JS progresivamente.
+  - DTOs en camelCase documentados (JSDoc/TypeScript si aplica); ESLint+Prettier activos.
+- Versionado y PRs:
+  - Versionar API con `v1`; cambios incompatibles → `v2`.
+  - PRs deben describir endpoints/DTOs cambiados y pasos de prueba (roles y oficinas).
+- Migración (guía):
+  - 1) Añadir endpoints read-only y cliente API; 2) portar mutaciones; 3) deprecar y retirar entrypoints antiguos.
+  - Mantener compatibilidad temporal anunciando deprecaciones en CHANGELOG.
