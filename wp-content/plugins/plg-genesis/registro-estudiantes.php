@@ -6,6 +6,17 @@ Version: 1.0
 Author: Daniel
 */
 
+// Bootstrap API-first (endpoints REST)
+require_once plugin_dir_path(__FILE__) . 'backend/bootstrap.php';
+
+// Flag de característica para activar consumo de API desde el frontend
+function plg_genesis_activate() {
+    if (get_option('plg_genesis_use_api') === false) {
+        add_option('plg_genesis_use_api', '0');
+    }
+}
+register_activation_hook(__FILE__, 'plg_genesis_activate');
+
 // Ocultar la barra de administración para todos los usuarios excepto administradores
 add_filter('show_admin_bar', function($show) {
     if (!current_user_can('administrator')) {
@@ -65,6 +76,38 @@ function proteger_dashboard_para_registrados() {
     }
 }
 add_action('template_redirect', 'proteger_dashboard_para_registrados');
+
+
+// Shortcode para Dashboard v2 (API-first)
+function shortcode_mostrar_dashboard_v2() {
+    if (is_user_logged_in()) {
+        ob_start();
+        if (is_page('dashboard')) {
+            include plugin_dir_path(__FILE__) . 'frontendv2/dashboard.php';
+        } else {
+            include plugin_dir_path(__FILE__) . 'frontendv2/dashboard.php';
+        }
+        return ob_get_clean();
+    } else {
+        wp_redirect(wp_login_url());
+        exit;
+    }
+}
+add_shortcode('mostrar_dashboard_v2', 'shortcode_mostrar_dashboard_v2');
+
+// Renderizar Dashboard v2 como página completa (sin header del tema)
+function plg_genesis_render_dashboard_v2_fullpage() {
+    if (!is_page('dashboard-v2')) {
+        return;
+    }
+    if (!is_user_logged_in()) {
+        wp_redirect(wp_login_url());
+        exit;
+    }
+    include plugin_dir_path(__FILE__) . 'frontendv2/dashboard.php';
+    exit;
+}
+add_action('template_redirect', 'plg_genesis_render_dashboard_v2_fullpage', 20);
 
 
 // Mostrar el campo de oficina en el perfil del usuario solo para administradores

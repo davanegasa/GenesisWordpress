@@ -1,0 +1,51 @@
+/* Reset y base tipográfica */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+	margin:0;
+	font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+	background:var(--plg-bg);
+	color:var(--plg-text);
+}
+
+/* Breakpoints (aplazado) */
+
+h1,h2,h3,h4{margin:0 0 12px 0}
+.card{
+	background:var(--plg-cardBg);
+	border:1px solid var(--plg-border);
+	border-radius:var(--plg-radius);
+	box-shadow:var(--plg-shadow);
+	padding:16px;
+}
+
+/* Utilidades */
+.u-flex{display:flex}
+.u-grid{display:grid;gap:var(--plg-gap)}
+.u-gap{gap:var(--plg-gap)}
+.u-mt-16{margin-top:16px}
+.u-mt-8{margin-top:8px}
+.u-mb-8{margin-bottom:8px}
+.u-mb-12{margin-bottom:12px}
+.u-hidden{display:none}
+
+/* Inputs y botones base */
+input,select,button{font:inherit}
+input[type=color]{width:64px;height:36px;padding:0;}
+input,select{
+	padding:8px 10px;
+	border:1px solid var(--plg-border);
+	border-radius:8px;
+	background:#fff;
+}
+input:focus,select:focus,button:focus{outline:2px solid var(--plg-accent); outline-offset:1px}
+
+button{
+	padding:8px 12px;
+	border:1px solid var(--plg-border);
+	border-radius:8px;
+	background:var(--plg-accent);
+	color:#fff;
+	cursor:pointer;
+}
+button:disabled{opacity:.6;cursor:not-allowed}
