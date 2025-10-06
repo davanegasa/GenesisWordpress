@@ -94,9 +94,40 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
 .status-cancel{background:color-mix(in srgb, var(--plg-danger) 14%, var(--plg-cardBg));border-color:color-mix(in srgb, var(--plg-danger) 45%, var(--plg-border));color:#fff}
 .congreso-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:12px 0}
 .metric{background:color-mix(in srgb, var(--plg-accent) 2%, var(--plg-cardBg));border:1px solid color-mix(in srgb, var(--plg-accent) 24%, var(--plg-border));border-radius:10px;padding:12px;text-align:center;box-shadow:var(--plg-shadow);color:var(--plg-text)}
+.congreso-metrics .metric:nth-child(1){
+    /* Total → matiz info */
+    background:color-mix(in srgb, var(--plg-info) 6%, var(--plg-cardBg));
+    border-color:color-mix(in srgb, var(--plg-info) 30%, var(--plg-border));
+}
+.congreso-metrics .metric:nth-child(2){
+    /* Estudiantes → matiz success */
+    background:color-mix(in srgb, var(--plg-success) 6%, var(--plg-cardBg));
+    border-color:color-mix(in srgb, var(--plg-success) 30%, var(--plg-border));
+}
+.congreso-metrics .metric:nth-child(3){
+    /* Externos → matiz warning suave para contraste */
+    background:color-mix(in srgb, var(--plg-warning) 12%, var(--plg-cardBg));
+    border-color:color-mix(in srgb, var(--plg-warning) 35%, var(--plg-border));
+}
 .metric-label{color:var(--plg-mutedText);font-size:12px;letter-spacing:.2px}
 .metric-value{font-weight:800;font-size:22px;margin-top:4px;color:var(--plg-text)}
 .congreso-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+/* Acentos sutiles por acción para reducir monocromía conservando la paleta */
+.congreso-actions .btn:nth-child(1){ /* Ver detalle → acento base */ }
+.congreso-actions .btn:nth-child(2){ /* Ver inscritos → info */
+    background:color-mix(in srgb, var(--plg-info) 10%, var(--plg-cardBg));
+    border-color:color-mix(in srgb, var(--plg-info) 45%, var(--plg-border));
+    color:color-mix(in srgb, var(--plg-info) 80%, #fff);
+}
+.congreso-actions .btn:nth-child(3){ /* Asistencia → success */
+    background:color-mix(in srgb, var(--plg-success) 10%, var(--plg-cardBg));
+    border-color:color-mix(in srgb, var(--plg-success) 45%, var(--plg-border));
+    color:color-mix(in srgb, var(--plg-success) 80%, #fff);
+}
+.congreso-actions .btn:nth-child(4){ /* Cambiar estado → warning tenue */
+    background:color-mix(in srgb, var(--plg-warning) 12%, var(--plg-cardBg));
+    border-color:color-mix(in srgb, var(--plg-warning) 40%, var(--plg-border));
+}
 /* Actividad reciente */
 .activity-list{list-style:none;padding:0;margin:0}
 .activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--plg-border)}
