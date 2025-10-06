@@ -121,7 +121,7 @@ Más detalles y ejemplos en `frontendv2/FRONTEND_GUIDE.md`.
 
 ## Documentación v1 (referencia)
 
-- Programas y Cursos v1: ver `docs/programas-v1.md`
+- Programas y Cursos v1: ver `wp-content/plugins/plg-genesis/docs/programas-v1.md`
 
 ## Configuración de DB_HOST en `wp-config.php`
 
