@@ -54,6 +54,9 @@ function resolveLoader(hash) {
     }
     if (hash.startsWith('#/contactos')) return () => import('../pages/contactos/list.js').then(m => m.mount(container));
     if (hash.startsWith('#/congresos')) return () => import('../pages/congresos/list.js').then(m => m.mount(container));
+    if (hash.startsWith('#/programas/nuevo')) return () => import('../pages/programas/create.js').then(m => m.mount(container));
+    if (hash.startsWith('#/programa/')) { let id = hash.split('/')[2] || ''; if (id.includes('?')) id=id.split('?')[0]; id=decodeURIComponent(id); return () => import('../pages/programas/detail.js').then(m=> m.mount(container,{ id })); }
+    if (hash.startsWith('#/programas')) return () => import('../pages/programas/list.js').then(m => m.mount(container));
     if (hash.startsWith('#/congreso/') && hash.includes('/asistencia')) { let id = hash.split('/')[2] || ''; if (id.includes('?')) id=id.split('?')[0]; id=decodeURIComponent(id); return () => import('../pages/congresos/attendance.js').then(m=> m.mount(container,{ id })); }
     if (hash.startsWith('#/congreso/')) { let id = hash.split('/')[2] || ''; if (id.includes('?')) id=id.split('?')[0]; id=decodeURIComponent(id); return () => import('../pages/congresos/detail.js').then(m=> m.mount(container,{ id })); }
 	if (hash.startsWith('#/tema')) return () => import('../pages/settings/theme.js').then(m => m.mount(container));
