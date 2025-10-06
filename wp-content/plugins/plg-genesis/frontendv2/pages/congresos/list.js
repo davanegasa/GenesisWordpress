@@ -104,11 +104,13 @@ export async function mount(container){
                 <div class="congreso-actions">
                     <button class="btn" data-act="detalle">Ver detalle</button>
                     <button class="btn" data-act="inscritos">Ver inscritos</button>
+                    <button class="btn" data-act="asistencia">Asistencia</button>
                     <button class="btn" data-act="estado">Cambiar estado</button>
                 </div>
             `;
             card.querySelector('[data-act="detalle"]').addEventListener('click', ()=> { location.hash = '#/congreso/'+encodeURIComponent(cg.idCongreso || cg.id || ''); });
             card.querySelector('[data-act="inscritos"]').addEventListener('click', ()=> { location.hash = '#/congreso/'+encodeURIComponent(cg.idCongreso || cg.id || '') ; });
+            card.querySelector('[data-act="asistencia"]').addEventListener('click', ()=> { location.hash = '#/congreso/'+encodeURIComponent(cg.idCongreso || cg.id || '')+'/asistencia' ; });
             card.querySelector('[data-act="estado"]').addEventListener('click', ()=> changeState(cg));
             $grid.appendChild(card);
         });
