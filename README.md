@@ -119,6 +119,11 @@ Para mantener homogeneidad en el dashboard v2 (`wp-content/plugins/plg-genesis/f
 
 Más detalles y ejemplos en `frontendv2/FRONTEND_GUIDE.md`.
 
+## Documentación v1 (referencia)
+
+- Programas y Cursos v1: ver `wp-content/plugins/plg-genesis/docs/programas-v1.md`
+- API v2 (propuesta): `wp-content/plugins/plg-genesis/docs/programas-v2-spec.md`
+
 ## Configuración de DB_HOST en `wp-config.php`
 
 Dependiendo del entorno donde ejecutes WordPress, debes ajustar el valor de `DB_HOST` en el archivo `wp-config.php`:
