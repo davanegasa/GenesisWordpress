@@ -11,10 +11,19 @@ class PlgGenesis_ProgramasRepository {
         if ($sql) { error_log($prefix . $sql . ' | err=' . $pgErr); } else { error_log($prefix . $pgErr); }
     }
 
+    private function hasColumn($table, $column) {
+        $sql = "SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name=$1 AND column_name=$2 LIMIT 1";
+        $res = pg_query_params($this->conn, $sql, [ strval($table), strval($column) ]);
+        if (!$res) { $this->logPg('hasColumn', $sql); return false; }
+        $ok = pg_num_rows($res) > 0; pg_free_result($res); return $ok;
+    }
+
     public function list($q = '', $includeAll = false){
-        $where = "WHERE (p.deleted_at IS NULL OR p.deleted_at IS NULL)"; // soft delete futuro
-        $params = [];
-        if ($q !== ''){ $where .= " AND (p.nombre ILIKE $1 OR p.descripcion ILIKE $1)"; $params[] = '%'.$q.'%'; }
+        $clauses = [];
+        $params = []; $idx = 1;
+        if ($this->hasColumn('programas','deleted_at')) { $clauses[] = 'p.deleted_at IS NULL'; }
+        if ($q !== '') { $clauses[] = "(p.nombre ILIKE $${idx} OR p.descripcion ILIKE $${idx})"; $params[] = '%'.$q.'%'; $idx++; }
+        $where = count($clauses) ? ('WHERE '.implode(' AND ',$clauses)) : '';
         $sql = "SELECT p.id, p.nombre, p.descripcion FROM programas p $where ORDER BY p.id";
         $res = pg_query_params($this->conn, $sql, $params);
         if (!$res){ $this->logPg('list', $sql); return new WP_Error('db_query_failed','Error listando programas',[ 'status'=>500 ]); }
@@ -158,9 +167,15 @@ class PlgGenesis_ProgramasRepository {
             if (!$q1 || !$q2 || !$q3 || !$q4){ pg_query($this->conn,'ROLLBACK'); $this->logPg('delete.hard'); return new WP_Error('db_update_failed','Error eliminando programa',[ 'status'=>500 ]); }
             pg_query($this->conn,'COMMIT'); return true;
         }
-        $q = pg_query_params($this->conn, "UPDATE programas SET deleted_at=NOW() WHERE id=$1", [ intval($id) ]);
-        if (!$q){ $this->logPg('delete.soft'); return new WP_Error('db_update_failed','Error aplicando soft delete',[ 'status'=>500 ]); }
-        pg_free_result($q); return true;
+        if ($this->hasColumn('programas','deleted_at')){
+            $q = pg_query_params($this->conn, "UPDATE programas SET deleted_at=NOW() WHERE id=$1", [ intval($id) ]);
+            if (!$q){ $this->logPg('delete.soft'); return new WP_Error('db_update_failed','Error aplicando soft delete',[ 'status'=>500 ]); }
+            pg_free_result($q); return true;
+        }
+        // si no hay columna deleted_at, degradar a hard delete seguro
+        $qd = pg_query_params($this->conn, "DELETE FROM programas WHERE id=$1", [ intval($id) ]);
+        if (!$qd){ $this->logPg('delete.noSoft'); return new WP_Error('db_update_failed','Error eliminando programa',[ 'status'=>500 ]); }
+        pg_free_result($qd); return true;
     }
 
     public function assign($idPrograma, $idEstudiante = null, $idContacto = null, $remove = false){
