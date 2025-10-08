@@ -131,7 +131,7 @@ class PlgGenesis_ProgramasRepository {
         $descripcion = isset($payload['descripcion']) ? trim(strval($payload['descripcion'])) : null;
         pg_query($this->conn, 'BEGIN');
         if ($nombre !== null || $descripcion !== null){
-            $q = pg_query_params($this->conn, "UPDATE programas SET nombre=COALESCE($1,nombre), descripcion=COALESCE($2,descripcion) WHERE id=$3", [ $nombre, $descripcion, intval($id) ]);
+            $q = pg_query_params($this->conn, "UPDATE programas SET nombre=COALESCE($1,nombre), descripcion=COALESCE($2,descripcion), updated_at=NOW() WHERE id=$3", [ $nombre, $descripcion, intval($id) ]);
             if (!$q){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.programa'); return new WP_Error('db_update_failed','Error actualizando programa',[ 'status'=>500 ]); }
             pg_free_result($q);
         }
@@ -190,7 +190,7 @@ class PlgGenesis_ProgramasRepository {
             pg_query($this->conn,'COMMIT'); return true;
         }
         if ($this->hasColumn('programas','deleted_at')){
-            $q = pg_query_params($this->conn, "UPDATE programas SET deleted_at=NOW() WHERE id=$1", [ intval($id) ]);
+            $q = pg_query_params($this->conn, "UPDATE programas SET deleted_at=NOW(), updated_at=NOW() WHERE id=$1", [ intval($id) ]);
             if (!$q){ $this->logPg('delete.soft'); return new WP_Error('db_update_failed','Error aplicando soft delete',[ 'status'=>500 ]); }
             pg_free_result($q); return true;
         }

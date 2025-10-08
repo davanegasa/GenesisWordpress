@@ -46,6 +46,7 @@ export async function bootstrap() {
 	setupAccordion('nav-estudiantes', '.sidebar a.submenu[href^="#/estudiantes"]');
 	setupAccordion('nav-contactos', '.sidebar a.submenu[href^="#/contactos"]');
 	setupAccordion('nav-programas', '.sidebar a.submenu[href^="#/programas"]');
+	setupAccordion('nav-cursos', '.sidebar a.submenu[href^="#/cursos"]');
 
 	startRouter();
 }

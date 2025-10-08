@@ -47,6 +47,9 @@ if (!defined('ABSPATH')) { exit; }
 			<a href="#/programas" id="nav-programas">Programas</a>
 			<a href="#/programas" class="submenu">Listar Programas</a>
 			<a href="#/programas/nuevo" class="submenu">Crear Programa</a>
+			<a href="#/cursos" id="nav-cursos">Cursos</a>
+			<a href="#/cursos" class="submenu">Listar Cursos</a>
+			<a href="#/cursos/nuevo" class="submenu">Crear Curso</a>
 			<a href="#/tema" id="nav-tema">Tema</a>
 		</nav>
 		<main class="content">
