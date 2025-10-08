@@ -5,6 +5,11 @@
 .btn-secondary{background:color-mix(in srgb, var(--plg-accent) 10%, var(--plg-cardBg));color:var(--plg-accent);border-color:color-mix(in srgb, var(--plg-accent) 55%, var(--plg-border))}
 .btn-ghost{background:transparent;color:var(--plg-text)}
 .input{padding:10px 12px;border:1px solid var(--plg-border);border-radius:10px;background:var(--plg-cardBg);transition:border .15s, box-shadow .15s;width:100%}
+textarea.input{white-space:pre-wrap;line-height:1.4;min-height:100px}
+
+/* Utilidades espaciado usadas en crear programas */
+.u-mt-8{margin-top:8px}
+.u-mb-8{margin-bottom:8px}
 .input:focus{border-color:var(--plg-accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--plg-accent) 25%, transparent)}
 .input::placeholder{color:var(--plg-mutedText)}
 .input[readonly]{background:color-mix(in srgb, var(--plg-text) 6%, var(--plg-cardBg))}
@@ -15,7 +20,16 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
 .hint-text{color:var(--plg-mutedText);font-size:12px;margin-top:4px}
 .table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--plg-border);border-radius:12px;overflow:hidden}
 .table th,.table td{padding:12px;border-bottom:1px solid var(--plg-border);text-align:left}
-.table thead th{background:color-mix(in srgb, var(--plg-accent) 16%, var(--plg-cardBg));font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--plg-text)}
+.table thead th{background:color-mix(in srgb, var(--plg-accent) 12%, var(--plg-cardBg));font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--plg-text)}
+.table td{max-width:520px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Grid de programas (listado) */
+.program-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.program-card{border:1px solid var(--plg-border);border-radius:12px;background:var(--plg-cardBg);padding:16px;box-shadow:var(--plg-shadow);cursor:pointer;display:flex;flex-direction:column;gap:8px}
+.program-card:hover{border-color:color-mix(in srgb, var(--plg-accent) 50%, var(--plg-border));background:color-mix(in srgb, var(--plg-accent) 6%, var(--plg-cardBg))}
+.program-title{font-weight:800;color:var(--plg-text)}
+.program-desc{color:var(--plg-mutedText);font-size:14px;line-height:1.4}
+.program-actions{margin-top:auto;display:flex;justify-content:flex-end}
 .table tbody tr:last-child td{border-bottom:none}
 .table tbody tr{transition:background .15s ease}
 .table tbody tr:hover{background:color-mix(in srgb, var(--plg-accent) 8%, var(--plg-cardBg))}
@@ -26,6 +40,22 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
 }
 .toast{position:fixed;right:16px;bottom:16px;background:var(--plg-cardBg);border:1px solid var(--plg-border);box-shadow:var(--plg-shadow);padding:12px 14px;border-radius:8px;color:var(--plg-text)}
 .card-title{font-weight:700;margin-bottom:12px;color:var(--plg-accent)}
+.card-title .badge{margin-left:8px}
+
+/* Header acciones alineadas */
+.u-flex{display:flex}
+.u-gap{gap:12px}
+.two-col{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+.aside{position:sticky;top:16px;max-height:calc(100vh - 48px);overflow:auto}
+
+/* Estilos para tarjetas de nivel/curso en Programas */
+.course-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:8px}
+.course-card{border:1px solid var(--plg-border);border-radius:10px;padding:12px;background:color-mix(in srgb, var(--plg-accent) 3%, var(--plg-cardBg));display:flex;align-items:center;justify-content:space-between;box-shadow:var(--plg-shadow);color:var(--plg-text);cursor:pointer}
+.course-card:hover{background:color-mix(in srgb, var(--plg-accent) 8%, var(--plg-cardBg))}
+.course-name{font-weight:600}
+.course-badge{display:inline-block;background:color-mix(in srgb, var(--plg-info) 16%, var(--plg-cardBg));border:1px solid color-mix(in srgb, var(--plg-info) 40%, var(--plg-border));color:var(--plg-text);padding:2px 8px;border-radius:999px;font-size:12px}
+.drop-zone{border:2px dashed color-mix(in srgb, var(--plg-accent) 45%, var(--plg-border));border-radius:12px;padding:12px;min-height:64px;background:color-mix(in srgb, var(--plg-accent) 2%, var(--plg-cardBg))}
+.drop-zone.drag-over{background:color-mix(in srgb, var(--plg-accent) 10%, var(--plg-cardBg));box-shadow:0 0 0 3px color-mix(in srgb, var(--plg-accent) 25%, transparent)}
 .section-title{font-weight:700;margin:16px 0 10px 0;font-size:16px;letter-spacing:.2px;color:var(--plg-accent)}
 .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--plg-info);color:#fff;font-size:12px}
 .alert{border:1px solid var(--plg-border);border-radius:10px;padding:12px}
@@ -46,7 +76,15 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
 .field-label{color:var(--plg-mutedText);font-size:14px}
 .field-value{border:1px solid var(--plg-border);background:color-mix(in srgb, var(--plg-text) 6%, var(--plg-cardBg));border-radius:10px;padding:10px 12px;min-height:40px;display:flex;align-items:center;color:var(--plg-text)}
 
+/* Course grid */
+.course-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:8px}
+.course-card{border:1px solid var(--plg-border);border-radius:10px;padding:12px;background:color-mix(in srgb, var(--plg-accent) 3%, var(--plg-cardBg));display:flex;align-items:center;justify-content:space-between;box-shadow:var(--plg-shadow);color:var(--plg-text)}
+.course-name{font-weight:600}
+.course-badge{display:inline-block;background:color-mix(in srgb, var(--plg-info) 16%, var(--plg-cardBg));border:1px solid color-mix(in srgb, var(--plg-info) 40%, var(--plg-border));color:var(--plg-text);padding:2px 8px;border-radius:999px;font-size:12px}
+
 @media (max-width: 1024px){
+    .two-col{grid-template-columns:1fr}
+    .aside{position:static;max-height:none}
 	.listbox{max-height:180px}
 	.input[size], .input[multiple]{max-height:180px}
 }
@@ -113,7 +151,7 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
 .metric-value{font-weight:800;font-size:22px;margin-top:4px;color:var(--plg-text)}
 .congreso-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 /* Acentos sutiles por acción para reducir monocromía conservando la paleta */
-.congreso-actions .btn:nth-child(1){ /* Ver detalle → acento base */ }
+.congreso-actions .btn:nth-child(1){ /* Ver detalle → acento base */ background:color-mix(in srgb, var(--plg-accent) 8%, var(--plg-cardBg)); }
 .congreso-actions .btn:nth-child(2){ /* Ver inscritos → info */
     background:color-mix(in srgb, var(--plg-info) 10%, var(--plg-cardBg));
     border-color:color-mix(in srgb, var(--plg-info) 45%, var(--plg-border));

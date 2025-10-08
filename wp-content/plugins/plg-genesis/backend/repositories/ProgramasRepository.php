@@ -49,20 +49,28 @@ class PlgGenesis_ProgramasRepository {
         $niveles = [];
         while($n = pg_fetch_assoc($qN)){
             $nivelId = intval($n['id']);
-            $qC = pg_query_params($this->conn, "SELECT curso_id, consecutivo FROM programas_cursos WHERE programa_id=$1 AND nivel_id=$2 ORDER BY consecutivo", [ $programaId, $nivelId ]);
+            $qC = pg_query_params(
+                $this->conn,
+                "SELECT pc.curso_id, c.nombre, c.descripcion, pc.consecutivo\n                 FROM programas_cursos pc\n                 JOIN cursos c ON pc.curso_id = c.id\n                 WHERE pc.programa_id=$1 AND pc.nivel_id=$2\n                 ORDER BY pc.consecutivo",
+                [ $programaId, $nivelId ]
+            );
             if (!$qC){ $this->logPg('get.cursosNivel'); return new WP_Error('db_query_failed','Error obteniendo cursos de nivel',[ 'status'=>500 ]); }
-            $cursos = []; while($c = pg_fetch_assoc($qC)){ $cursos[] = [ 'id'=>intval($c['curso_id']), 'consecutivo'=>intval($c['consecutivo']) ]; } pg_free_result($qC);
+            $cursos = []; while($c = pg_fetch_assoc($qC)){ $cursos[] = [ 'id'=>intval($c['curso_id']), 'nombre'=>$c['nombre'], 'descripcion'=>$c['descripcion'], 'consecutivo'=>intval($c['consecutivo']) ]; } pg_free_result($qC);
             $niveles[] = [ 'id'=>$nivelId, 'nombre'=>$n['nombre'], 'cursos'=>$cursos ];
         }
         pg_free_result($qN);
         // cursos sin nivel
-        $qS = pg_query_params($this->conn, "SELECT curso_id, consecutivo FROM programas_cursos WHERE programa_id=$1 AND nivel_id IS NULL ORDER BY consecutivo", [ $programaId ]);
+        $qS = pg_query_params(
+            $this->conn,
+            "SELECT pc.curso_id, c.nombre, c.descripcion, pc.consecutivo\n             FROM programas_cursos pc\n             JOIN cursos c ON pc.curso_id = c.id\n             WHERE pc.programa_id = $1 AND pc.nivel_id IS NULL\n             ORDER BY pc.consecutivo",
+            [ $programaId ]
+        );
         if (!$qS){ $this->logPg('get.cursosSinNivel'); return new WP_Error('db_query_failed','Error obteniendo cursos sin nivel',[ 'status'=>500 ]); }
-        $sinNivel = []; while($s = pg_fetch_assoc($qS)){ $sinNivel[] = [ 'id'=>intval($s['curso_id']), 'consecutivo'=>intval($s['consecutivo']) ]; } pg_free_result($qS);
+        $sinNivel = []; while($s = pg_fetch_assoc($qS)){ $sinNivel[] = [ 'id'=>intval($s['curso_id']), 'nombre'=>$s['nombre'], 'descripcion'=>$s['descripcion'], 'consecutivo'=>intval($s['consecutivo']) ]; } pg_free_result($qS);
         // prerequisitos
-        $qP = pg_query_params($this->conn, "SELECT prerequisito_id FROM programas_prerequisitos WHERE programa_id=$1 ORDER BY prerequisito_id", [ $programaId ]);
+        $qP = pg_query_params($this->conn, "SELECT pp.prerequisito_id, p2.nombre FROM programas_prerequisitos pp JOIN programas p2 ON pp.prerequisito_id=p2.id WHERE pp.programa_id=$1 ORDER BY pp.prerequisito_id", [ $programaId ]);
         if (!$qP){ $this->logPg('get.prereq'); return new WP_Error('db_query_failed','Error obteniendo prerequisitos',[ 'status'=>500 ]); }
-        $pre = []; while($p = pg_fetch_assoc($qP)){ $pre[] = [ 'id'=>intval($p['prerequisito_id']) ]; } pg_free_result($qP);
+        $pre = []; while($p = pg_fetch_assoc($qP)){ $pre[] = [ 'id'=>intval($p['prerequisito_id']), 'nombre'=>$p['nombre'] ]; } pg_free_result($qP);
         return [ 'id'=>$programaId, 'nombre'=>$row['nombre'], 'descripcion'=>$row['descripcion'], 'niveles'=>$niveles, 'cursosSinNivel'=>$sinNivel, 'prerequisitos'=>$pre ];
     }
 
@@ -70,6 +78,20 @@ class PlgGenesis_ProgramasRepository {
         $nombre = trim(strval($payload['nombre'] ?? ''));
         $descripcion = trim(strval($payload['descripcion'] ?? ''));
         if ($nombre === '') return new WP_Error('invalid_payload','Nombre requerido',[ 'status'=>422 ]);
+        // Validación: consecutivos únicos en todo el programa (incluye niveles y sin nivel)
+        $allCons = [];
+        foreach (($payload['niveles'] ?? []) as $nivel){
+            foreach (($nivel['cursos'] ?? []) as $curso){
+                $c = intval($curso['consecutivo'] ?? 0); if ($c <= 0) continue; $allCons[] = $c;
+            }
+        }
+        foreach (($payload['cursosSinNivel'] ?? $payload['cursos_sin_nivel'] ?? []) as $csn){
+            $c = intval($csn['consecutivo'] ?? 0); if ($c <= 0) continue; $allCons[] = $c;
+        }
+        $dups = array_unique(array_diff_assoc($allCons, array_unique($allCons)));
+        if (!empty($dups)){
+            return new WP_Error('invalid_payload','Consecutivos duplicados en cursos del programa',[ 'status'=>422, 'duplicates'=>array_values($dups) ]);
+        }
         pg_query($this->conn, 'BEGIN');
         $q = pg_query_params($this->conn, "INSERT INTO programas (nombre, descripcion) VALUES ($1,$2) RETURNING id", [ $nombre, $descripcion ]);
         if (!$q){ pg_query($this->conn,'ROLLBACK'); $this->logPg('create.insert'); return new WP_Error('db_update_failed','Error creando programa',[ 'status'=>500 ]); }
