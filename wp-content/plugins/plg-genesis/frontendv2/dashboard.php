@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) { exit; }
 	<style>
 		body { margin:0; font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--plg-bg, #f7f7fb); color: var(--plg-text, #111827); }
 		.layout { display:flex; min-height:100vh; }
-        .sidebar { width:260px; background: var(--plg-sidebarBg, #111827); color: var(--plg-sidebarText, #e5e7eb); padding:16px; }
+		.sidebar { position:sticky; top:0; align-self:flex-start; height:100vh; overflow:auto; width:260px; background: var(--plg-sidebarBg, #111827); color: var(--plg-sidebarText, #e5e7eb); padding:16px; }
         .sidebar a { color: var(--plg-sidebarText, #e5e7eb); text-decoration:none; display:block; padding:10px 12px; border-radius:6px; }
         .sidebar a.active, .sidebar a:hover { background: var(--plg-accent, #1f2937); color:#fff; }
 		.content { flex:1; padding:24px; }
@@ -38,8 +38,8 @@ if (!defined('ABSPATH')) { exit; }
 			<div style="font-weight:700;font-size:20px;margin-bottom:12px;">Genesis</div>
 			<a href="#/dashboard" id="nav-dashboard" class="active">Dashboard</a>
 			<a href="#/estudiantes" id="nav-estudiantes">Estudiantes</a>
-			<a href="#/estudiantes/nuevo" class="submenu">Crear Estudiantes</a>
-			<a href="#/estudiantes" class="submenu">Listar por Contactos</a>
+			<a href="#/estudiantes" class="submenu">Gestionar</a>
+			<a href="#/estudiantes/nuevo" class="submenu">Crear</a>
 			<a href="#/contactos" id="nav-contactos">Contactos</a>
 			<a href="#/contactos" class="submenu">Buscar Contactos</a>
 			<a href="#/contactos/nuevo" class="submenu">Crear Contacto</a>
@@ -50,7 +50,9 @@ if (!defined('ABSPATH')) { exit; }
 			<a href="#/cursos" id="nav-cursos">Cursos</a>
 			<a href="#/cursos" class="submenu">Listar Cursos</a>
 			<a href="#/cursos/nuevo" class="submenu">Crear Curso</a>
-			<a href="#/tema" id="nav-tema">Tema</a>
+			<a href="#/ajustes" id="nav-ajustes">Ajustes ⚙️</a>
+			<a href="#/tema" class="submenu" data-group="ajustes">Tema</a>
+			<a href="<?php echo esc_url( wp_logout_url( home_url('/dashboard-v2/') ) ); ?>" class="submenu" data-group="ajustes">Cerrar sesión</a>
 		</nav>
 		<main class="content">
 			<div id="view"></div>

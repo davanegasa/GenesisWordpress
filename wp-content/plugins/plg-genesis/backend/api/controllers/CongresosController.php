@@ -8,59 +8,59 @@ require_once dirname(__FILE__, 3) . '/services/CongresosService.php';
 
 class PlgGenesis_CongresosController {
 	public static function register_routes() {
-		register_rest_route('plg-genesis/v1', '/congresos', [
-			'methods'             => 'GET',
-			'callback'            => [ __CLASS__, 'get_congresos' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
-		]);
+        register_rest_route('plg-genesis/v1', '/congresos', [
+            'methods'             => 'GET',
+            'callback'            => [ __CLASS__, 'get_congresos' ],
+            'permission_callback' => function() { return is_user_logged_in(); }
+        ]);
 
-		register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)', [
-			'methods'             => 'GET',
-			'callback'            => [ __CLASS__, 'get_congreso' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
-		]);
+        register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)', [
+            'methods'             => 'GET',
+            'callback'            => [ __CLASS__, 'get_congreso' ],
+            'permission_callback' => function() { return is_user_logged_in(); }
+        ]);
 
-		register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)', [
-			'methods'             => 'PUT',
-			'callback'            => [ __CLASS__, 'put_congreso' ],
-			'permission_callback' => function() { return current_user_can('edit_users'); }
-		]);
+        register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)', [
+            'methods'             => 'PUT',
+            'callback'            => [ __CLASS__, 'put_congreso' ],
+            'permission_callback' => function() { return is_user_logged_in(); }
+        ]);
 
-		register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/stats', [
-			'methods'             => 'GET',
-			'callback'            => [ __CLASS__, 'get_stats' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
-		]);
+        register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/stats', [
+            'methods'             => 'GET',
+            'callback'            => [ __CLASS__, 'get_stats' ],
+            'permission_callback' => function() { return is_user_logged_in(); }
+        ]);
 
-		register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/checkin', [
-			'methods'             => 'POST',
-			'callback'            => [ __CLASS__, 'post_checkin' ],
-			'permission_callback' => function() { return current_user_can('edit_users'); }
-		]);
+        register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/checkin', [
+            'methods'             => 'POST',
+            'callback'            => [ __CLASS__, 'post_checkin' ],
+            'permission_callback' => function() { return is_user_logged_in(); }
+        ]);
 
-		register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/void', [
-			'methods'             => 'POST',
-			'callback'            => [ __CLASS__, 'post_void' ],
-			'permission_callback' => function() { return current_user_can('edit_users'); }
-		]);
+        register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/void', [
+            'methods'             => 'POST',
+            'callback'            => [ __CLASS__, 'post_void' ],
+            'permission_callback' => function() { return is_user_logged_in(); }
+        ]);
 
-		register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/inscritos', [
-			'methods'             => 'GET',
-			'callback'            => [ __CLASS__, 'get_inscritos' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
-		]);
+        register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/inscritos', [
+            'methods'             => 'GET',
+            'callback'            => [ __CLASS__, 'get_inscritos' ],
+            'permission_callback' => function() { return is_user_logged_in(); }
+        ]);
 
-		register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/no-asistentes', [
-			'methods'             => 'GET',
-			'callback'            => [ __CLASS__, 'get_no_asistentes' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
-		]);
+        register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/no-asistentes', [
+            'methods'             => 'GET',
+            'callback'            => [ __CLASS__, 'get_no_asistentes' ],
+            'permission_callback' => function() { return is_user_logged_in(); }
+        ]);
 
-		register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/ultimos', [
-			'methods'             => 'GET',
-			'callback'            => [ __CLASS__, 'get_ultimos' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
-		]);
+        register_rest_route('plg-genesis/v1', '/congresos/(?P<id>[0-9]+)/ultimos', [
+            'methods'             => 'GET',
+            'callback'            => [ __CLASS__, 'get_ultimos' ],
+            'permission_callback' => function() { return is_user_logged_in(); }
+        ]);
 	}
 
 	public static function get_congresos($request) {

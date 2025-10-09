@@ -17,7 +17,7 @@ class PlgGenesis_ContactosController {
 		register_rest_route('plg-genesis/v1', '/contactos', [
 			'methods'             => 'POST',
 			'callback'            => [ __CLASS__, 'crear' ],
-			'permission_callback' => function() { return current_user_can('edit_users'); }
+			'permission_callback' => function() { return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/contactos/(?P<id>[0-9]+)', [
@@ -29,7 +29,7 @@ class PlgGenesis_ContactosController {
 		register_rest_route('plg-genesis/v1', '/contactos/(?P<id>[0-9]+)', [
 			'methods'             => 'PUT',
 			'callback'            => [ __CLASS__, 'actualizar' ],
-			'permission_callback' => function() { return current_user_can('edit_users'); }
+			'permission_callback' => function() { return is_user_logged_in(); }
 		]);
 	}
 

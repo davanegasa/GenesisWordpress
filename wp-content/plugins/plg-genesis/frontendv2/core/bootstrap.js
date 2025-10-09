@@ -30,7 +30,7 @@ export async function bootstrap() {
 	}
 
 	// Acordeón independiente por sección
-	function setupAccordion(triggerId, submenuSelector){
+    function setupAccordion(triggerId, submenuSelector){
 		const trigger = document.getElementById(triggerId);
 		if (!trigger) return;
 		const subs = Array.from(document.querySelectorAll(submenuSelector));
@@ -47,6 +47,7 @@ export async function bootstrap() {
 	setupAccordion('nav-contactos', '.sidebar a.submenu[href^="#/contactos"]');
 	setupAccordion('nav-programas', '.sidebar a.submenu[href^="#/programas"]');
 	setupAccordion('nav-cursos', '.sidebar a.submenu[href^="#/cursos"]');
+    setupAccordion('nav-ajustes', '.sidebar a.submenu[data-group="ajustes"]');
 
 	startRouter();
 }

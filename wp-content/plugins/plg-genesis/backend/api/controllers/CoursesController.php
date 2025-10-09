@@ -21,19 +21,19 @@ class PlgGenesis_CoursesController {
         register_rest_route('plg-genesis/v1', '/cursos', [
             'methods'             => 'POST',
             'callback'            => [ __CLASS__, 'post_curso' ],
-            'permission_callback' => function() { return current_user_can('edit_users'); }
+            'permission_callback' => function() { return is_user_logged_in(); }
         ]);
 
         register_rest_route('plg-genesis/v1', '/cursos/(?P<id>[0-9]+)', [
             'methods'             => 'PUT',
             'callback'            => [ __CLASS__, 'put_curso' ],
-            'permission_callback' => function() { return current_user_can('edit_users'); }
+            'permission_callback' => function() { return is_user_logged_in(); }
         ]);
 
         register_rest_route('plg-genesis/v1', '/cursos/(?P<id>[0-9]+)', [
             'methods'             => 'DELETE',
             'callback'            => [ __CLASS__, 'delete_curso' ],
-            'permission_callback' => function() { return current_user_can('edit_users'); }
+            'permission_callback' => function() { return is_user_logged_in(); }
         ]);
 
         register_rest_route('plg-genesis/v1', '/cursos/(?P<id>[0-9]+)/stats', [
