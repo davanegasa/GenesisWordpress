@@ -1,0 +1,306 @@
+openapi: 3.0.3
+info:
+  title: WordPress REST API (Base)
+  version: 1.0.0
+  description: >-
+    Especificación base de los endpoints REST nativos de WordPress (namespace `wp/v2`).
+    Actualiza esta plantilla con la URL real del sitio, autenticación y rutas personalizadas.
+servers:
+  - url: https://tu-dominio/wp-json
+    description: Instancia de WordPress
+paths:
+  /wp/v2/posts:
+    get:
+      summary: Lista de entradas (posts)
+      parameters:
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 10
+            maximum: 100
+          description: Número de elementos por página.
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Página actual de resultados.
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Texto para filtrar por búsqueda.
+      responses:
+        '200':
+          description: Lista paginada de posts.
+          headers:
+            X-WP-Total:
+              description: Total de elementos disponibles.
+              schema:
+                type: integer
+            X-WP-TotalPages:
+              description: Total de páginas disponibles.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+  /wp/v2/posts/{id}:
+    get:
+      summary: Obtener un post por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Post encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: Post no encontrado.
+  /wp/v2/pages:
+    get:
+      summary: Lista de páginas
+      parameters:
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: Lista de páginas.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Page'
+  /wp/v2/pages/{id}:
+    get:
+      summary: Obtener una página por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Página encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+        '404':
+          description: Página no encontrada.
+  /wp/v2/media:
+    get:
+      summary: Lista de elementos multimedia
+      parameters:
+        - in: query
+          name: media_type
+          schema:
+            type: string
+            enum: [image, video, audio, file]
+      responses:
+        '200':
+          description: Lista de elementos multimedia.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Media'
+  /wp/v2/categories:
+    get:
+      summary: Lista de categorías
+      responses:
+        '200':
+          description: Lista de categorías.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+  /wp/v2/tags:
+    get:
+      summary: Lista de etiquetas
+      responses:
+        '200':
+          description: Lista de etiquetas.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+  /wp/v2/users:
+    get:
+      summary: Lista de usuarios (requiere autenticación)
+      security:
+        - basicAuth: []
+      parameters:
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Lista de usuarios.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: No autenticado.
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+          format: date-time
+        slug:
+          type: string
+        status:
+          type: string
+          enum: [publish, future, draft, pending, private]
+        type:
+          type: string
+          example: post
+        link:
+          type: string
+          format: uri
+        title:
+          $ref: '#/components/schemas/RenderedString'
+        content:
+          $ref: '#/components/schemas/RenderedString'
+        excerpt:
+          $ref: '#/components/schemas/RenderedString'
+        author:
+          type: integer
+        featured_media:
+          type: integer
+        categories:
+          type: array
+          items:
+            type: integer
+        tags:
+          type: array
+          items:
+            type: integer
+    Page:
+      allOf:
+        - $ref: '#/components/schemas/Post'
+      properties:
+        type:
+          type: string
+          example: page
+    Media:
+      type: object
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+          format: date-time
+        slug:
+          type: string
+        type:
+          type: string
+          example: attachment
+        link:
+          type: string
+          format: uri
+        media_type:
+          type: string
+          example: image
+        mime_type:
+          type: string
+          example: image/jpeg
+        source_url:
+          type: string
+          format: uri
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        url:
+          type: string
+          format: uri
+        description:
+          type: string
+        link:
+          type: string
+          format: uri
+        slug:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    RenderedString:
+      type: object
+      properties:
+        rendered:
+          type: string
+        protected:
+          type: boolean
+
+security:
+  - bearerAuth: []
