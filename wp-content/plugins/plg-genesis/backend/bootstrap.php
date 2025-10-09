@@ -5,6 +5,12 @@ add_action('rest_api_init', function () {
 	register_rest_route('plg-genesis/v1', '/health', [
 		'methods'  => 'GET',
 		'callback' => function () {
+			if (!is_user_logged_in()) {
+				return new WP_REST_Response([
+					'success' => false,
+					'error'   => [ 'code' => 'not_logged_in', 'message' => 'Usuario no autenticado' ]
+				], 401);
+			}
 			return [
 				'success' => true,
 				'data' => [
@@ -13,7 +19,7 @@ add_action('rest_api_init', function () {
 				],
 			];
 		},
-		'permission_callback' => '__return_true',
+		'permission_callback' => function () { return is_user_logged_in(); },
 	]);
 
 	// Endpoint para obtener nonce de REST (requiere sesión)

@@ -119,10 +119,14 @@ Para mantener homogeneidad en el dashboard v2 (`wp-content/plugins/plg-genesis/f
 
 Más detalles y ejemplos en `frontendv2/FRONTEND_GUIDE.md`.
 
-## Documentación v1 (referencia)
+## Documentación y deprecaciones
 
-- Programas y Cursos v1: ver `wp-content/plugins/plg-genesis/docs/programas-v1.md`
-- API v2 (propuesta): `wp-content/plugins/plg-genesis/docs/programas-v2-spec.md`
+- API v2 (Programas/Cursos): `wp-content/plugins/plg-genesis/docs/programas-v2-spec.md`
+- Dashboard v1 (PHP views) en proceso de deprecación. El nuevo Dashboard v2 (vanilla JS) es la UI por defecto:
+  - Estudiantes: unificada en “Gestionar Estudiantes” (`#/estudiantes`) con búsqueda, quick view, edición inline, asignación de cursos y observaciones.
+  - Las vistas v1 se mantienen temporalmente solo como referencia y serán retiradas en siguientes versiones.
+  - Cambios de permisos: todos los endpoints requieren usuario autenticado.
+  - Ajustes (Tema) y Logout se centralizan en el menú “Ajustes ⚙️`.
 
 ## Configuración de DB_HOST en `wp-config.php`
 

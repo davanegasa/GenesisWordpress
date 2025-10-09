@@ -20,11 +20,11 @@ async function request(method, path, { headers = {}, body } = {}) {
 	}));
 	const contentType = res.headers.get('content-type') || '';
 	const data = contentType.includes('application/json') ? await res.json() : await res.text();
-	if (!res.ok || (data && data.success === false)) {
-		const err = (data && data.error) || { message: res.statusText, code: 'http_error' };
-		const e = new Error(err.message || 'Request failed');
-		e.details = err; e.status = res.status; throw e;
-	}
+    if (!res.ok || (data && data.success === false)) {
+        const err = (data && data.error) || { message: res.statusText, code: 'http_error' };
+        const e = new Error(err.message || 'Request failed');
+        e.details = err; e.status = res.status; e.payload = data; throw e;
+    }
 	return data;
 }
 

@@ -55,15 +55,25 @@ export function createTable({ columns = [], rows = [] } = {}) {
 		tr.appendChild(td);
 		tbody.appendChild(tr);
 	} else {
-		rows.forEach(row => {
-			const tr = document.createElement('tr');
-			row.forEach(cell => {
-				const td = document.createElement('td');
-				td.textContent = cell == null ? '' : String(cell);
-				tr.appendChild(td);
-			});
-			tbody.appendChild(tr);
-		});
+    rows.forEach(row => {
+            const tr = document.createElement('tr');
+            row.forEach(cell => {
+                const td = document.createElement('td');
+                if (cell && typeof cell === 'object') {
+                    if (cell.nodeType === 1) {
+                        td.appendChild(cell);
+                    } else if ('html' in cell) {
+                        td.innerHTML = String(cell.html);
+                    } else {
+                        td.textContent = String(cell);
+                    }
+                } else {
+                    td.textContent = cell == null ? '' : String(cell);
+                }
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
 	}
 	table.appendChild(thead);
 	table.appendChild(tbody);
@@ -117,6 +127,26 @@ export function createFieldView({ label = '', value = '', span = 1 } = {}) {
     return box;
 }
 
+// Modal helper
+export function createModal({ title = '', bodyHtml = '', primaryLabel = '', onPrimary, secondaryLabel = 'Cancelar', onSecondary } = {}) {
+    const overlay = document.createElement('div'); overlay.className='modal-overlay';
+    const modal = document.createElement('div'); modal.className='modal';
+    modal.innerHTML = `
+        <div class="modal-header"><strong>${title||''}</strong><button data-x class="btn">✕</button></div>
+        <div class="modal-body" data-body>${bodyHtml||''}</div>
+        <div class="modal-footer">
+            ${secondaryLabel?`<button data-sec class="btn">${secondaryLabel}</button>`:''}
+            ${primaryLabel?`<button data-pri class="btn btn-primary">${primaryLabel}</button>`:''}
+        </div>
+    `;
+    overlay.appendChild(modal);
+    function close(){ overlay.remove(); }
+    modal.querySelector('[data-x]')?.addEventListener('click', close);
+    if (secondaryLabel && onSecondary){ modal.querySelector('[data-sec]').addEventListener('click', (e)=>{ e.preventDefault(); onSecondary(close); }); } else if (secondaryLabel){ modal.querySelector('[data-sec]').addEventListener('click', (e)=>{ e.preventDefault(); close(); }); }
+    if (primaryLabel && onPrimary){ modal.querySelector('[data-pri]').addEventListener('click', (e)=>{ e.preventDefault(); onPrimary(close); }); }
+    return { overlay, modal, close, setBody(html){ const b=modal.querySelector('[data-body]'); if (b) b.innerHTML=html; } };
+}
+
 export default {
 	createButton,
 	createInput,
@@ -126,6 +156,7 @@ export default {
     showToast,
     createDetailGrid,
     createFieldView,
+    createModal,
 };
 
 

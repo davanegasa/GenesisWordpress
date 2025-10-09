@@ -40,6 +40,10 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
 }
 .toast{position:fixed;right:16px;bottom:16px;background:var(--plg-cardBg);border:1px solid var(--plg-border);box-shadow:var(--plg-shadow);padding:12px 14px;border-radius:8px;color:var(--plg-text)}
 .card-title{font-weight:700;margin-bottom:12px;color:var(--plg-accent)}
+.card-title.is-info{color:var(--plg-info)}
+.card-title.is-success{color:var(--plg-success)}
+.card-title.is-warning{color:var(--plg-warning)}
+.card-title.is-muted{color:var(--plg-mutedText)}
 .card-title .badge{margin-left:8px}
 
 /* Header acciones alineadas */
@@ -62,6 +66,10 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
 .alert-warning{background:color-mix(in srgb, var(--plg-warning) 10%, var(--plg-cardBg));border-color:color-mix(in srgb, var(--plg-warning) 40%, var(--plg-border));color:#7a4b03}
 .section{margin-top:20px}
 .divider{border-top:1px solid var(--plg-border);margin:16px 0}
+
+/* Icon-only buttons (compact) */
+.icon-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;padding:0}
+.action-icons .icon-btn{min-width:32px}
 
 /* Listbox (lista de opciones vertical) */
 .listbox{border:1px solid var(--plg-border);border-radius:10px;background:var(--plg-cardBg);max-height:220px;overflow:auto;font-size:14px;line-height:1.2}
@@ -87,6 +95,13 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
     .aside{position:static;max-height:none}
 	.listbox{max-height:180px}
 	.input[size], .input[multiple]{max-height:180px}
+}
+
+/* Responsive: tablas apiladas y con texto multilinea en pantallas pequeñas */
+@media (max-width: 720px){
+  .table th, .table td{padding:8px}
+  .table td{white-space:normal;max-width:none}
+  .action-icons{gap:8px}
 }
 
 /* Contact card */

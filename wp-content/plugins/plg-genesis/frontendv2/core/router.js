@@ -37,14 +37,15 @@ async function handleRoute() {
 function resolveLoader(hash) {
 	const container = getContainer();
 	if (hash.startsWith('#/dashboard')) return () => import('../pages/dashboard/index.js').then(m => m.mount(container));
-	if (hash.startsWith('#/estudiantes/nuevo')) return () => import('../pages/estudiantes/create.js').then(m => m.mount(container));
+    if (hash.startsWith('#/estudiantes/asignar')) return () => import('../pages/estudiantes/assign.js').then(m => m.mount(container));
+    if (hash.startsWith('#/estudiantes/nuevo')) return () => import('../pages/estudiantes/create.js').then(m => m.mount(container));
 	if (hash.startsWith('#/estudiante/')) {
         let id = hash.split('/')[2] || '';
         if (id.includes('?')) id = id.split('?')[0];
         id = decodeURIComponent(id);
 		return () => import('../pages/estudiantes/detail.js').then(m => m.mount(container, { id }));
 	}
-    if (hash.startsWith('#/estudiantes')) return () => import('../pages/estudiantes/list.js').then(m => m.mount(container));
+    if (hash.startsWith('#/estudiantes')) return () => import('../pages/estudiantes/assign.js').then(m => m.mount(container));
     if (hash.startsWith('#/contactos/nuevo')) return () => import('../pages/contactos/create.js').then(m => m.mount(container));
     if (hash.startsWith('#/contacto/')) {
         let id = hash.split('/')[2] || '';

@@ -15,6 +15,10 @@ class PlgGenesis_EstudiantesService {
 		return $this->repository->findByContactoId(intval($contactoId));
 	}
 
+	public function listar($q = '', $page = 1, $limit = 20) {
+		return $this->repository->list(strval($q), intval($page), intval($limit));
+	}
+
 	private function generateStudentId($contactId, $manualId = null) {
 		if ($manualId) {
 			$exists = $this->repository->existsStudentId($manualId);
@@ -56,6 +60,13 @@ class PlgGenesis_EstudiantesService {
 
 	public function update($idEstudiante, array $e) {
 		if (!$idEstudiante) return new WP_Error('invalid_student_id', 'ID estudiante inválido', [ 'status' => 400 ]);
+		// Permitir actualización parcial de documento/celular/email
+		if (array_key_exists('celular',$e) || array_key_exists('email',$e) || array_key_exists('doc_identidad',$e) || array_key_exists('docIdentidad',$e)) {
+			$cel = isset($e['celular']) ? trim(strval($e['celular'])) : null;
+			$eml = isset($e['email']) ? trim(strval($e['email'])) : null;
+			$doc = isset($e['doc_identidad']) ? trim(strval($e['doc_identidad'])) : (isset($e['docIdentidad']) ? trim(strval($e['docIdentidad'])) : null);
+			return $this->repository->updatePartialByStudentId($idEstudiante, $cel, $eml, $doc);
+		}
 		$required = ['doc_identidad','nombre1','apellido1','estado_civil','escolaridad'];
 		foreach ($required as $k) {
 			if (!isset($e[$k]) || $e[$k] === '') {
