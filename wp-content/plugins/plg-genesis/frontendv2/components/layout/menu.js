@@ -113,6 +113,12 @@ const menuStructure = [
 		requires: null, // Siempre visible
 		submenu: [
 			{
+				id: 'ajustes-migracion',
+				label: '🔄 Migración (Temporal)',
+				href: '#/migration',
+				requires: null, // Acceso de emergencia para administrators
+			},
+			{
 				id: 'ajustes-tema',
 				label: 'Tema',
 				href: '#/tema',

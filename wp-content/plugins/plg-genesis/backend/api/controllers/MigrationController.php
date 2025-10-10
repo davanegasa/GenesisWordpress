@@ -9,41 +9,39 @@ require_once dirname(__FILE__, 3) . '/setup/roles.php';
  */
 class PlgGenesis_MigrationController {
 	public static function register_routes() {
+		// Helper para validar que sea administrator de WordPress
+		$is_wp_admin = function() {
+			// Validar cookie manualmente para REST API
+			plg_genesis_validate_user_from_cookie();
+			return is_user_logged_in() && current_user_can('administrator');
+		};
+
 		// Listar todos los usuarios con sus roles actuales
 		register_rest_route('plg-genesis/v1', '/migration/users', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_all_users' ],
-			'permission_callback' => function() {
-				// Solo Super Admin o Administrator de WordPress
-				return current_user_can('administrator') || current_user_can('plg_switch_office');
-			}
+			'permission_callback' => $is_wp_admin
 		]);
 
 		// Migrar un usuario específico
 		register_rest_route('plg-genesis/v1', '/migration/users/(?P<id>[0-9]+)', [
 			'methods'             => 'POST',
 			'callback'            => [ __CLASS__, 'migrate_user' ],
-			'permission_callback' => function() {
-				return current_user_can('administrator') || current_user_can('plg_switch_office');
-			}
+			'permission_callback' => $is_wp_admin
 		]);
 
 		// Migrar todos los usuarios automáticamente
 		register_rest_route('plg-genesis/v1', '/migration/auto', [
 			'methods'             => 'POST',
 			'callback'            => [ __CLASS__, 'auto_migrate' ],
-			'permission_callback' => function() {
-				return current_user_can('administrator') || current_user_can('plg_switch_office');
-			}
+			'permission_callback' => $is_wp_admin
 		]);
 
 		// Hacer al usuario actual Super Admin (emergencia)
 		register_rest_route('plg-genesis/v1', '/migration/make-me-admin', [
 			'methods'             => 'POST',
 			'callback'            => [ __CLASS__, 'make_me_admin' ],
-			'permission_callback' => function() {
-				return current_user_can('administrator');
-			}
+			'permission_callback' => $is_wp_admin
 		]);
 	}
 
