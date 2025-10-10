@@ -10,26 +10,17 @@ class PlgGenesis_ThemeController {
 		register_rest_route('plg-genesis/v1', '/theme', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_theme' ],
-			'permission_callback' => function() { 
-				plg_genesis_validate_user_from_cookie();
-				return is_user_logged_in(); 
-			}
+			'permission_callback' => plg_genesis_can('plg_view_theme')
 		]);
 		register_rest_route('plg-genesis/v1', '/theme', [
 			'methods'             => 'PUT',
 			'callback'            => [ __CLASS__, 'put_theme' ],
-			'permission_callback' => function() { 
-				plg_genesis_validate_user_from_cookie();
-				return is_user_logged_in(); 
-			}
+			'permission_callback' => plg_genesis_can('plg_change_theme')
 		]);
 		register_rest_route('plg-genesis/v1', '/theme', [
 			'methods'             => 'DELETE',
 			'callback'            => [ __CLASS__, 'delete_theme' ],
-			'permission_callback' => function() { 
-				plg_genesis_validate_user_from_cookie();
-				return is_user_logged_in(); 
-			}
+			'permission_callback' => plg_genesis_can('plg_change_theme')
 		]);
 	}
 

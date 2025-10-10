@@ -9,37 +9,37 @@ class PlgGenesis_CoursesController {
         register_rest_route('plg-genesis/v1', '/cursos', [
             'methods'             => 'GET',
             'callback'            => [ __CLASS__, 'get_cursos' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_view_courses')
         ]);
 
         register_rest_route('plg-genesis/v1', '/cursos/(?P<id>[0-9]+)', [
             'methods'             => 'GET',
             'callback'            => [ __CLASS__, 'get_curso' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_view_courses')
         ]);
 
         register_rest_route('plg-genesis/v1', '/cursos', [
             'methods'             => 'POST',
             'callback'            => [ __CLASS__, 'post_curso' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_create_courses')
         ]);
 
         register_rest_route('plg-genesis/v1', '/cursos/(?P<id>[0-9]+)', [
             'methods'             => 'PUT',
             'callback'            => [ __CLASS__, 'put_curso' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_edit_courses')
         ]);
 
         register_rest_route('plg-genesis/v1', '/cursos/(?P<id>[0-9]+)', [
             'methods'             => 'DELETE',
             'callback'            => [ __CLASS__, 'delete_curso' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_delete_courses')
         ]);
 
         register_rest_route('plg-genesis/v1', '/cursos/(?P<id>[0-9]+)/stats', [
             'methods'             => 'GET',
             'callback'            => [ __CLASS__, 'get_curso_stats' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_view_stats')
         ]);
     }
 

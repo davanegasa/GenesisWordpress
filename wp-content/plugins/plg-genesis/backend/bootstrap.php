@@ -1,6 +1,41 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
+// Cargar clases necesarias
+require_once __DIR__ . '/setup/roles.php';
+require_once __DIR__ . '/infrastructure/OfficeResolver.php';
+require_once __DIR__ . '/infrastructure/ConnectionProvider.php';
+
+/**
+ * Hook de activación: setup inicial de roles y capabilities
+ */
+register_activation_hook(__FILE__, function() {
+	PlgGenesis_Roles::setup_roles();
+	flush_rewrite_rules();
+});
+
+/**
+ * Hook de desactivación: limpiar roles
+ */
+register_deactivation_hook(__FILE__, function() {
+	PlgGenesis_Roles::remove_roles();
+	flush_rewrite_rules();
+});
+
+/**
+ * Ejecutar setup de roles en cada carga (para actualizaciones)
+ * Solo si hay cambios en la versión
+ */
+add_action('init', function() {
+	$version = get_option('plg_genesis_roles_version', '0');
+	$current_version = '1.0.0'; // Incrementar cuando cambien roles
+	
+	if (version_compare($version, $current_version, '<')) {
+		PlgGenesis_Roles::setup_roles();
+		update_option('plg_genesis_roles_version', $current_version);
+	}
+}, 5);
+
 /**
  * Helper: valida cookie de WordPress y establece usuario actual.
  * Retorna true si el usuario está autenticado, false en caso contrario.
@@ -13,6 +48,25 @@ function plg_genesis_validate_user_from_cookie() {
 	}
 	if ($uid <= 0 && is_user_logged_in()) { $uid = get_current_user_id(); }
 	return ($uid > 0);
+}
+
+/**
+ * Helper: verifica si el usuario tiene una capability específica
+ * Valida la cookie primero y luego verifica el permiso
+ */
+function plg_genesis_user_can($capability) {
+	plg_genesis_validate_user_from_cookie();
+	return current_user_can($capability);
+}
+
+/**
+ * Helper: permission_callback estándar para endpoints
+ * Uso: 'permission_callback' => plg_genesis_can('plg_view_students')
+ */
+function plg_genesis_can($capability) {
+	return function() use ($capability) {
+		return plg_genesis_user_can($capability);
+	};
 }
 
 add_action('rest_api_init', function () {
