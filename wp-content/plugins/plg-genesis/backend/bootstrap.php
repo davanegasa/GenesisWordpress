@@ -1,40 +1,115 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
+/**
+ * Helper: valida cookie de WordPress y establece usuario actual.
+ * Retorna true si el usuario está autenticado, false en caso contrario.
+ */
+function plg_genesis_validate_user_from_cookie() {
+	$uid = 0;
+	if (defined('LOGGED_IN_COOKIE') && isset($_COOKIE[LOGGED_IN_COOKIE])) {
+		$uid = (int) wp_validate_auth_cookie('', 'logged_in');
+		if ($uid) { wp_set_current_user($uid); }
+	}
+	if ($uid <= 0 && is_user_logged_in()) { $uid = get_current_user_id(); }
+	return ($uid > 0);
+}
+
 add_action('rest_api_init', function () {
 	register_rest_route('plg-genesis/v1', '/health', [
 		'methods'  => 'GET',
 		'callback' => function () {
-			if (!is_user_logged_in()) {
-				return new WP_REST_Response([
-					'success' => false,
-					'error'   => [ 'code' => 'not_logged_in', 'message' => 'Usuario no autenticado' ]
-				], 401);
+			plg_genesis_validate_user_from_cookie();
+			$login = is_user_logged_in();
+			$uid = $login ? get_current_user_id() : 0;
+			$office = null; $hasDb = false; $dbError = null;
+			if ($login) {
+				try {
+					$office = PlgGenesis_OfficeResolver::resolve_user_office($uid);
+					if (is_wp_error($office)) { $dbError = $office->get_error_message(); }
+					else {
+						$conn = PlgGenesis_ConnectionProvider::get_connection_for_office($office);
+						$hasDb = !is_wp_error($conn) && $conn !== null;
+						if (is_wp_error($conn)) { $dbError = $conn->get_error_message(); }
+					}
+				} catch (Exception $e) { $dbError = $e->getMessage(); }
 			}
-			return [
+			return new WP_REST_Response([
 				'success' => true,
 				'data' => [
 					'status' => 'ok',
 					'timestamp' => time(),
+					'loggedIn' => (bool)$login,
+					'userId' => $uid > 0 ? $uid : null,
+					'office' => is_wp_error($office) ? null : $office,
+					'hasDb' => (bool)$hasDb,
+					'dbError' => $dbError,
 				],
-			];
+			], 200);
 		},
-		'permission_callback' => function () { return is_user_logged_in(); },
+		'permission_callback' => '__return_true',
 	]);
 
-	// Endpoint para obtener nonce de REST (requiere sesión)
-	register_rest_route('plg-genesis/v1', '/auth/nonce', [
+    // Endpoint para obtener nonce de REST (autentica por cookie sin exigir nonce previo)
+    register_rest_route('plg-genesis/v1', '/auth/nonce', [
+        'methods'  => 'GET',
+        'callback' => function () {
+            // Intentar resolver usuario desde cookie 'logged_in' cuando la API REST aún no tiene nonce
+            $uid = 0;
+            if (defined('LOGGED_IN_COOKIE') && isset($_COOKIE[LOGGED_IN_COOKIE])) {
+                $uid = (int) wp_validate_auth_cookie('', 'logged_in');
+                if ($uid) { wp_set_current_user($uid); }
+            }
+            if ($uid <= 0 && is_user_logged_in()) { $uid = get_current_user_id(); }
+            if ($uid <= 0) {
+                return new WP_REST_Response([
+                    'success' => false,
+                    'error'   => [ 'code' => 'not_logged_in', 'message' => 'Usuario no autenticado' ]
+                ], 401);
+            }
+            return [ 'success' => true, 'data' => [ 'nonce' => wp_create_nonce('wp_rest') ] ];
+        },
+        'permission_callback' => '__return_true',
+    ]);
+
+	// Endpoint para servir Swagger UI (solo usuarios autenticados)
+	register_rest_route('plg-genesis/v1', '/docs', [
+		'methods'  => 'GET',
+		'callback' => function () {
+			$html = file_get_contents(ABSPATH . 'docs/swagger.html');
+			if (!$html) {
+				return new WP_REST_Response(['error' => 'Swagger UI not found'], 404);
+			}
+			// Ajustar la ruta relativa del openapi.yaml para que apunte al endpoint correcto
+			$html = str_replace("url: './openapi.yaml'", "url: '" . home_url('/wp-json/plg-genesis/v1/docs/openapi') . "'", $html);
+			header('Content-Type: text/html; charset=utf-8');
+			echo $html;
+			exit;
+		},
+		'permission_callback' => function() { return is_user_logged_in(); },
+	]);
+
+	// Endpoint para servir el archivo openapi.yaml (solo usuarios autenticados)
+	register_rest_route('plg-genesis/v1', '/docs/openapi', [
 		'methods'  => 'GET',
 		'callback' => function () {
 			if (!is_user_logged_in()) {
-				return new WP_REST_Response([
-					'success' => false,
-					'error'   => [ 'code' => 'not_logged_in', 'message' => 'Usuario no autenticado' ]
-				], 401);
+				return new WP_REST_Response(['error' => 'Unauthorized'], 401);
 			}
-			return [ 'success' => true, 'data' => [ 'nonce' => wp_create_nonce('wp_rest') ] ];
+			// Ruta del openapi.yaml dentro del plugin
+			$yaml_path = __DIR__ . '/../docs/openapi.yaml';
+			if (!file_exists($yaml_path)) {
+				return new WP_REST_Response(['error' => 'OpenAPI spec not found', 'path' => $yaml_path], 404);
+			}
+			$yaml = file_get_contents($yaml_path);
+			// Devolver YAML directamente sin que REST API lo envuelva en JSON
+			status_header(200);
+			header('Content-Type: text/yaml; charset=utf-8');
+			header('Content-Length: ' . strlen($yaml));
+			echo $yaml;
+			exit;
 		},
-		'permission_callback' => function () { return is_user_logged_in(); },
+		'permission_callback' => '__return_true', // Verificamos dentro del callback
 	]);
 
 	// Registrar controladores API
@@ -42,6 +117,10 @@ add_action('rest_api_init', function () {
 	if (class_exists('PlgGenesis_EstudiantesController')) {
 		PlgGenesis_EstudiantesController::register_routes();
 	}
+    require_once __DIR__ . '/api/controllers/AuthController.php';
+    if (class_exists('PlgGenesis_AuthController')) {
+        PlgGenesis_AuthController::register_routes();
+    }
 	require_once __DIR__ . '/api/controllers/CongresosController.php';
 	if (class_exists('PlgGenesis_CongresosController')) {
 		PlgGenesis_CongresosController::register_routes();
@@ -70,4 +149,37 @@ add_action('rest_api_init', function () {
 	if (class_exists('PlgGenesis_CoursesController')) {
 		PlgGenesis_CoursesController::register_routes();
 	}
+    
+    // CORS controlado (whitelist): permitir dashboard desde dominios específicos
+    add_action('rest_api_init', function(){
+        remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
+        add_filter('rest_pre_serve_request', function($value){
+            $origin = get_http_origin();
+            $allowed = [
+                'https://emmausbogota.com',
+                'https://emmausdigital.com',
+            ];
+            if ($origin && in_array($origin, $allowed, true)) {
+                header('Access-Control-Allow-Origin: ' . $origin);
+                header('Access-Control-Allow-Credentials: true');
+                header('Vary: Origin');
+                header('Access-Control-Allow-Headers: Authorization, Content-Type, X-WP-Nonce');
+                header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+            }
+            if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
+                status_header(200);
+                return true;
+            }
+            return $value;
+        }, 15);
+    });
+
+    // Ajustar SameSite para permitir credenciales cross-site SOLO sobre HTTPS
+    if (!function_exists('plg_genesis_cookie_samesite')) {
+        function plg_genesis_cookie_samesite($samesite){
+            if (is_ssl()) return 'None';
+            return $samesite; // mantiene valor por defecto (Lax) si no es HTTPS
+        }
+        add_filter('wp_cookie_samesite', 'plg_genesis_cookie_samesite');
+    }
 });

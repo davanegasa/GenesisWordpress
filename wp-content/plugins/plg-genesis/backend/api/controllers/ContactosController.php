@@ -11,25 +11,25 @@ class PlgGenesis_ContactosController {
 		register_rest_route('plg-genesis/v1', '/contactos', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'search' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/contactos', [
 			'methods'             => 'POST',
 			'callback'            => [ __CLASS__, 'crear' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/contactos/(?P<id>[0-9]+)', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'obtener' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/contactos/(?P<id>[0-9]+)', [
 			'methods'             => 'PUT',
 			'callback'            => [ __CLASS__, 'actualizar' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 	}
 

@@ -12,6 +12,9 @@ if (!defined('ABSPATH')) { exit; }
 	<link rel="stylesheet" href="<?php echo plugin_dir_url(__FILE__); ?>styles/base.css">
 	<link rel="stylesheet" href="<?php echo plugin_dir_url(__FILE__); ?>styles/components.css">
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+	<link rel="icon" href="<?php echo plugin_dir_url(__FILE__); ?>assets/favicon.ico" sizes="any">
+	<link rel="icon" type="image/png" href="<?php echo plugin_dir_url(__FILE__); ?>assets/icon-32.png" sizes="32x32">
+	<link rel="apple-touch-icon" href="<?php echo plugin_dir_url(__FILE__); ?>assets/apple-touch-icon.png">
 	<style>
 		body { margin:0; font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--plg-bg, #f7f7fb); color: var(--plg-text, #111827); }
 		.layout { display:flex; min-height:100vh; }
@@ -52,6 +55,7 @@ if (!defined('ABSPATH')) { exit; }
 			<a href="#/cursos/nuevo" class="submenu">Crear Curso</a>
 			<a href="#/ajustes" id="nav-ajustes">Ajustes ⚙️</a>
 			<a href="#/tema" class="submenu" data-group="ajustes">Tema</a>
+			<a href="#/docs" class="submenu" data-group="ajustes">API Docs</a>
 			<a href="<?php echo esc_url( wp_logout_url( home_url('/dashboard-v2/') ) ); ?>" class="submenu" data-group="ajustes">Cerrar sesión</a>
 		</nav>
 		<main class="content">

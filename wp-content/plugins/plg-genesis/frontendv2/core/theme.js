@@ -1,14 +1,12 @@
+import { api } from '../api/client.js';
+
 export async function loadTheme() {
-	try {
-		const res = await fetch('/wp-json/plg-genesis/v1/theme', {
-			headers: window.wpApiSettings?.nonce ? { 'X-WP-Nonce': window.wpApiSettings.nonce } : {},
-			credentials: 'same-origin'
-		});
-		const data = await res.json();
-		return (data && data.data) || {};
-	} catch (e) {
-		return {};
-	}
+    try {
+        const r = await api.get('/theme');
+        return (r && r.data) || {};
+    } catch (e) {
+        return {};
+    }
 }
 
 export function applyTheme(vars) {

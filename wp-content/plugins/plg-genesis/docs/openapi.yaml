@@ -1,0 +1,381 @@
+openapi: 3.0.0
+info:
+  title: Genesis WordPress REST API
+  version: v1
+  description: |
+    API del plugin plg-genesis (excluye Programas).
+    
+    ## Autenticación
+    - Las cookies de WordPress se envían automáticamente desde el navegador
+    - Solo necesitas autorizar con el **X-WP-Nonce** obtenido desde `/auth/nonce`
+    - Para apps externas, usa `/auth/login` primero y guarda las cookies
+servers:
+  - url: https://emmausdigital.com/genesis/wp-json/plg-genesis/v1
+  - url: http://localhost:8080/wp-json/plg-genesis/v1
+components:
+  securitySchemes:
+    wpNonce:
+      type: apiKey
+      in: header
+      name: X-WP-Nonce
+      description: 'Nonce de WordPress. Obtenerlo desde POST /auth/nonce (requiere estar autenticado en el dashboard)'
+  responses:
+    Success:
+      description: Respuesta exitosa estándar
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                nullable: true
+    Error:
+      description: Error estándar
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  details:
+                    nullable: true
+tags:
+  - name: Auth
+  - name: Health
+  - name: Theme
+  - name: Estudiantes
+  - name: Cursos
+  - name: Contactos
+  - name: Congresos
+  - name: Estadisticas
+  - name: Catalogos
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Inicia sesión y devuelve nonce
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+                remember: { type: boolean }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Cierra sesión
+      security:
+        - wpNonce: []
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+  /auth/nonce:
+    get:
+      tags: [Auth]
+      summary: Devuelve un nonce válido
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+  /health:
+    get:
+      tags: [Health]
+      summary: Estado del backend
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+  /theme:
+    get:
+      tags: [Theme]
+      summary: Obtiene el tema de la oficina
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+    put:
+      tags: [Theme]
+      summary: Actualiza el tema de la oficina
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+    delete:
+      tags: [Theme]
+      summary: Restablece el tema por defecto
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+  /estudiantes:
+    get:
+      tags: [Estudiantes]
+      summary: Lista estudiantes con filtros y paginación
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100 }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+  /estudiantes/{id}:
+    put:
+      tags: [Estudiantes]
+      summary: Actualiza datos del estudiante (parcial)
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+  /estudiantes/{id}/cursos:
+    post:
+      tags: [Estudiantes]
+      summary: Asigna curso a estudiante (maneja 409)
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '409': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+  /estudiantes/{id}/observaciones:
+    get:
+      tags: [Estudiantes]
+      summary: Lista observaciones del estudiante
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+    post:
+      tags: [Estudiantes]
+      summary: Crea observación del estudiante
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+  /estudiantes/{id}/quickview:
+    get:
+      tags: [Estudiantes]
+      summary: KPIs y últimos del estudiante
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+  /cursos:
+    get:
+      tags: [Cursos]
+      summary: Lista cursos (activos)
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+    post:
+      tags: [Cursos]
+      summary: Crea curso
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+  /cursos/{id}:
+    put:
+      tags: [Cursos]
+      summary: Actualiza curso
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+  /contactos:
+    get:
+      tags: [Contactos]
+      summary: Lista contactos
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+    post:
+      tags: [Contactos]
+      summary: Crea contacto
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+  /contactos/{id}:
+    put:
+      tags: [Contactos]
+      summary: Actualiza contacto
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+  /congresos:
+    get:
+      tags: [Congresos]
+      summary: Lista congresos
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+  /congresos/{id}:
+    put:
+      tags: [Congresos]
+      summary: Actualiza congreso
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+  /congresos/{id}/checkin:
+    post:
+      tags: [Congresos]
+      summary: Check-in
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+  /congresos/{id}/void:
+    post:
+      tags: [Congresos]
+      summary: Anula check-in
+      security:
+        - wpNonce: []
+        - wpNonce: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+  /congresos/{id}/stats:
+    get:
+      tags: [Estadisticas]
+      summary: Estadísticas de un congreso
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }

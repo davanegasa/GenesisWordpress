@@ -12,62 +12,62 @@ class PlgGenesis_EstudiantesController {
 		register_rest_route('plg-genesis/v1', '/estudiantes/exists', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'exists_estudiante' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/estudiantes/next-code', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'next_code' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/estudiantes', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_estudiantes' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 
 		register_rest_route('plg-genesis/v1', '/estudiantes', [
 			'methods'             => 'POST',
 			'callback'            => [ __CLASS__, 'post_estudiante' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_estudiante' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)/observaciones', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_observaciones' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)/observaciones', [
 			'methods'             => 'POST',
 			'callback'            => [ __CLASS__, 'post_observacion' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)/quickview', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_quickview' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)', [
 			'methods'             => 'PUT',
 			'callback'            => [ __CLASS__, 'put_estudiante' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 
 		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)/cursos', [
 			'methods'             => 'POST',
 			'callback'            => [ __CLASS__, 'post_asignar_curso' ],
-			'permission_callback' => function() { return is_user_logged_in(); }
+			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
 		]);
 	}
 

@@ -9,6 +9,18 @@ class PlgGenesis_ConnectionProvider {
 		$user = getenv($office . '_DB_USER');
 		$pass = getenv($office . '_DB_PASSWORD');
 
+		// Fallback: constantes definidas en wp-config.php (BOG_DB_HOST, etc.)
+		if ((!$host || !$db || !$user || !$pass)
+			&& defined($office . '_DB_HOST')
+			&& defined($office . '_DB_NAME')
+			&& defined($office . '_DB_USER')
+			&& defined($office . '_DB_PASSWORD')) {
+			$host = constant($office . '_DB_HOST');
+			$db   = constant($office . '_DB_NAME');
+			$user = constant($office . '_DB_USER');
+			$pass = constant($office . '_DB_PASSWORD');
+		}
+
 		// Fallback: si estamos en Docker según WORDPRESS_DB_HOST, usar postgres default
 		if (getenv('WORDPRESS_DB_HOST') === 'mariadb' && (!$host || !$db || !$user || !$pass)) {
 			$host = 'postgres';
