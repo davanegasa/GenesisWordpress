@@ -1,0 +1,261 @@
+/**
+ * Constructor del menú del dashboard con filtrado por permisos
+ */
+import AuthService from '../../services/auth.js';
+
+/**
+ * Define la estructura completa del menú con sus permisos requeridos
+ */
+const menuStructure = [
+	{
+		id: 'dashboard',
+		label: 'Dashboard',
+		icon: '📊',
+		href: '#/dashboard',
+		requires: null, // Siempre visible
+	},
+	{
+		id: 'estudiantes',
+		label: 'Estudiantes',
+		icon: '👨‍🎓',
+		href: '#/estudiantes',
+		requires: 'plg_view_students',
+		submenu: [
+			{
+				id: 'estudiantes-gestionar',
+				label: 'Gestionar',
+				href: '#/estudiantes',
+				requires: 'plg_view_students',
+			},
+			{
+				id: 'estudiantes-crear',
+				label: 'Crear',
+				href: '#/estudiantes/nuevo',
+				requires: 'plg_create_students',
+			},
+		],
+	},
+	{
+		id: 'contactos',
+		label: 'Contactos',
+		icon: '📇',
+		href: '#/contactos',
+		requires: 'plg_view_contacts',
+		submenu: [
+			{
+				id: 'contactos-buscar',
+				label: 'Buscar Contactos',
+				href: '#/contactos',
+				requires: 'plg_view_contacts',
+			},
+			{
+				id: 'contactos-crear',
+				label: 'Crear Contacto',
+				href: '#/contactos/nuevo',
+				requires: 'plg_create_contacts',
+			},
+		],
+	},
+	{
+		id: 'congresos',
+		label: 'Congresos',
+		icon: '🎪',
+		href: '#/congresos',
+		requires: 'plg_view_events',
+	},
+	{
+		id: 'programas',
+		label: 'Programas',
+		icon: '📚',
+		href: '#/programas',
+		requires: 'plg_view_programs',
+		submenu: [
+			{
+				id: 'programas-listar',
+				label: 'Listar Programas',
+				href: '#/programas',
+				requires: 'plg_view_programs',
+			},
+			{
+				id: 'programas-crear',
+				label: 'Crear Programa',
+				href: '#/programas/nuevo',
+				requires: 'plg_create_programs',
+			},
+		],
+	},
+	{
+		id: 'cursos',
+		label: 'Cursos',
+		icon: '📖',
+		href: '#/cursos',
+		requires: 'plg_view_courses',
+		submenu: [
+			{
+				id: 'cursos-listar',
+				label: 'Listar Cursos',
+				href: '#/cursos',
+				requires: 'plg_view_courses',
+			},
+			{
+				id: 'cursos-crear',
+				label: 'Crear Curso',
+				href: '#/cursos/nuevo',
+				requires: 'plg_create_courses',
+			},
+		],
+	},
+	{
+		id: 'ajustes',
+		label: 'Ajustes',
+		icon: '⚙️',
+		href: '#/ajustes',
+		requires: null, // Siempre visible
+		submenu: [
+			{
+				id: 'ajustes-tema',
+				label: 'Tema',
+				href: '#/tema',
+				requires: 'plg_view_theme',
+			},
+			{
+				id: 'ajustes-usuarios',
+				label: 'Usuarios',
+				href: '#/usuarios',
+				requires: 'plg_view_users',
+			},
+			{
+				id: 'ajustes-docs',
+				label: 'API Docs',
+				href: '#/docs',
+				requires: 'plg_view_swagger',
+			},
+		],
+	},
+];
+
+/**
+ * Filtra un item del menú según permisos del usuario
+ * @param {object} item - Item del menú
+ * @returns {object|null} - Item filtrado o null si no tiene permiso
+ */
+function filterMenuItem(item) {
+	// Si no requiere permiso, siempre mostrar
+	if (!item.requires) {
+		// Filtrar submenú si existe
+		if (item.submenu) {
+			const filteredSubmenu = item.submenu
+				.map(filterMenuItem)
+				.filter(Boolean);
+			
+			// Si no quedan items en el submenú y el padre requiere permiso, ocultar
+			if (filteredSubmenu.length === 0 && item.requires) {
+				return null;
+			}
+			
+			return { ...item, submenu: filteredSubmenu };
+		}
+		return item;
+	}
+
+	// Verificar permiso
+	if (!AuthService.can(item.requires)) {
+		return null;
+	}
+
+	// Filtrar submenú si existe
+	if (item.submenu) {
+		const filteredSubmenu = item.submenu
+			.map(filterMenuItem)
+			.filter(Boolean);
+		
+		return { ...item, submenu: filteredSubmenu };
+	}
+
+	return item;
+}
+
+/**
+ * Construye el HTML del menú filtrado según permisos
+ * @returns {string} - HTML del menú
+ */
+export function buildMenu() {
+	const filteredMenu = menuStructure
+		.map(filterMenuItem)
+		.filter(Boolean);
+
+	let html = '<div style="font-weight:700;font-size:20px;margin-bottom:12px;">Genesis</div>';
+	
+	// Agregar selector de oficina para Super Admin
+	if (AuthService.canSwitchOffice()) {
+		const currentOffice = AuthService.getOffice() || 'BOG';
+		html += `
+			<div style="margin-bottom:16px; padding:8px; background:rgba(255,255,255,0.1); border-radius:6px;">
+				<label style="font-size:12px; opacity:0.8;">Oficina:</label>
+				<select id="office-selector" style="width:100%; padding:6px; border-radius:4px; border:none; margin-top:4px;">
+					<option value="BOG" ${currentOffice === 'BOG' ? 'selected' : ''}>Bogotá</option>
+					<option value="MED" ${currentOffice === 'MED' ? 'selected' : ''}>Medellín</option>
+					<option value="CAL" ${currentOffice === 'CAL' ? 'selected' : ''}>Cali</option>
+				</select>
+			</div>
+		`;
+	}
+
+	filteredMenu.forEach(item => {
+		html += `<a href="${item.href}" id="nav-${item.id}" class="${item.id === 'dashboard' ? 'active' : ''}">
+			${item.icon ? item.icon + ' ' : ''}${item.label}
+		</a>`;
+
+		if (item.submenu && item.submenu.length > 0) {
+			item.submenu.forEach(sub => {
+				html += `<a href="${sub.href}" class="submenu" data-group="${item.id}">${sub.label}</a>`;
+			});
+		}
+	});
+
+	// Siempre agregar logout al final
+	const logoutUrl = window.location.origin + window.location.pathname.replace(/\/$/, '') + '/?plg_logout=1';
+	html += `<a href="${logoutUrl}" class="submenu" style="margin-top:16px; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">Cerrar sesión</a>`;
+
+	return html;
+}
+
+/**
+ * Inicializa el menú en el sidebar
+ */
+export function initMenu() {
+	const sidebar = document.getElementById('sidebar');
+	if (!sidebar) return;
+
+	sidebar.innerHTML = buildMenu();
+
+	// Agregar listener para selector de oficina si existe
+	const officeSelector = document.getElementById('office-selector');
+	if (officeSelector) {
+		officeSelector.addEventListener('change', (e) => {
+			const newOffice = e.target.value;
+			// Guardar en localStorage y recargar
+			localStorage.setItem('selectedOffice', newOffice);
+			window.location.reload();
+		});
+	}
+}
+
+/**
+ * Actualiza el item activo del menú
+ * @param {string} hash - El hash actual (ej: '#/estudiantes')
+ */
+export function updateActiveMenuItem(hash) {
+	// Remover active de todos
+	document.querySelectorAll('.sidebar a').forEach(a => {
+		a.classList.remove('active');
+	});
+
+	// Agregar active al correspondiente
+	const cleanHash = hash.split('?')[0]; // Remover query params
+	const link = document.querySelector(`.sidebar a[href="${cleanHash}"], .sidebar a[href^="${cleanHash}"]`);
+	if (link) {
+		link.classList.add('active');
+	}
+}
+

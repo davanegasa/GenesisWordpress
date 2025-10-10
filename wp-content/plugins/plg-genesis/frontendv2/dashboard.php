@@ -66,6 +66,31 @@ if (!defined('ABSPATH')) { exit; }
 	<script>
 		window.wpApiSettings = window.wpApiSettings || {};
 		window.wpApiSettings.nonce = '<?php echo wp_create_nonce('wp_rest'); ?>';
+		
+		// Inyectar datos del usuario actual para el frontend
+		window.wpUserData = <?php 
+			$current_user = wp_get_current_user();
+			$user_data = [
+				'id' => $current_user->ID,
+				'name' => $current_user->display_name,
+				'email' => $current_user->user_email,
+				'login' => $current_user->user_login,
+				'roles' => $current_user->roles,
+				'office' => get_user_meta($current_user->ID, 'oficina', true),
+				'capabilities' => array_filter($current_user->allcaps, function($val) {
+					return $val === true && strpos(key($current_user->allcaps), 'plg_') === 0;
+				}, ARRAY_FILTER_USE_BOTH),
+			];
+			// Filtrar solo capabilities del plugin (que empiezan con plg_)
+			$plg_caps = [];
+			foreach ($current_user->allcaps as $cap => $val) {
+				if ($val === true && strpos($cap, 'plg_') === 0) {
+					$plg_caps[$cap] = true;
+				}
+			}
+			$user_data['capabilities'] = $plg_caps;
+			echo json_encode($user_data);
+		?>;
 	</script>
 	<script type="module" src="<?php echo plugin_dir_url(__FILE__); ?>core/bootstrap.js"></script>
 	<!-- Script inline removido; ahora todo el arranque lo hace core/bootstrap.js -->

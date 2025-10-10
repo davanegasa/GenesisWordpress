@@ -2,14 +2,25 @@
 import { loadTheme, applyTheme } from '../core/theme.js';
 import { mountLayout } from '../components/layout/Layout.js';
 import { startRouter } from '../core/router.js';
+import AuthService from '../services/auth.js';
+import { initMenu, updateActiveMenuItem } from '../components/layout/menu.js';
 
 export async function bootstrap() {
+	// 1. Inicializar servicio de autenticación
+	await AuthService.init();
+	
+	// 2. Cargar tema
 	try {
 		const theme = await loadTheme();
 		applyTheme(theme);
 	} catch (e) {
 		console.warn('Theme load failed', e);
 	}
+	
+	// 3. Construir menú según permisos
+	initMenu();
+	
+	// 4. Montar layout
 	const appRoot = document.getElementById('view') || document.body;
 	mountLayout(appRoot);
 
@@ -24,31 +35,18 @@ export async function bootstrap() {
 	for (const el of candidates) {
 		if (el) { el.style.cursor = 'pointer'; el.addEventListener('click', clickToDashboard); break; }
 	}
-	// Hash por defecto
+	// 5. Hash por defecto
 	if (!location.hash || location.hash === '#/' || location.hash === '#') {
 		location.hash = '#/dashboard';
 	}
 
-	// Acordeón independiente por sección
-    function setupAccordion(triggerId, submenuSelector){
-		const trigger = document.getElementById(triggerId);
-		if (!trigger) return;
-		const subs = Array.from(document.querySelectorAll(submenuSelector));
-		// Cierra todos los submenus primero
-		const closeAll = () => document.querySelectorAll('.sidebar a.submenu').forEach(s=> s.classList.remove('open'));
-		trigger.addEventListener('click', (e)=>{
-			e.preventDefault();
-			const isAnyClosed = subs.some(s=> !s.classList.contains('open'));
-			closeAll();
-			if (isAnyClosed) subs.forEach(s=> s.classList.add('open'));
-		});
-	}
-	setupAccordion('nav-estudiantes', '.sidebar a.submenu[href^="#/estudiantes"]');
-	setupAccordion('nav-contactos', '.sidebar a.submenu[href^="#/contactos"]');
-	setupAccordion('nav-programas', '.sidebar a.submenu[href^="#/programas"]');
-	setupAccordion('nav-cursos', '.sidebar a.submenu[href^="#/cursos"]');
-    setupAccordion('nav-ajustes', '.sidebar a.submenu[data-group="ajustes"]');
+	// 6. Actualizar menú activo cuando cambia el hash
+	window.addEventListener('hashchange', () => {
+		updateActiveMenuItem(location.hash);
+	});
+	updateActiveMenuItem(location.hash);
 
+	// 7. Arrancar router
 	startRouter();
 }
 
