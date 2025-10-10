@@ -192,3 +192,49 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
 /* Sidebar submenus */
 .sidebar a.submenu{display:none;padding-left:24px;opacity:.9}
 .sidebar a.submenu.open{display:block}
+
+/* Estilos para gestión de usuarios */
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--plg-border);
+  border-radius: 8px;
+  background: var(--plg-cardBg);
+  color: var(--plg-text);
+  font-size: 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--plg-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--plg-accent) 20%, transparent);
+}
+
+.btn-sm {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid var(--plg-border);
+  background: var(--plg-cardBg);
+  color: var(--plg-text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-sm:hover {
+  background: color-mix(in srgb, var(--plg-accent) 10%, var(--plg-cardBg));
+  border-color: var(--plg-accent);
+}
+
+.btn-danger {
+  background: color-mix(in srgb, var(--plg-danger) 10%, var(--plg-cardBg));
+  color: var(--plg-danger);
+  border-color: color-mix(in srgb, var(--plg-danger) 50%, var(--plg-border));
+}
+
+.btn-danger:hover {
+  background: var(--plg-danger);
+  color: white;
+  border-color: var(--plg-danger);
+}
