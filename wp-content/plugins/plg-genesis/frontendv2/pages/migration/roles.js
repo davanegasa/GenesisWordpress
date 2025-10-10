@@ -2,7 +2,7 @@
  * Página temporal de migración de roles
  * NOTA: Esta página debe eliminarse después de completar la migración
  */
-import apiClient from '../../api/client.js';
+import { api as apiClient } from '../../api/client.js';
 import { createTable, createButton } from '../../components/ui/index.js';
 
 export async function render(root) {

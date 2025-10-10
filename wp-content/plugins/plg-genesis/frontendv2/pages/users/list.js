@@ -1,7 +1,7 @@
 /**
  * Vista de listado y gestión de usuarios
  */
-import apiClient from '../../api/client.js';
+import { api as apiClient } from '../../api/client.js';
 import { createTable, createButton, createModal } from '../../components/ui/index.js';
 import AuthService from '../../services/auth.js';
 
