@@ -70,17 +70,7 @@ if (!defined('ABSPATH')) { exit; }
 		// Inyectar datos del usuario actual para el frontend
 		window.wpUserData = <?php 
 			$current_user = wp_get_current_user();
-			$user_data = [
-				'id' => $current_user->ID,
-				'name' => $current_user->display_name,
-				'email' => $current_user->user_email,
-				'login' => $current_user->user_login,
-				'roles' => $current_user->roles,
-				'office' => get_user_meta($current_user->ID, 'oficina', true),
-				'capabilities' => array_filter($current_user->allcaps, function($val) {
-					return $val === true && strpos(key($current_user->allcaps), 'plg_') === 0;
-				}, ARRAY_FILTER_USE_BOTH),
-			];
+			
 			// Filtrar solo capabilities del plugin (que empiezan con plg_)
 			$plg_caps = [];
 			foreach ($current_user->allcaps as $cap => $val) {
@@ -88,7 +78,17 @@ if (!defined('ABSPATH')) { exit; }
 					$plg_caps[$cap] = true;
 				}
 			}
-			$user_data['capabilities'] = $plg_caps;
+			
+			$user_data = [
+				'id' => $current_user->ID,
+				'name' => $current_user->display_name,
+				'email' => $current_user->user_email,
+				'login' => $current_user->user_login,
+				'roles' => $current_user->roles,
+				'office' => get_user_meta($current_user->ID, 'oficina', true) ?: null,
+				'capabilities' => $plg_caps,
+			];
+			
 			echo json_encode($user_data);
 		?>;
 	</script>
