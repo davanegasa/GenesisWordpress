@@ -239,6 +239,52 @@ export function initMenu() {
 			window.location.reload();
 		});
 	}
+
+	// Configurar acordeones para submenús
+	setupAccordions();
+}
+
+/**
+ * Configura los acordeones para los menús con submenús
+ */
+function setupAccordions() {
+	const menuItems = [
+		{ triggerId: 'nav-estudiantes', submenuSelector: '.sidebar a.submenu[data-group="estudiantes"]' },
+		{ triggerId: 'nav-contactos', submenuSelector: '.sidebar a.submenu[data-group="contactos"]' },
+		{ triggerId: 'nav-congresos', submenuSelector: '.sidebar a.submenu[data-group="congresos"]' },
+		{ triggerId: 'nav-programas', submenuSelector: '.sidebar a.submenu[data-group="programas"]' },
+		{ triggerId: 'nav-cursos', submenuSelector: '.sidebar a.submenu[data-group="cursos"]' },
+		{ triggerId: 'nav-ajustes', submenuSelector: '.sidebar a.submenu[data-group="ajustes"]' },
+	];
+
+	menuItems.forEach(({ triggerId, submenuSelector }) => {
+		const trigger = document.getElementById(triggerId);
+		if (!trigger) return;
+
+		const subs = Array.from(document.querySelectorAll(submenuSelector));
+		if (subs.length === 0) return;
+
+		// Cierra todos los submenus excepto el actual
+		const closeOthers = () => {
+			document.querySelectorAll('.sidebar a.submenu').forEach(s => {
+				if (!subs.includes(s)) {
+					s.style.display = 'none';
+				}
+			});
+		};
+
+		trigger.addEventListener('click', (e) => {
+			e.preventDefault();
+			const isAnyClosed = subs.some(s => s.style.display === 'none' || !s.style.display);
+			closeOthers();
+			
+			if (isAnyClosed) {
+				subs.forEach(s => s.style.display = 'block');
+			} else {
+				subs.forEach(s => s.style.display = 'none');
+			}
+		});
+	});
 }
 
 /**

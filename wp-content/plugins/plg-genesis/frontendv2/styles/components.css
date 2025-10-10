@@ -190,8 +190,7 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
 .activity-time{color:var(--plg-mutedText);font-size:12px}
 
 /* Sidebar submenus */
-.sidebar a.submenu{display:none;padding-left:24px;opacity:.9}
-.sidebar a.submenu.open{display:block}
+.sidebar a.submenu{display:none;padding-left:24px;opacity:.9;font-size:14px}
 
 /* Estilos para gestión de usuarios */
 .form-input {
