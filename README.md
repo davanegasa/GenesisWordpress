@@ -197,3 +197,8 @@ Adecua/ordena estas migraciones según el flujo del plugin (p. ej. versiones fec
 ## Licencia
 
 Este proyecto está bajo la licencia MIT.
+
+## Documentación de la API REST
+
+- Consulta la guía de verificación y generación de Swagger en [`docs/wp-rest-api-review.md`](docs/wp-rest-api-review.md).
+- Usa la plantilla OpenAPI disponible en [`docs/wp-rest-openapi.yaml`](docs/wp-rest-openapi.yaml) para documentar los endpoints disponibles en tu instancia.

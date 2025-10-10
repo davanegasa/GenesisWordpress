@@ -7,25 +7,61 @@ function withTimeout(promise, ms = DEFAULT_TIMEOUT_MS) {
 	});
 }
 
-async function request(method, path, { headers = {}, body } = {}) {
-	const h = new Headers(headers);
-	if (window.wpApiSettings && window.wpApiSettings.nonce) h.set('X-WP-Nonce', window.wpApiSettings.nonce);
-	const hasJson = body && !(body instanceof FormData);
-	if (hasJson && !h.has('Content-Type')) h.set('Content-Type', 'application/json');
-	const res = await withTimeout(fetch(`/wp-json/plg-genesis/v1${path}` , {
-		method,
-		headers: h,
-		credentials: 'same-origin',
-		body: hasJson ? JSON.stringify(body) : body
-	}));
-	const contentType = res.headers.get('content-type') || '';
-	const data = contentType.includes('application/json') ? await res.json() : await res.text();
-    if (!res.ok || (data && data.success === false)) {
-        const err = (data && data.error) || { message: res.statusText, code: 'http_error' };
-        const e = new Error(err.message || 'Request failed');
-        e.details = err; e.status = res.status; e.payload = data; throw e;
+async function refreshNonceIfNeeded() {
+    try {
+        const r = await withTimeout(fetch('/wp-json/plg-genesis/v1/auth/nonce', { credentials: 'same-origin' }));
+        const ct = r.headers.get('content-type') || '';
+        const d = ct.includes('application/json') ? await r.json() : null;
+        const nonce = d && d.data && d.data.nonce;
+        if (nonce) {
+            window.wpApiSettings = window.wpApiSettings || {};
+            window.wpApiSettings.nonce = nonce;
+            return true;
+        }
+    } catch (_) {}
+    return false;
+}
+
+const API_PREFIX = (() => {
+    try {
+        // Si el dashboard corre bajo una subcarpeta (p.ej. /genesis/), usar ese prefijo para que el navegador envíe cookies (path)
+        const path = window.location.pathname || '';
+        if (path.includes('/genesis/')) return '/genesis/wp-json/plg-genesis/v1';
+    } catch(_) {}
+    return '/wp-json/plg-genesis/v1';
+})();
+
+async function coreRequest(method, path, { headers = {}, body } = {}) {
+    const h = new Headers(headers || {});
+    if (window.wpApiSettings && window.wpApiSettings.nonce) h.set('X-WP-Nonce', window.wpApiSettings.nonce);
+    const hasJson = body && !(body instanceof FormData);
+    if (hasJson && !h.has('Content-Type')) h.set('Content-Type', 'application/json');
+    const res = await withTimeout(fetch(`${API_PREFIX}${path}` , {
+        method,
+        headers: h,
+        credentials: 'include',
+        body: hasJson ? JSON.stringify(body) : body
+    }));
+    const contentType = res.headers.get('content-type') || '';
+    const data = contentType.includes('application/json') ? await res.json() : await res.text();
+    return { res, data };
+}
+
+async function request(method, path, opts = {}) {
+    let { res, data } = await coreRequest(method, path, opts);
+    // Auto-refresh nonce on 403 rest_cookie_invalid_nonce and retry once
+    if ((!res.ok || (data && data.success === false)) && data && (data.code === 'rest_cookie_invalid_nonce' || (data.error && data.error.code === 'rest_cookie_invalid_nonce'))) {
+        const refreshed = await refreshNonceIfNeeded();
+        if (refreshed) {
+            ({ res, data } = await coreRequest(method, path, opts));
+        }
     }
-	return data;
+    if (!res.ok || (data && data.success === false)) {
+        const errObj = (data && (data.error || data)) || { message: res.statusText, code: 'http_error' };
+        const e = new Error(errObj.message || 'Request failed');
+        e.details = errObj; e.status = res.status; e.payload = data; throw e;
+    }
+    return data;
 }
 
 export const api = {
