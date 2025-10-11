@@ -8,7 +8,11 @@ import AuthService from '../../services/auth.js';
 let currentPage = 1;
 const limit = 20;
 
-export async function render(root) {
+export function mount(root) {
+	return render(root);
+}
+
+async function render(root) {
 	// Verificar permisos
 	if (!AuthService.can('plg_view_users')) {
 		root.innerHTML = '<div class="card"><p style="color:red;">No tienes permiso para ver esta página.</p></div>';

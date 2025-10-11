@@ -5,7 +5,11 @@
 import { api as apiClient } from '../../api/client.js';
 import { createTable, createButton } from '../../components/ui/index.js';
 
-export async function render(root) {
+export function mount(root) {
+	return render(root);
+}
+
+async function render(root) {
 	root.innerHTML = `
 		<div class="card" style="border: 2px solid var(--plg-warning); background: color-mix(in srgb, var(--plg-warning) 5%, var(--plg-cardBg));">
 			<div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
