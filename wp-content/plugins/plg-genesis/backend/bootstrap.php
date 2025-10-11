@@ -44,9 +44,19 @@ function plg_genesis_validate_user_from_cookie() {
 	$uid = 0;
 	if (defined('LOGGED_IN_COOKIE') && isset($_COOKIE[LOGGED_IN_COOKIE])) {
 		$uid = (int) wp_validate_auth_cookie('', 'logged_in');
-		if ($uid) { wp_set_current_user($uid); }
+		if ($uid) { 
+			wp_set_current_user($uid);
+			// Forzar recarga de roles y capabilities desde DB
+			$user = wp_get_current_user();
+			$user->get_role_caps();
+		}
 	}
-	if ($uid <= 0 && is_user_logged_in()) { $uid = get_current_user_id(); }
+	if ($uid <= 0 && is_user_logged_in()) { 
+		$uid = get_current_user_id();
+		// Forzar recarga de capabilities también para usuarios ya autenticados
+		$user = wp_get_current_user();
+		$user->get_role_caps();
+	}
 	return ($uid > 0);
 }
 
