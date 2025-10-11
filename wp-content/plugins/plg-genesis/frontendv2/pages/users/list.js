@@ -9,6 +9,15 @@ let currentPage = 1;
 const limit = 20;
 
 export async function render(root) {
+	// Verificar permisos
+	if (!AuthService.can('plg_view_users')) {
+		root.innerHTML = '<div class="card"><p style="color:red;">No tienes permiso para ver esta página.</p></div>';
+		console.error('Sin permiso plg_view_users');
+		return;
+	}
+
+	console.log('Renderizando página de usuarios...');
+	
 	root.innerHTML = `
 		<div class="card">
 			<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -61,7 +70,9 @@ async function loadUsers() {
 	tableContainer.innerHTML = '<p>Cargando...</p>';
 
 	try {
+		console.log('Cargando usuarios...', { search, currentPage, limit });
 		const response = await apiClient.get(`/users?q=${encodeURIComponent(search)}&page=${currentPage}&limit=${limit}`);
+		console.log('Respuesta recibida:', response);
 		
 		if (!response.success) {
 			throw new Error(response.error?.message || 'Error al cargar usuarios');
