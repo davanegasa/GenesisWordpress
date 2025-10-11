@@ -2,7 +2,6 @@
  * Vista de listado y gestión de usuarios
  */
 import { api as apiClient } from '../../api/client.js';
-import { createTable, createButton, createModal } from '../../components/ui/index.js';
 import AuthService from '../../services/auth.js';
 
 let currentPage = 1;
@@ -101,9 +100,7 @@ async function loadUsers() {
 			{ key: 'actions', label: 'Acciones', render: (_, user) => renderActions(user) },
 		];
 
-		const table = createTable({ columns, rows: users });
-		tableContainer.innerHTML = '';
-		tableContainer.appendChild(table);
+		tableContainer.innerHTML = renderUsersTable(columns, users);
 
 		// Paginación
 		renderPagination(pagination);
@@ -112,6 +109,33 @@ async function loadUsers() {
 		console.error('Error cargando usuarios:', error);
 		tableContainer.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
 	}
+}
+
+function renderUsersTable(columns, users) {
+	const headerHtml = columns.map(col => `<th>${col.label}</th>`).join('');
+	const rowsHtml = users.map(user => {
+		const cellsHtml = columns.map(col => {
+			let value;
+			if (col.render) {
+				value = col.render(user[col.key], user);
+			} else {
+				value = user[col.key] || '';
+			}
+			return `<td>${value}</td>`;
+		}).join('');
+		return `<tr>${cellsHtml}</tr>`;
+	}).join('');
+
+	return `
+		<table class="table">
+			<thead>
+				<tr>${headerHtml}</tr>
+			</thead>
+			<tbody>
+				${rowsHtml}
+			</tbody>
+		</table>
+	`;
 }
 
 function formatRole(roleSlug) {
