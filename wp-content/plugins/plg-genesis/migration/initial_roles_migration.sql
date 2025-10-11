@@ -12,8 +12,9 @@
 
 -- 1. Actualizar el usuario actual (daniel.vanegas) a Super Admin
 -- Reemplaza 'daniel.vanegas' con tu usuario si es diferente
+-- IMPORTANTE: s:15 porque "plg_super_admin" tiene 15 caracteres
 UPDATE edgen_usermeta 
-SET meta_value = 'a:1:{s:16:"plg_super_admin";b:1;}'
+SET meta_value = 'a:1:{s:15:"plg_super_admin";b:1;}'
 WHERE user_id = (SELECT ID FROM edgen_users WHERE user_login = 'daniel.vanegas')
   AND meta_key = 'edgen_capabilities';
 
