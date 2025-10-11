@@ -84,7 +84,9 @@ async function loadUsers() {
 
 		const { users, pagination } = response.data;
 
-		if (users.length === 0) {
+		console.log('Usuarios extraídos:', users, 'Cantidad:', users?.length);
+
+		if (!users || users.length === 0) {
 			tableContainer.innerHTML = '<p style="text-align:center; color:#666;">No se encontraron usuarios</p>';
 			return;
 		}
@@ -99,7 +101,7 @@ async function loadUsers() {
 			{ key: 'actions', label: 'Acciones', render: (_, user) => renderActions(user) },
 		];
 
-		const table = createTable(columns, users);
+		const table = createTable({ columns, rows: users });
 		tableContainer.innerHTML = '';
 		tableContainer.appendChild(table);
 
