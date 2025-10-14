@@ -220,8 +220,9 @@ export function buildMenu() {
 	});
 
 	// Siempre agregar logout al final
-	const logoutUrl = window.location.origin + window.location.pathname.replace(/\/$/, '') + '/?plg_logout=1';
-	html += `<a href="${logoutUrl}" class="submenu" style="margin-top:16px; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">Cerrar sesión</a>`;
+	// Usar el logout URL de WordPress con redirect al home
+	const logoutUrl = '/wp-login.php?action=logout&redirect_to=' + encodeURIComponent(window.location.origin);
+	html += `<a href="${logoutUrl}" class="submenu" style="margin-top:16px; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">🚪 Cerrar sesión</a>`;
 
 	return html;
 }

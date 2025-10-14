@@ -2,6 +2,7 @@
  * Vista de listado y gestión de usuarios
  */
 import { api as apiClient } from '../../api/client.js';
+import { createModal } from '../../components/ui/index.js';
 import AuthService from '../../services/auth.js';
 
 let currentPage = 1;
@@ -266,9 +267,16 @@ async function showCreateModal() {
 					<div>
 						<label style="display:block; margin-bottom:4px; font-weight:500;">Oficina *</label>
 						<select id="modal-office" class="form-input" required>
-							<option value="BOG">Bogotá</option>
-							<option value="MED">Medellín</option>
-							<option value="CAL">Cali</option>
+							<option value="">Seleccionar oficina...</option>
+							<option value="BOG">Bogotá (BOG)</option>
+							<option value="MED">Medellín (MED)</option>
+							<option value="CAL">Cali (CAL)</option>
+							<option value="BAR">Barranquilla (BAR)</option>
+							<option value="BUC">Bucaramanga (BUC)</option>
+							<option value="PER">Pereira (PER)</option>
+							<option value="FDL">Floridablanca (FDL)</option>
+							<option value="PR">Puerto Rico (PR)</option>
+							<option value="BO">Bolivia (BO)</option>
 						</select>
 					</div>
 				` : ''}
@@ -323,9 +331,12 @@ async function showEditModal(user) {
 	const rolesResponse = await apiClient.get('/users/roles/assignable');
 	const roles = rolesResponse.success ? rolesResponse.data : {};
 
-	const modal = createModal({
-		title: `Editar Usuario: ${user.login}`,
-		body: `
+	// Crear modal overlay
+	const overlay = document.createElement('div');
+	overlay.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:9999;';
+	overlay.innerHTML = `
+		<div class="card" style="max-width:600px; width:90%; max-height:90vh; overflow-y:auto;">
+			<h2 style="margin:0 0 20px 0;">Editar Usuario: ${user.login}</h2>
 			<div style="display:flex; flex-direction:column; gap:16px;">
 				<div>
 					<label style="display:block; margin-bottom:4px; font-weight:500;">Nombre Completo</label>
@@ -351,25 +362,30 @@ async function showEditModal(user) {
 					<div>
 						<label style="display:block; margin-bottom:4px; font-weight:500;">Oficina</label>
 						<select id="modal-office" class="form-input">
-							<option value="BOG" ${user.office === 'BOG' ? 'selected' : ''}>Bogotá</option>
-							<option value="MED" ${user.office === 'MED' ? 'selected' : ''}>Medellín</option>
-							<option value="CAL" ${user.office === 'CAL' ? 'selected' : ''}>Cali</option>
+							<option value="">Sin oficina</option>
+							<option value="BOG" ${user.office === 'BOG' ? 'selected' : ''}>Bogotá (BOG)</option>
+							<option value="BAR" ${user.office === 'BAR' ? 'selected' : ''}>Barranquilla (BAR)</option>
+							<option value="BUC" ${user.office === 'BUC' ? 'selected' : ''}>Bucaramanga (BUC)</option>
+							<option value="PER" ${user.office === 'PER' ? 'selected' : ''}>Pereira (PER)</option>
+							<option value="FDL" ${user.office === 'FDL' ? 'selected' : ''}>Fuente De Luz (FDL)</option>
+							<option value="PR" ${user.office === 'PR' ? 'selected' : ''}>Puerto Rico (PR)</option>
+							<option value="BO" ${user.office === 'BO' ? 'selected' : ''}>Bolivia (BO)</option>
 						</select>
 					</div>
 				` : ''}
 			</div>
-		`,
-		footer: `
-			<button id="btn-cancel-modal" class="btn-secondary">Cancelar</button>
-			<button id="btn-save-user" class="btn-primary">Guardar Cambios</button>
-		`,
-	});
+			<div style="display:flex; gap:12px; justify-content:flex-end; margin-top:20px;">
+				<button id="btn-cancel-modal" class="btn-secondary">Cancelar</button>
+				<button id="btn-save-user" class="btn-primary">Guardar Cambios</button>
+			</div>
+		</div>
+	`;
 
-	document.body.appendChild(modal);
+	document.body.appendChild(overlay);
 
 	// Event listeners
 	document.getElementById('btn-cancel-modal').addEventListener('click', () => {
-		modal.remove();
+		overlay.remove();
 	});
 
 	document.getElementById('btn-save-user').addEventListener('click', async () => {
@@ -390,10 +406,17 @@ async function showEditModal(user) {
 			}
 
 			alert('Usuario actualizado exitosamente');
-			modal.remove();
+			overlay.remove();
 			loadUsers();
 		} catch (error) {
 			alert('Error: ' + error.message);
+		}
+	});
+
+	// Cerrar al hacer click fuera del modal
+	overlay.addEventListener('click', (e) => {
+		if (e.target === overlay) {
+			overlay.remove();
 		}
 	});
 }
