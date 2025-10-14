@@ -130,14 +130,20 @@ const menuStructure = [
 				href: '#/usuarios',
 				requires: 'plg_view_users',
 			},
-			{
-				id: 'ajustes-docs',
-				label: 'API Docs',
-				href: '#/docs',
-				requires: 'plg_view_swagger',
-			},
-		],
-	},
+		{
+			id: 'ajustes-docs',
+			label: 'API Docs',
+			href: '#/docs',
+			requires: 'plg_view_swagger',
+		},
+		{
+			id: 'ajustes-logout',
+			label: '🚪 Cerrar sesión',
+			href: '/wp-login.php?action=logout&redirect_to=' + encodeURIComponent(window.location.origin),
+			requires: null, // Siempre visible
+		},
+	],
+},
 ];
 
 /**
@@ -197,12 +203,16 @@ export function buildMenu() {
 		const currentOffice = AuthService.getOffice() || 'BOG';
 		html += `
 			<div style="margin-bottom:16px; padding:8px; background:rgba(255,255,255,0.1); border-radius:6px;">
-				<label style="font-size:12px; opacity:0.8;">Oficina:</label>
-				<select id="office-selector" style="width:100%; padding:6px; border-radius:4px; border:none; margin-top:4px;">
-					<option value="BOG" ${currentOffice === 'BOG' ? 'selected' : ''}>Bogotá</option>
-					<option value="MED" ${currentOffice === 'MED' ? 'selected' : ''}>Medellín</option>
-					<option value="CAL" ${currentOffice === 'CAL' ? 'selected' : ''}>Cali</option>
-				</select>
+			<label style="font-size:12px; opacity:0.8;">Oficina:</label>
+			<select id="office-selector" style="width:100%; padding:6px; border-radius:4px; border:none; margin-top:4px;">
+				<option value="BOG" ${currentOffice === 'BOG' ? 'selected' : ''}>Bogotá (BOG)</option>
+				<option value="BAR" ${currentOffice === 'BAR' ? 'selected' : ''}>Barranquilla (BAR)</option>
+				<option value="BUC" ${currentOffice === 'BUC' ? 'selected' : ''}>Bucaramanga (BUC)</option>
+				<option value="PER" ${currentOffice === 'PER' ? 'selected' : ''}>Pereira (PER)</option>
+				<option value="FDL" ${currentOffice === 'FDL' ? 'selected' : ''}>Floridablanca (FDL)</option>
+				<option value="PR" ${currentOffice === 'PR' ? 'selected' : ''}>Puerto Rico (PR)</option>
+				<option value="BO" ${currentOffice === 'BO' ? 'selected' : ''}>Bolivia (BO)</option>
+			</select>
 			</div>
 		`;
 	}
@@ -218,11 +228,6 @@ export function buildMenu() {
 			});
 		}
 	});
-
-	// Siempre agregar logout al final
-	// Usar el logout URL de WordPress con redirect al home
-	const logoutUrl = '/wp-login.php?action=logout&redirect_to=' + encodeURIComponent(window.location.origin);
-	html += `<a href="${logoutUrl}" class="submenu" style="margin-top:16px; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">🚪 Cerrar sesión</a>`;
 
 	return html;
 }
