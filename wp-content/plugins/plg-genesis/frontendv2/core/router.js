@@ -67,5 +67,6 @@ function resolveLoader(hash) {
 	if (hash.startsWith('#/usuarios')) return () => import('../pages/users/list.js').then(m => m.mount(container));
 	if (hash.startsWith('#/migration')) return () => import('../pages/migration/roles.js').then(m => m.mount(container));
 	if (hash.startsWith('#/docs')) return () => import('../pages/docs/swagger.js').then(m => m.mount(container));
+	if (hash.startsWith('#/informes/anual')) return () => import('../pages/informes/informe-anual.js').then(m => m.mount(container));
 	return () => import('../pages/dashboard/index.js').then(m => m.mount(container));
 }
