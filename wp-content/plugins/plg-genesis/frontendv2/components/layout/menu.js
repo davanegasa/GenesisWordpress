@@ -113,12 +113,6 @@ const menuStructure = [
 		requires: null, // Siempre visible
 		submenu: [
 			{
-				id: 'ajustes-migracion',
-				label: '🔄 Migración (Temporal)',
-				href: '#/migration',
-				requires: null, // Acceso de emergencia para administrators
-			},
-			{
 				id: 'ajustes-tema',
 				label: 'Tema',
 				href: '#/tema',
@@ -244,11 +238,30 @@ export function initMenu() {
 	// Agregar listener para selector de oficina si existe
 	const officeSelector = document.getElementById('office-selector');
 	if (officeSelector) {
-		officeSelector.addEventListener('change', (e) => {
+		officeSelector.addEventListener('change', async (e) => {
 			const newOffice = e.target.value;
-			// Guardar en localStorage y recargar
-			localStorage.setItem('selectedOffice', newOffice);
-			window.location.reload();
+			
+			try {
+				// Llamar al backend para cambiar la oficina
+				const { api: apiClient } = await import('../../api/client.js');
+				const response = await apiClient.post('/users/switch-office', { office: newOffice });
+				
+				if (response.success) {
+					// Recargar la página para que todos los datos se actualicen
+					// Usamos true para forzar recarga desde el servidor (bypass cache)
+					window.location.reload(true);
+				} else {
+					console.error('Error al cambiar de oficina:', response.error);
+					alert('Error al cambiar de oficina: ' + (response.error?.message || 'Error desconocido'));
+					// Revertir el selector a la oficina anterior
+					officeSelector.value = AuthService.getOffice() || 'BOG';
+				}
+			} catch (error) {
+				console.error('Error al cambiar de oficina:', error);
+				alert('Error al cambiar de oficina');
+				// Revertir el selector a la oficina anterior
+				officeSelector.value = AuthService.getOffice() || 'BOG';
+			}
 		});
 	}
 

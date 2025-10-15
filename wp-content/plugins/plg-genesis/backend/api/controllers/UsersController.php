@@ -6,6 +6,13 @@ require_once dirname(__FILE__, 3) . '/setup/roles.php';
 
 class PlgGenesis_UsersController {
 	public static function register_routes() {
+		// Endpoint para que Super Admin cambie de oficina
+		register_rest_route('plg-genesis/v1', '/users/switch-office', [
+			'methods'             => 'POST',
+			'callback'            => [ __CLASS__, 'switch_office' ],
+			'permission_callback' => plg_genesis_can('plg_switch_office')
+		]);
+
 		// Listar usuarios
 		register_rest_route('plg-genesis/v1', '/users', [
 			'methods'             => 'GET',
@@ -300,6 +307,51 @@ class PlgGenesis_UsersController {
 		return new WP_REST_Response([
 			'success' => true,
 			'data' => $roles
+		], 200);
+	}
+
+	/**
+	 * Endpoint: POST /users/switch-office
+	 * Permite al Super Admin cambiar la oficina actual
+	 */
+	public static function switch_office($request) {
+		plg_genesis_validate_user_from_cookie();
+		$current_user_id = get_current_user_id();
+
+		if (!$current_user_id) {
+			return self::error('Usuario no autenticado', 'unauthorized', 401);
+		}
+
+		$body = json_decode($request->get_body(), true);
+		$new_office = $body['office'] ?? '';
+
+		if (empty($new_office)) {
+			return self::error('Debe proporcionar una oficina', 'invalid_office', 400);
+		}
+
+		// Validar que la oficina sea válida
+		$valid_offices = ['BOG', 'BAR', 'BUC', 'PER', 'FDL', 'PR', 'BO'];
+		if (!in_array($new_office, $valid_offices)) {
+			return self::error('Oficina no válida', 'invalid_office', 400);
+		}
+
+		// Actualizar el user meta
+		update_user_meta($current_user_id, 'oficina', $new_office);
+		
+		// Limpiar el cache del usuario para forzar recarga inmediata
+		clean_user_cache($current_user_id);
+		wp_cache_delete($current_user_id, 'users');
+		wp_cache_delete($current_user_id, 'user_meta');
+		
+		// Forzar WordPress a recargar el usuario actual
+		wp_set_current_user($current_user_id);
+
+		return new WP_REST_Response([
+			'success' => true,
+			'data' => [
+				'office' => $new_office,
+				'message' => 'Oficina actualizada correctamente'
+			]
 		], 200);
 	}
 

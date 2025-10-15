@@ -192,10 +192,12 @@ add_action('rest_api_init', function () {
 		PlgGenesis_UsersController::register_routes();
 	}
 	// Controlador temporal de migración (eliminar después de migrar)
-	require_once __DIR__ . '/api/controllers/MigrationController.php';
-	if (class_exists('PlgGenesis_MigrationController')) {
-		PlgGenesis_MigrationController::register_routes();
-	}
+	// NOTA: MigrationController deshabilitado tras migración inicial
+	// Descomentar solo si necesitas acceder a la UI de migración de nuevo
+	// require_once __DIR__ . '/api/controllers/MigrationController.php';
+	// if (class_exists('PlgGenesis_MigrationController')) {
+	// 	PlgGenesis_MigrationController::register_routes();
+	// }
 	require_once __DIR__ . '/api/controllers/CongresosController.php';
 	if (class_exists('PlgGenesis_CongresosController')) {
 		PlgGenesis_CongresosController::register_routes();
