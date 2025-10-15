@@ -1,3 +1,19 @@
+# Configuración para REST API y Content-Type
+<IfModule mod_headers.c>
+    # Permitir Content-Type application/json
+    SetEnvIf Content-Type "application/json" ALLOW_JSON=1
+    
+    # Headers CORS para REST API
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-WP-Nonce, X-Requested-With"
+    Header always set Access-Control-Max-Age "3600"
+    
+    # Para peticiones OPTIONS (preflight)
+    <If "%{REQUEST_METHOD} == 'OPTIONS'">
+        Header always set Content-Type "text/plain"
+    </If>
+</IfModule>
 
 # BEGIN WordPress
 # The directives (lines) between "BEGIN WordPress" and "END WordPress" are
