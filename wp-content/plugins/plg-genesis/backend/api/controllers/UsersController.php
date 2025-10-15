@@ -7,49 +7,49 @@ require_once dirname(__FILE__, 3) . '/setup/roles.php';
 class PlgGenesis_UsersController {
 	public static function register_routes() {
 		// Endpoint para que Super Admin cambie de oficina
-		register_rest_route('plg-genesis/v1', '/users/switch-office', [
+		register_rest_route('plg-genesis/v1', '/user-management/switch-office', [
 			'methods'             => 'POST',
 			'callback'            => [ __CLASS__, 'switch_office' ],
 			'permission_callback' => plg_genesis_can('plg_switch_office')
 		]);
 
 		// Listar usuarios
-		register_rest_route('plg-genesis/v1', '/users', [
+		register_rest_route('plg-genesis/v1', '/user-management', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_users' ],
 			'permission_callback' => plg_genesis_can('plg_view_users')
 		]);
 
 		// Obtener usuario específico
-		register_rest_route('plg-genesis/v1', '/users/(?P<id>[0-9]+)', [
+		register_rest_route('plg-genesis/v1', '/user-management/(?P<id>[0-9]+)', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_user' ],
 			'permission_callback' => plg_genesis_can('plg_view_users')
 		]);
 
 		// Crear usuario
-		register_rest_route('plg-genesis/v1', '/users', [
+		register_rest_route('plg-genesis/v1', '/user-management', [
 			'methods'             => 'POST',
 			'callback'            => [ __CLASS__, 'post_user' ],
 			'permission_callback' => plg_genesis_can('plg_create_users')
 		]);
 
 		// Actualizar usuario
-		register_rest_route('plg-genesis/v1', '/users/(?P<id>[0-9]+)', [
+		register_rest_route('plg-genesis/v1', '/user-management/(?P<id>[0-9]+)', [
 			'methods'             => 'PUT',
 			'callback'            => [ __CLASS__, 'put_user' ],
 			'permission_callback' => plg_genesis_can('plg_edit_users')
 		]);
 
 		// Eliminar usuario
-		register_rest_route('plg-genesis/v1', '/users/(?P<id>[0-9]+)', [
+		register_rest_route('plg-genesis/v1', '/user-management/(?P<id>[0-9]+)', [
 			'methods'             => 'DELETE',
 			'callback'            => [ __CLASS__, 'delete_user' ],
 			'permission_callback' => plg_genesis_can('plg_delete_users')
 		]);
 
 		// Obtener roles asignables
-		register_rest_route('plg-genesis/v1', '/users/roles/assignable', [
+		register_rest_route('plg-genesis/v1', '/user-management/roles/assignable', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_assignable_roles' ],
 			'permission_callback' => plg_genesis_can('plg_view_users')

@@ -75,7 +75,7 @@ async function loadUsers() {
 
 	try {
 		console.log('Cargando usuarios...', { search, currentPage, limit });
-		const response = await apiClient.get(`/users?q=${encodeURIComponent(search)}&page=${currentPage}&limit=${limit}`);
+		const response = await apiClient.get(`/user-management?q=${encodeURIComponent(search)}&page=${currentPage}&limit=${limit}`);
 		console.log('Respuesta recibida:', response);
 		
 		if (!response.success) {
@@ -204,7 +204,7 @@ window.goToPage = (page) => {
 
 window.editUser = async (userId) => {
 	try {
-		const response = await apiClient.get(`/users/${userId}`);
+		const response = await apiClient.get(`/user-management/${userId}`);
 		if (!response.success) {
 			throw new Error(response.error?.message || 'Error al cargar usuario');
 		}
@@ -220,7 +220,7 @@ window.deleteUser = async (userId, username) => {
 	}
 
 	try {
-		const response = await apiClient.delete(`/users/${userId}`);
+		const response = await apiClient.delete(`/user-management/${userId}`);
 		if (!response.success) {
 			throw new Error(response.error?.message || 'Error al eliminar usuario');
 		}
@@ -233,7 +233,7 @@ window.deleteUser = async (userId, username) => {
 
 async function showCreateModal() {
 	// Obtener roles asignables
-	const rolesResponse = await apiClient.get('/users/roles/assignable');
+	const rolesResponse = await apiClient.get('/user-management/roles/assignable');
 	const roles = rolesResponse.success ? rolesResponse.data : {};
 
 	const modal = createModal({
@@ -312,7 +312,7 @@ async function showCreateModal() {
 			const payload = { username, email, password, role, name };
 			if (office) payload.office = office;
 
-			const response = await apiClient.post('/users', payload);
+			const response = await apiClient.post('/user-management', payload);
 			if (!response.success) {
 				throw new Error(response.error?.message || 'Error al crear usuario');
 			}
@@ -328,7 +328,7 @@ async function showCreateModal() {
 
 async function showEditModal(user) {
 	// Obtener roles asignables
-	const rolesResponse = await apiClient.get('/users/roles/assignable');
+	const rolesResponse = await apiClient.get('/user-management/roles/assignable');
 	const roles = rolesResponse.success ? rolesResponse.data : {};
 
 	// Crear modal overlay
@@ -400,7 +400,7 @@ async function showEditModal(user) {
 			if (password) payload.password = password;
 			if (office) payload.office = office;
 
-			const response = await apiClient.put(`/users/${user.id}`, payload);
+			const response = await apiClient.put(`/user-management/${user.id}`, payload);
 			if (!response.success) {
 				throw new Error(response.error?.message || 'Error al actualizar usuario');
 			}
