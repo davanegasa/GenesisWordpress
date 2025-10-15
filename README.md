@@ -119,14 +119,65 @@ Para mantener homogeneidad en el dashboard v2 (`wp-content/plugins/plg-genesis/f
 
 Más detalles y ejemplos en `frontendv2/FRONTEND_GUIDE.md`.
 
+## Sistema de Roles y Permisos
+
+El plugin implementa un **sistema granular de roles y capacidades** para controlar el acceso por oficina:
+
+### Roles disponibles
+
+1. **Super Admin** (`plg_super_admin`)
+   - Acceso total a todas las oficinas
+   - Puede cambiar entre oficinas mediante selector
+   - Gestiona usuarios de todo el sistema
+   - 32 capabilities completas
+
+2. **Administrador de Oficina** (`plg_office_manager`)
+   - Acceso completo a su oficina específica
+   - Puede crear/editar cursos y programas
+   - Gestiona usuarios de su oficina
+   - CRUD completo de estudiantes, contactos y eventos
+   - 31 capabilities
+
+3. **Personal de Oficina** (`plg_office_staff`)
+   - Acceso operativo a su oficina
+   - Gestiona estudiantes, contactos y eventos
+   - No puede eliminar registros
+   - Ve estadísticas completas
+   - 16 capabilities
+
+4. **Visualizador de Oficina** (`plg_office_viewer`)
+   - Solo lectura de su oficina
+   - Puede ver estudiantes, cursos, programas, contactos, eventos y estadísticas
+   - No puede crear ni modificar
+   - 8 capabilities
+
+### Aislamiento por oficina
+
+- Cada oficina se conecta a una **base de datos PostgreSQL separada**
+- El usuario solo ve y gestiona datos de su oficina asignada
+- Super Admin puede cambiar entre oficinas mediante el selector del menú
+
+### Gestión de usuarios
+
+- Acceso mediante: Dashboard v2 → Ajustes → Usuarios
+- Crear/editar usuarios con roles y oficinas
+- Requiere capability `plg_view_users`
+
+### Migración de roles existentes
+
+Si tienes usuarios con roles antiguos de WordPress, consulta:
+- `wp-content/plugins/plg-genesis/migration/README_MIGRATION.md`
+- Script SQL: `initial_roles_migration.sql`
+
 ## Documentación y deprecaciones
 
 - API v2 (Programas/Cursos): `wp-content/plugins/plg-genesis/docs/programas-v2-spec.md`
+- **Swagger/OpenAPI**: Accede a la documentación de la API REST en `/dashboard-v2/docs/swagger.html` (requiere autenticación)
 - Dashboard v1 (PHP views) en proceso de deprecación. El nuevo Dashboard v2 (vanilla JS) es la UI por defecto:
-  - Estudiantes: unificada en “Gestionar Estudiantes” (`#/estudiantes`) con búsqueda, quick view, edición inline, asignación de cursos y observaciones.
+  - Estudiantes: unificada en "Gestionar Estudiantes" (`#/estudiantes`) con búsqueda, quick view, edición inline, asignación de cursos y observaciones.
   - Las vistas v1 se mantienen temporalmente solo como referencia y serán retiradas en siguientes versiones.
-  - Cambios de permisos: todos los endpoints requieren usuario autenticado.
-  - Ajustes (Tema) y Logout se centralizan en el menú “Ajustes ⚙️`.
+  - **Menú dinámico**: El menú del dashboard se filtra automáticamente según las capabilities del usuario.
+  - Ajustes (Tema, Usuarios) y Logout se centralizan en el menú "Ajustes ⚙️".
 
 ## Configuración de DB_HOST en `wp-config.php`
 
