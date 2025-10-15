@@ -133,8 +133,9 @@ const menuStructure = [
 		{
 			id: 'ajustes-logout',
 			label: '🚪 Cerrar sesión',
-			href: '/wp-login.php?action=logout&redirect_to=' + encodeURIComponent(window.location.origin),
+			href: '#',
 			requires: null, // Siempre visible
+			onclick: 'handleLogout(event)'
 		},
 	],
 },
@@ -218,7 +219,8 @@ export function buildMenu() {
 
 		if (item.submenu && item.submenu.length > 0) {
 			item.submenu.forEach(sub => {
-				html += `<a href="${sub.href}" class="submenu" data-group="${item.id}">${sub.label}</a>`;
+				const onclickAttr = sub.onclick ? ` onclick="${sub.onclick}"` : '';
+				html += `<a href="${sub.href}" class="submenu" data-group="${item.id}"${onclickAttr}>${sub.label}</a>`;
 			});
 		}
 	});
@@ -329,4 +331,27 @@ export function updateActiveMenuItem(hash) {
 		link.classList.add('active');
 	}
 }
+
+/**
+ * Maneja el logout del usuario
+ * @param {Event} event - El evento de click
+ */
+window.handleLogout = async function(event) {
+	event.preventDefault();
+	
+	try {
+		const { api: apiClient } = await import('../../api/client.js');
+		await apiClient.post('/auth/logout');
+	} catch (error) {
+		console.warn('Error al cerrar sesión via API:', error);
+	}
+	
+	// Construir URL de redirección correcta
+	const baseUrl = window.location.origin;
+	const pathPrefix = window.location.pathname.includes('/genesis/') ? '/genesis' : '';
+	const redirectUrl = `${baseUrl}${pathPrefix}/wp-login.php?loggedout=true&wp_lang=en_US`;
+	
+	// Redirigir al login
+	window.location.href = redirectUrl;
+};
 
