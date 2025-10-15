@@ -147,6 +147,9 @@ export function createModal({ title = '', bodyHtml = '', primaryLabel = '', onPr
     return { overlay, modal, close, setBody(html){ const b=modal.querySelector('[data-body]'); if (b) b.innerHTML=html; } };
 }
 
+// Re-export del nuevo sistema de toast mejorado
+export { toast, showToast as showToastAdvanced } from './toast.js';
+
 export default {
 	createButton,
 	createInput,

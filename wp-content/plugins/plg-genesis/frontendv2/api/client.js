@@ -59,7 +59,16 @@ async function request(method, path, opts = {}) {
     if (!res.ok || (data && data.success === false)) {
         const errObj = (data && (data.error || data)) || { message: res.statusText, code: 'http_error' };
         const e = new Error(errObj.message || 'Request failed');
-        e.details = errObj; e.status = res.status; e.payload = data; throw e;
+        e.details = errObj; e.status = res.status; e.payload = data;
+        
+        // Mostrar toast para errores de permisos (403)
+        if (res.status === 403 || errObj.code === 'rest_forbidden') {
+            import('../components/ui/toast.js').then(({ toast }) => {
+                toast.forbidden('⛔ No tienes permisos para realizar esta acción');
+            });
+        }
+        
+        throw e;
     }
     return data;
 }

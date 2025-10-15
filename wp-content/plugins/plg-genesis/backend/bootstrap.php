@@ -100,6 +100,16 @@ add_action('rest_api_init', function () {
 					}
 				} catch (Exception $e) { $dbError = $e->getMessage(); }
 			}
+			// Debug info: roles y capabilities
+			$user_info = [];
+			if ($login && $uid > 0) {
+				$user = wp_get_current_user();
+				$user_info = [
+					'roles' => $user->roles,
+					'capabilities' => array_keys(array_filter($user->allcaps, function($v) { return $v === true; })),
+				];
+			}
+			
 			return new WP_REST_Response([
 				'success' => true,
 				'data' => [
@@ -110,6 +120,7 @@ add_action('rest_api_init', function () {
 					'office' => is_wp_error($office) ? null : $office,
 					'hasDb' => (bool)$hasDb,
 					'dbError' => $dbError,
+					'userInfo' => $user_info,
 				],
 			], 200);
 		},

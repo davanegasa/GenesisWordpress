@@ -74,80 +74,86 @@ class PlgGenesis_Roles {
 	public static function get_role_capabilities() {
 		return [
 			// OFFICE VIEWER - Solo lectura
-			'plg_office_viewer' => [
-				'read' => true, // Capability base de WordPress
-				'plg_view_students',
-				'plg_view_courses',
-				'plg_view_programs',
-				'plg_view_contacts',
-				'plg_view_events',
-				'plg_view_stats',
-				'plg_view_theme',
-			],
+			'plg_office_viewer' => array_merge(
+				['read' => true],
+				array_fill_keys([
+					'plg_view_students',
+					'plg_view_courses',
+					'plg_view_programs',
+					'plg_view_contacts',
+					'plg_view_events',
+					'plg_view_stats',
+					'plg_view_theme',
+				], true)
+			),
 			
 			// OFFICE STAFF - Operativo
-			'plg_office_staff' => [
-				'read' => true,
-				'plg_view_students',
-				'plg_create_students',
-				'plg_edit_students',
-				'plg_view_courses',
-				'plg_assign_courses',
-				'plg_view_programs',
-				'plg_view_contacts',
-				'plg_create_contacts',
-				'plg_edit_contacts',
-				'plg_view_events',
-				'plg_create_events',
-				'plg_edit_events',
-				'plg_view_stats',
-				'plg_view_theme',
-				'plg_view_swagger',
-			],
+			'plg_office_staff' => array_merge(
+				['read' => true],
+				array_fill_keys([
+					'plg_view_students',
+					'plg_create_students',
+					'plg_edit_students',
+					'plg_view_courses',
+					'plg_assign_courses',
+					'plg_view_programs',
+					'plg_view_contacts',
+					'plg_create_contacts',
+					'plg_edit_contacts',
+					'plg_view_events',
+					'plg_create_events',
+					'plg_edit_events',
+					'plg_view_stats',
+					'plg_view_theme',
+					'plg_view_swagger',
+				], true)
+			),
 			
 			// OFFICE MANAGER - Administrador de oficina
-			'plg_office_manager' => [
-				'read' => true,
-				// Estudiantes: full CRUD
-				'plg_view_students',
-				'plg_create_students',
-				'plg_edit_students',
-				'plg_delete_students',
-				// Cursos: full CRUD
-				'plg_view_courses',
-				'plg_assign_courses',
-				'plg_create_courses',
-				'plg_edit_courses',
-				'plg_delete_courses',
-				// Programas: full CRUD
-				'plg_view_programs',
-				'plg_create_programs',
-				'plg_edit_programs',
-				'plg_delete_programs',
-				// Contactos: full CRUD
-				'plg_view_contacts',
-				'plg_create_contacts',
-				'plg_edit_contacts',
-				'plg_delete_contacts',
-				// Congresos: full CRUD
-				'plg_view_events',
-				'plg_create_events',
-				'plg_edit_events',
-				'plg_delete_events',
-				// Estadísticas: ver y exportar
-				'plg_view_stats',
-				'plg_export_stats',
-				// Tema: ver y cambiar
-				'plg_view_theme',
-				'plg_change_theme',
-				// Usuarios: gestión completa de su oficina
-				'plg_view_users',
-				'plg_create_users',
-				'plg_edit_users',
-				'plg_delete_users',
-				// Swagger
-				'plg_view_swagger',
-			],
+			'plg_office_manager' => array_merge(
+				['read' => true],
+				array_fill_keys([
+					// Estudiantes: full CRUD
+					'plg_view_students',
+					'plg_create_students',
+					'plg_edit_students',
+					'plg_delete_students',
+					// Cursos: full CRUD
+					'plg_view_courses',
+					'plg_assign_courses',
+					'plg_create_courses',
+					'plg_edit_courses',
+					'plg_delete_courses',
+					// Programas: full CRUD
+					'plg_view_programs',
+					'plg_create_programs',
+					'plg_edit_programs',
+					'plg_delete_programs',
+					// Contactos: full CRUD
+					'plg_view_contacts',
+					'plg_create_contacts',
+					'plg_edit_contacts',
+					'plg_delete_contacts',
+					// Congresos: full CRUD
+					'plg_view_events',
+					'plg_create_events',
+					'plg_edit_events',
+					'plg_delete_events',
+					// Estadísticas: ver y exportar
+					'plg_view_stats',
+					'plg_export_stats',
+					// Tema: ver y cambiar
+					'plg_view_theme',
+					'plg_change_theme',
+					// Usuarios: gestión completa de su oficina
+					'plg_view_users',
+					'plg_create_users',
+					'plg_edit_users',
+					'plg_delete_users',
+					// Swagger
+					'plg_view_swagger',
+				], true)
+			),
 			
 			// SUPER ADMIN - Acceso total multi-oficina
 			'plg_super_admin' => array_merge(
