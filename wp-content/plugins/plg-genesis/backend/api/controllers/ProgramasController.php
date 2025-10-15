@@ -11,43 +11,43 @@ class PlgGenesis_ProgramasController {
         register_rest_route('plg-genesis/v1', '/programas', [
             'methods'             => 'GET',
             'callback'            => [ __CLASS__, 'get_programas' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_view_programs')
         ]);
 
         register_rest_route('plg-genesis/v1', '/programas/(?P<id>[0-9]+)', [
             'methods'             => 'GET',
             'callback'            => [ __CLASS__, 'get_programa' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_view_programs')
         ]);
 
         register_rest_route('plg-genesis/v1', '/programas', [
             'methods'             => 'POST',
             'callback'            => [ __CLASS__, 'post_programa' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_create_programs')
         ]);
 
         register_rest_route('plg-genesis/v1', '/programas/(?P<id>[0-9]+)', [
             'methods'             => 'PUT',
             'callback'            => [ __CLASS__, 'put_programa' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_edit_programs')
         ]);
 
         register_rest_route('plg-genesis/v1', '/programas/(?P<id>[0-9]+)', [
             'methods'             => 'DELETE',
             'callback'            => [ __CLASS__, 'delete_programa' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_delete_programs')
         ]);
 
         register_rest_route('plg-genesis/v1', '/programas/(?P<id>[0-9]+)/asignar', [
             'methods'             => 'POST',
             'callback'            => [ __CLASS__, 'post_asignar' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_edit_programs')
         ]);
 
         register_rest_route('plg-genesis/v1', '/programas/(?P<id>[0-9]+)/asignar', [
             'methods'             => 'DELETE',
             'callback'            => [ __CLASS__, 'delete_asignar' ],
-            'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+            'permission_callback' => plg_genesis_can('plg_edit_programs')
         ]);
     }
 

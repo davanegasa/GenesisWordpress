@@ -6,7 +6,7 @@ class PlgGenesis_CatalogsController {
 		register_rest_route('plg-genesis/v1', '/catalogs', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_catalogs' ],
-			'permission_callback' => function() { plg_genesis_validate_user_from_cookie(); return is_user_logged_in(); }
+			'permission_callback' => plg_genesis_can('plg_view_programs') // Catálogos relacionados con programas
 		]);
 	}
 
