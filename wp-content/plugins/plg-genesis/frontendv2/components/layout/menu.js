@@ -244,7 +244,7 @@ export function initMenu() {
 			try {
 				// Llamar al backend para cambiar la oficina
 				const { api: apiClient } = await import('../../api/client.js');
-				const response = await apiClient.post('/users/switch-office', { office: newOffice });
+				const response = await apiClient.post('/user-management/switch-office', { office: newOffice });
 				
 				if (response.success) {
 					// Recargar la página para que todos los datos se actualicen
