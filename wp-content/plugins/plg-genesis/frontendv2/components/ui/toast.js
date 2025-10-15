@@ -13,14 +13,15 @@ function initToastContainer() {
 	toastContainer = document.createElement('div');
 	toastContainer.id = 'toast-container';
 	toastContainer.style.cssText = `
-		position: fixed;
-		top: 20px;
-		right: 20px;
-		z-index: 10000;
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-		max-width: 400px;
+		position: fixed !important;
+		top: 20px !important;
+		right: 20px !important;
+		z-index: 999999 !important;
+		display: flex !important;
+		flex-direction: column !important;
+		gap: 10px !important;
+		max-width: 400px !important;
+		pointer-events: none !important;
 	`;
 	document.body.appendChild(toastContainer);
 }
@@ -54,20 +55,23 @@ export function showToast(message, type = 'info', duration = 5000) {
 	};
 	
 	toast.style.cssText = `
-		background: ${colors[type] || colors.info};
-		color: white;
-		padding: 16px 20px;
-		border-radius: 8px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		font-size: 14px;
-		font-weight: 500;
-		animation: slideIn 0.3s ease-out;
-		cursor: pointer;
-		max-width: 100%;
-		word-wrap: break-word;
+		background: ${colors[type] || colors.info} !important;
+		color: white !important;
+		padding: 16px 20px !important;
+		border-radius: 8px !important;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+		display: flex !important;
+		align-items: center !important;
+		gap: 12px !important;
+		font-size: 14px !important;
+		font-weight: 500 !important;
+		animation: slideIn 0.3s ease-out !important;
+		cursor: pointer !important;
+		max-width: 100% !important;
+		word-wrap: break-word !important;
+		pointer-events: auto !important;
+		position: relative !important;
+		z-index: 1000000 !important;
 	`;
 	
 	toast.innerHTML = `
