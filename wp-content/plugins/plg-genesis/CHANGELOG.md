@@ -9,6 +9,145 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Agregado
 
+- **Nuevo Preset de Tema "emmausModal":**
+  - Basado en la paleta de colores del modal "Cursos del Día"
+  - Paleta de colores:
+    - Accent (azul oscuro): #0c497a
+    - Success (verde): #3fab49
+    - Warning (naranja): #f59e0b
+    - Danger (rojo): #e11d48
+    - Info (azul): #3b82f6
+    - Background: #f9fafb (gris muy claro)
+    - Card Background: #ffffff (blanco)
+    - Text: #1e293b (gris oscuro)
+    - Muted Text: #64748b (gris medio)
+    - Border: #e2e8f0 (gris claro)
+    - Sidebar Background: #0a1224 (azul muy oscuro)
+    - Sidebar Text: #f1f5f9 (gris muy claro)
+  - Distribución visual limpia y moderna
+  - Alto contraste y legibilidad
+  - Disponible en página de personalización de tema
+
+- **Eliminación de Colores Hardcodeados - Uso de Variables del Tema:**
+  - **Componentes actualizados para usar variables CSS del tema:**
+    - `components/ui/confirm.js`: Todos los colores ahora usan variables del tema
+      - Overlay, modal, botones, títulos, textos
+      - Gradientes dinámicos con color-mix() basados en --plg-danger, --plg-success, --plg-accent, --plg-warning
+      - Sombras con color-mix() para transparencias
+    - `pages/cursos/calendario.js`: 100% con variables del tema
+      - Calendar grids, días, modales, botones
+      - Gradientes en headers del modal
+      - Estados hover con color-mix()
+      - Notas de cursos usan --plg-success/--plg-danger
+    - No más #hex, rgba() o colores literales hardcodeados
+  - **Beneficios:**
+    - Cambio de tema instantáneo en toda la aplicación
+    - Consistencia visual garantizada
+    - Personalización por oficina funcional
+    - Fácil mantenimiento y extensión
+    - Dark mode compatible en el futuro
+  - **Técnica usada:** `color-mix(in srgb, var(--plg-color) X%, base)` para variaciones de color dinámicas
+
+- **Sistema de Confirmación y Toasts Unificado:**
+  - **Componente `confirm.js` reutilizable:** Reemplaza todos los `alert()` y `confirm()` nativos
+  - Modal de confirmación personalizable con opciones:
+    - title, message, confirmText, cancelText
+    - icon (personalizable por contexto)
+    - confirmClass: danger, success, primary, warning
+    - Gradientes y colores según el tipo de acción
+  - Diseño moderno con animaciones suaves (fadeIn, fadeOut, slideUp, bounce)
+  - Backdrop blur(4px) para mejor enfoque
+  - z-index: 10000 para estar sobre todo
+  - Cierre con ESC, clic fuera o botón cancelar
+  - Promise-based para async/await fácil
+  
+  - **Archivos actualizados:**
+    - `pages/users/list.js`: Eliminación de usuarios, validaciones, CRUD
+    - `pages/migration/roles.js`: Migraciones, hacerse admin
+    - `pages/cursos/detail.js`: Eliminación de cursos
+    - `pages/cursos/calendario.js`: Eliminación de cursos del calendario
+    - `components/layout/menu.js`: Errores al cambiar oficina
+  
+  - **Toasts consistentes:**
+    - ✓ Success (verde) para acciones exitosas
+    - ⚠️ Warning (naranja) para validaciones
+    - ❌ Error (rojo) para fallos
+    - ℹ️ Info (azul) para información general
+  
+  - **Resultado:**
+    - Experiencia de usuario profesional y consistente
+    - Sin alerts/confirms nativos feos
+    - Feedback visual claro y bonito
+    - Confirmaciones claras antes de acciones destructivas
+
+- **Página de Personalización de Tema Rediseñada:**
+  - Header centrado con emoji 🎨 y descripción
+  - Secciones organizadas por categoría (Colores Base, Sidebar/Menú, Estados y Feedback, Presets Rápidos)
+  - Tarjetas de color interactivas:
+    - Fondo con gradiente del color seleccionado (15%-25% opacidad)
+    - Overlay blanco semitransparente (85%) para legibilidad
+    - Borde dinámico con el color seleccionado (40% opacidad)
+    - Color picker circular de 48px + input de texto monospace
+    - Sincronización bidireccional automática picker↔input
+    - Actualización en tiempo real del fondo al cambiar color
+    - Hover elevado con transform translateY(-3px)
+  - Campos con etiquetas uppercase, descripciones y tooltips
+  - Grid responsive: auto-fill minmax(200px, 1fr)
+  - Botones de acción con emojis: 👁️ Vista Previa, 💾 Guardar, 🔄 Restablecer
+  - Presets con hover effect y feedback visual
+  - Toasts en lugar de mensajes <pre>
+  - Responsive: 1 columna en mobile, botones stacked
+
+- **Sistema de Toasts/Notificaciones Mejorado:**
+  - Diseño moderno y consistente con el tema
+  - Colores del tema: `--plg-success` (verde), `--plg-warning` (naranja), `--plg-danger` (rojo), `--plg-accent` (azul)
+  - Icono circular con fondo semitransparente (36px)
+  - Border-radius 12px, sombras elevadas
+  - Backdrop-filter blur(10px) para efecto glassmorphism
+  - Animaciones suaves con cubic-bezier
+  - Botón cerrar con hover effect (scale 1.1)
+  - Responsive: full width en mobile con padding 10px
+  - Auto-cierre configurable por tipo
+  - Tipos: success, error, warning, info, forbidden
+
+- **Sistema Responsive Dashboard v2:**
+  - Archivo `frontendv2/styles/responsive.css` con breakpoints optimizados:
+    - Mobile + Tablet: < 1024px (menú hamburguesa + tarjetas)
+    - Desktop: >= 1024px (sidebar fijo + tabla)
+  - Menú hamburguesa funcional con overlay y animaciones (z-index: 1001)
+  - Sistema de tarjetas reutilizable para listas en mobile/tablet
+  - Clases de utilidad responsive (`.show-mobile`, `.hide-mobile`, `.hide-desktop`)
+  - Media queries para todos los componentes principales
+  - Botón hamburguesa flotante con icono SVG
+  - Toggle automático de menú al hacer clic en links (< 1024px)
+  - Content con padding-top (70px) para evitar solapamiento con botón
+  - Card con overflow:hidden para contener contenido
+
+- **Lista de Estudiantes Responsive (patrón v1 con tema):**
+  - Vista desktop (>= 1024px): tabla normal
+  - Vista mobile/tablet (< 1024px): tabla transformada a tarjetas con CSS
+  - Usa `data-label` en `<td>` para mostrar labels con `::before`
+  - Código: gradiente con `var(--plg-accent)`, texto blanco
+  - Nombre: fondo `color-mix` sutil con accent
+  - Iconos: 🆔 Documento, 📱 Celular, ✉️ Email
+  - Colores del tema: `--plg-border`, `--plg-cardBg`, `--plg-text`, `--plg-shadow`
+  - Sin colores hardcoded, todo usa variables CSS del tema
+  - Hover con elevación y transform
+
+- **Calendario Responsive:**
+  - Modal fullscreen en mobile
+  - Grid de calendario adaptable (7 columnas compactas en mobile)
+  - Tarjetas de cursos con layout vertical en mobile
+  - Buscador responsive
+  - Botones táctiles optimizados (min 44px)
+
+- **Informe Anual Responsive:**
+  - KPIs en 1 columna (mobile) y 2 columnas (tablet)
+  - Tabs apilados verticalmente en mobile
+  - Gráficas con altura adaptable (300px mobile, 350px tablet, 400px desktop)
+  - Tabla con scroll horizontal en mobile
+  - Controles de año en columna (mobile)
+
 - **Informe Anual:**
   - Endpoint REST `GET /plg-genesis/v1/estadisticas/informe-anual?year=YYYY`
   - Página `frontendv2/pages/informes/informe-anual.js` con sistema de pestañas
@@ -27,14 +166,22 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Modificado
 
+- **Layout Base:**
+  - `dashboard.php`: agregado menú hamburguesa, overlay y script de toggle
+  - Sidebar con transición y comportamiento overlay en mobile
+  - Padding adaptable del content (16px mobile, 20px tablet, 24px desktop)
+
+- `components.css`: agregados estilos responsive para grids, formularios y tablas
 - Extendido `EstadisticasRepository` con método `getInformeAnual()` usando queries parametrizadas (pg_query_params)
 - Extendido `EstadisticasService` con método `informeAnual()` con validación de año
 - Extendido `EstadisticasController` con ruta `/estadisticas/informe-anual`
 
 ### Notas
 
-- Dashboard v1 (`frontend/informes/oficina/ADC.php`) se mantiene sin cambios para compatibilidad
-- Dashboard v2 implementa la nueva arquitectura API-first con la página `frontendv2/pages/informes/informe-anual.js`
+- Dashboard v1 se mantiene sin cambios para compatibilidad
+- Dashboard v2 ahora es 100% responsive en mobile, tablet y desktop
+- Inputs con `font-size: 16px` en mobile para prevenir zoom en iOS
+- Todos los botones tienen altura mínima de 44px para mejor accesibilidad táctil
 
 ## [1.0.0] - 2024-04-05
 

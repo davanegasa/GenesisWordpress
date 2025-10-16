@@ -20,6 +20,11 @@ export function applyTheme(vars) {
 
 // Paletas predefinidas (presets completos)
 export const themePresets = {
+    emmausModal: {
+        accent: '#0c497a', success: '#3fab49', warning: '#f59e0b', danger: '#e11d48', info: '#3b82f6',
+        bg: '#f9fafb', cardBg: '#ffffff', text: '#1e293b', mutedText: '#64748b', border: '#e2e8f0',
+        sidebarBg: '#0a1224', sidebarText: '#f1f5f9'
+    },
     emmausBlue: {
         accent: '#0c497a', success: '#3fab49', warning: '#fff100', danger: '#e11d48', info: '#3b82f6',
         bg: '#f5f7fb', cardBg: '#ffffff', text: '#0f172a', mutedText: '#6b7280', border: '#d7dfeb'

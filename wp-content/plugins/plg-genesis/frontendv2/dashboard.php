@@ -11,22 +11,26 @@ if (!defined('ABSPATH')) { exit; }
 	<link rel="stylesheet" href="<?php echo plugin_dir_url(__FILE__); ?>styles/tokens.css">
 	<link rel="stylesheet" href="<?php echo plugin_dir_url(__FILE__); ?>styles/base.css">
 	<link rel="stylesheet" href="<?php echo plugin_dir_url(__FILE__); ?>styles/components.css">
+	<link rel="stylesheet" href="<?php echo plugin_dir_url(__FILE__); ?>styles/responsive.css">
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 	<link rel="icon" href="<?php echo plugin_dir_url(__FILE__); ?>assets/favicon.ico" sizes="any">
 	<link rel="icon" type="image/png" href="<?php echo plugin_dir_url(__FILE__); ?>assets/icon-32.png" sizes="32x32">
 	<link rel="apple-touch-icon" href="<?php echo plugin_dir_url(__FILE__); ?>assets/apple-touch-icon.png">
 	<style>
-		body { margin:0; font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--plg-bg, #f7f7fb); color: var(--plg-text, #111827); }
-		.layout { display:flex; min-height:100vh; }
-		.sidebar { position:sticky; top:0; align-self:flex-start; height:100vh; overflow:auto; width:260px; background: var(--plg-sidebarBg, #111827); color: var(--plg-sidebarText, #e5e7eb); padding:16px; }
+		body { margin:0; font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--plg-bg, #f7f7fb); color: var(--plg-text, #111827); width: 100%; overflow-x: hidden; }
+		.layout { display:flex; min-height:100vh; position: relative; width: 100%; }
+		.sidebar { position:sticky; top:0; align-self:flex-start; height:100vh; overflow:auto; width:260px; background: var(--plg-sidebarBg, #111827); color: var(--plg-sidebarText, #e5e7eb); padding:16px; transition: transform 0.3s ease; z-index: 1000; }
         .sidebar a { color: var(--plg-sidebarText, #e5e7eb); text-decoration:none; display:block; padding:10px 12px; border-radius:6px; }
         .sidebar a.active, .sidebar a:hover { background: var(--plg-accent, #1f2937); color:#fff; }
-		.content { flex:1; padding:24px; }
+		.content { flex:1; padding:24px; width: 100%; box-sizing: border-box; }
 		.kpi { background: var(--plg-cardBg, #fff); border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
 		.kpi-grid { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:16px; }
-		.card { background: var(--plg-cardBg, #fff); border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+		.card { background: var(--plg-cardBg, #fff); border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05); box-sizing: border-box; }
 
-		/* Responsive: aplazado */
+		/* Menú hamburguesa */
+		.menu-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 1001; background: var(--plg-accent); color: white; border: none; border-radius: 8px; width: 44px; height: 44px; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(12, 73, 122, 0.3); }
+		.menu-toggle:hover { background: #0a3a5f; }
+		.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
 
         /* Ocultar cabeceras/títulos del tema WP solo en esta página */
 		.wp-block-site-title, .wp-block-post-title, .site-header, .wp-block-template-part, .entry-title, .page-title {
@@ -36,6 +40,14 @@ if (!defined('ABSPATH')) { exit; }
 	</style>
 </head>
 <body>
+	<button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+		<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<line x1="3" y1="12" x2="21" y2="12"></line>
+			<line x1="3" y1="6" x2="21" y2="6"></line>
+			<line x1="3" y1="18" x2="21" y2="18"></line>
+		</svg>
+	</button>
+	<div class="sidebar-overlay" id="sidebar-overlay"></div>
 	<div class="layout">
 		<nav class="sidebar" id="sidebar">
 			<div style="font-weight:700;font-size:20px;margin-bottom:12px;">Genesis</div>
@@ -93,7 +105,30 @@ if (!defined('ABSPATH')) { exit; }
 		?>;
 	</script>
 	<script type="module" src="<?php echo plugin_dir_url(__FILE__); ?>core/bootstrap.js"></script>
-	<!-- Script inline removido; ahora todo el arranque lo hace core/bootstrap.js -->
+	<script>
+		// Menú hamburguesa toggle
+		document.addEventListener('DOMContentLoaded', () => {
+			const menuToggle = document.getElementById('menu-toggle');
+			const sidebar = document.getElementById('sidebar');
+			const overlay = document.getElementById('sidebar-overlay');
+
+			function toggleMenu() {
+				sidebar.classList.toggle('open');
+				overlay.classList.toggle('active');
+				document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+			}
+
+			menuToggle?.addEventListener('click', toggleMenu);
+			overlay?.addEventListener('click', toggleMenu);
+
+			// Cerrar menú al hacer clic en un link (solo en mobile)
+		sidebar?.addEventListener('click', (e) => {
+			if (e.target.tagName === 'A' && window.innerWidth < 1024) {
+				toggleMenu();
+			}
+		});
+		});
+	</script>
 
 	<?php wp_footer(); ?>
 </body>

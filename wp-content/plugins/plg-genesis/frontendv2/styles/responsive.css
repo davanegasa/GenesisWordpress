@@ -1,0 +1,756 @@
+/**
+ * Sistema Responsive Dashboard v2
+ * Breakpoints: 
+ * - Mobile + Tablet: < 1024px (hamburguesa + tarjetas)
+ * - Desktop: >= 1024px (sidebar fijo + tabla)
+ */
+
+/* ===== MOBILE Y TABLET (< 1024px) ===== */
+@media (max-width: 1023px) {
+	/* Layout base */
+	body {
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		overflow-x: hidden;
+	}
+
+	.layout {
+		width: 100%;
+		margin: 0;
+		padding: 0;
+	}
+
+	.content {
+		padding: 70px 12px 12px 12px !important; /* Top padding para el botón hamburguesa */
+		width: 100%;
+		max-width: 100%;
+		margin: 0;
+		box-sizing: border-box;
+	}
+
+	.card {
+		width: 100% !important;
+		max-width: 100% !important;
+		margin: 0 0 16px 0;
+		box-sizing: border-box;
+		overflow: hidden;
+	}
+
+	/* Contenedor principal */
+	#view,
+	#view > * {
+		width: 100% !important;
+		max-width: 100% !important;
+		box-sizing: border-box;
+	}
+	
+	/* Contenedor de tabla sin overflow (las tarjetas se muestran vertical) */
+	#s-table {
+		width: 100% !important;
+		max-width: 100% !important;
+		overflow-x: visible !important;
+		box-sizing: border-box;
+	}
+
+	/* Menú hamburguesa visible */
+	.menu-toggle {
+		display: flex !important;
+		z-index: 1001 !important;
+	}
+
+	/* Sidebar como overlay */
+	.sidebar {
+		position: fixed !important;
+		top: 0;
+		left: 0;
+		height: 100vh;
+		width: 280px;
+		transform: translateX(-100%);
+		box-shadow: 0 0 0 rgba(0,0,0,0);
+		z-index: 1000 !important;
+	}
+
+	.sidebar.open {
+		transform: translateX(0);
+		box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+	}
+	
+	.sidebar-overlay {
+		z-index: 999 !important;
+	}
+
+	.sidebar-overlay.active {
+		display: block !important;
+	}
+
+	/* Transformar tabla a tarjetas en mobile/tablet */
+	.table {
+		display: block !important;
+		width: 100% !important;
+		max-width: 100% !important;
+		min-width: 0 !important; /* Sobrescribir min-width:600px de components.css */
+		table-layout: auto !important;
+		border: none !important;
+		border-radius: 0 !important;
+		overflow: visible !important;
+	}
+
+	.table thead {
+		display: none !important; /* Ocultar encabezados en mobile */
+	}
+
+	.table tbody,
+	.table tr {
+		display: block !important;
+		width: 100% !important;
+		max-width: 100% !important;
+	}
+
+	.table tr {
+		margin-bottom: 1.25rem;
+		border: 1px solid var(--plg-border);
+		border-radius: 12px;
+		background: var(--plg-cardBg);
+		padding: 0;
+		box-shadow: var(--plg-shadow);
+		overflow: hidden;
+		transition: all 0.2s ease;
+		width: 100%;
+	}
+
+	.table tr:hover {
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+		transform: translateY(-2px);
+	}
+
+	.table td {
+		display: flex !important;
+		padding: 1rem 1.25rem !important;
+		text-align: left;
+		border: none !important;
+		width: 100% !important;
+		max-width: 100% !important;
+		box-sizing: border-box;
+		font-size: 1rem;
+		line-height: 1.5;
+		border-bottom: 1px solid var(--plg-border) !important;
+		gap: 0.5rem;
+		align-items: center;
+		color: var(--plg-text);
+	}
+
+	.table td:last-child {
+		border-bottom: none !important;
+		padding-bottom: 1.25rem !important;
+	}
+
+	/* Primer campo (Código) con fondo especial */
+	.table td:first-child {
+		background: linear-gradient(135deg, var(--plg-accent) 0%, color-mix(in srgb, var(--plg-accent) 90%, #ffffff) 100%);
+		color: white !important;
+		font-size: 1.5rem;
+		font-weight: 700;
+		padding: 1.5rem 1.25rem !important;
+		justify-content: flex-start;
+		border-bottom: 2px solid var(--plg-accent) !important;
+	}
+
+	.table td:first-child::before {
+		display: none; /* Ocultar label en el código */
+	}
+
+	/* Segundo campo (Nombre) destacado */
+	.table td:nth-child(2) {
+		background: color-mix(in srgb, var(--plg-accent) 3%, var(--plg-cardBg));
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: var(--plg-text);
+		padding: 1.25rem !important;
+		justify-content: flex-start;
+	}
+
+	.table td:nth-child(2)::before {
+		display: none; /* Ocultar label en el nombre */
+	}
+
+	.table td::before {
+		content: attr(data-label);
+		font-weight: 600;
+		min-width: 30px;
+		width: 30px;
+		flex-shrink: 0;
+		font-size: 1.2rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		opacity: 0.8;
+	}
+
+	/* Iconos mejorados para cada campo */
+	.table td:nth-child(3)::before {
+		content: "🆔"; /* Documento de Identidad */
+	}
+
+	.table td:nth-child(4)::before {
+		content: "📱"; /* Celular */
+	}
+
+	.table td:nth-child(5)::before {
+		content: "✉️"; /* Email */
+	}
+
+	/* El valor del campo ocupa el resto del espacio disponible */
+	.table tbody tr td {
+		justify-content: space-between;
+	}
+
+	/* Asegurar que el texto del valor use todo el espacio */
+	.table td > * {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.table td {
+		flex-wrap: nowrap;
+	}
+
+	/* Ocultar elementos con clase hide-mobile */
+	.hide-mobile {
+		display: none !important;
+	}
+
+	/* Mostrar elementos con clase show-mobile */
+	.show-mobile {
+		display: block !important;
+	}
+
+	.data-card {
+		background: #ffffff;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		padding: 20px;
+		box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		box-sizing: border-box;
+		margin-bottom: 12px;
+	}
+
+	.data-card-row {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		padding-bottom: 8px;
+		border-bottom: 1px solid var(--plg-border);
+	}
+
+	.data-card-row:last-child {
+		border-bottom: none;
+		padding-bottom: 0;
+	}
+
+	.data-card-label {
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--plg-mutedText);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.data-card-value {
+		font-size: 15px;
+		color: var(--plg-text);
+		font-weight: 500;
+	}
+
+	.data-card-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		margin-bottom: 16px;
+		padding-bottom: 12px;
+		border-bottom: 2px solid #e5e7eb;
+	}
+
+	.data-card-title {
+		font-size: 18px;
+		font-weight: 700;
+		color: #1e293b;
+		flex: 1;
+	}
+
+	.data-card-body {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 12px;
+		margin-bottom: 16px;
+	}
+
+	.data-card-field {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px;
+		background: #f8fafc;
+		border-radius: 6px;
+		gap: 8px;
+	}
+
+	.data-card-field-label {
+		font-size: 13px;
+		font-weight: 600;
+		color: #475569;
+		flex-shrink: 0;
+		min-width: 90px;
+	}
+
+	.data-card-field-value {
+		font-size: 15px;
+		color: #1e293b;
+		font-weight: 500;
+		text-align: right;
+		word-break: break-word;
+	}
+
+	.data-card-actions {
+		display: flex;
+		gap: 8px;
+		margin-top: 8px;
+		flex-wrap: wrap;
+		width: 100%;
+	}
+
+	.data-card-actions .btn,
+	.data-card-actions button {
+		flex: 1;
+		min-width: 80px;
+		padding: 10px 12px;
+		font-size: 13px;
+		box-sizing: border-box;
+	}
+
+	/* KPIs en 2 columnas */
+	.kpi-grid {
+		grid-template-columns: repeat(2, 1fr) !important;
+		gap: 12px !important;
+	}
+
+	.kpi-card {
+		padding: 14px !important;
+	}
+
+	.kpi-value {
+		font-size: 28px !important;
+	}
+
+	.kpi-label {
+		font-size: 12px !important;
+	}
+
+	/* Grids responsive */
+	.form-grid,
+	.detail-grid {
+		grid-template-columns: 1fr !important;
+		gap: 12px !important;
+	}
+
+	.program-grid,
+	.course-grid,
+	.congreso-metrics {
+		grid-template-columns: 1fr !important;
+		gap: 10px !important;
+	}
+
+	/* Hero más compacto y ancho completo */
+	.hero {
+		padding: 16px !important;
+		margin: 0 !important;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.hero h1 {
+		font-size: 24px !important;
+	}
+
+	.hero p {
+		font-size: 14px !important;
+	}
+
+	/* Botones más grandes para touch */
+	.btn {
+		min-height: 44px;
+		padding: 12px 16px !important;
+	}
+
+	.icon-btn {
+		width: 40px !important;
+		height: 40px !important;
+	}
+
+	/* Modales fullscreen en mobile */
+	.modal {
+		width: 100% !important;
+		height: 100vh !important;
+		max-height: 100vh !important;
+		border-radius: 0 !important;
+	}
+
+	.modal-body {
+		flex: 1;
+		overflow-y: auto;
+	}
+	
+	/* Grid de detalle en 1 columna */
+	.estudiante-detail-grid {
+		grid-template-columns: 1fr !important;
+	}
+
+	/* Tabs apilados */
+	.tabs {
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.tab {
+		width: 100%;
+		text-align: center;
+	}
+
+	/* Calendario grid */
+	#calendar-days {
+		grid-template-columns: repeat(7, minmax(45px, 1fr)) !important;
+		gap: 4px !important;
+	}
+
+	.calendar-day {
+		min-height: 70px !important;
+		padding: 4px !important;
+		font-size: 11px !important;
+	}
+
+	.day-number {
+		font-size: 13px !important;
+	}
+
+	.course-count {
+		font-size: 10px !important;
+		padding: 2px 4px !important;
+	}
+
+	.calendar-header {
+		flex-direction: column !important;
+		gap: 12px;
+	}
+
+	.calendar-nav {
+		width: 100%;
+		justify-content: space-between;
+	}
+
+	.nav-button {
+		flex: 1;
+	}
+
+	.calendar-title {
+		font-size: 22px !important;
+		text-align: center;
+	}
+
+	/* Inputs y selectores más accesibles */
+	input, select, textarea {
+		font-size: 16px !important; /* Prevenir zoom en iOS */
+		min-height: 44px;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.search-input, .input, .form-input {
+		font-size: 15px !important;
+		width: 100% !important;
+		box-sizing: border-box;
+	}
+
+	/* Asegurar que elementos internos ocupen 100% */
+	#view, #view > * {
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	/* Congreso cards */
+	.congreso-actions {
+		grid-template-columns: 1fr !important;
+	}
+
+	/* Contact cards */
+	.contact-card {
+		flex-direction: column;
+		align-items: flex-start !important;
+	}
+
+	.contact-avatar {
+		width: 56px !important;
+		height: 56px !important;
+		font-size: 20px !important;
+	}
+
+	/* Paginación responsive */
+	#s-pag {
+		flex-direction: column !important;
+		gap: 12px !important;
+		align-items: stretch !important;
+	}
+
+	#s-pag .hint-text {
+		text-align: center;
+	}
+
+	#s-pag .u-flex {
+		width: 100%;
+		gap: 8px !important;
+	}
+
+	#s-pag button {
+		flex: 1;
+	}
+
+	/* Ocultar elementos no críticos en mobile */
+	.hide-mobile {
+		display: none !important;
+	}
+}
+
+/* ===== AJUSTES ESPECÍFICOS MOBILE (< 768px) ===== */
+@media (max-width: 767px) {
+	.content {
+		padding: 70px 12px 12px 12px !important;
+	}
+	
+	/* KPIs en 2 columnas en mobile pequeño */
+	.kpi-grid {
+		grid-template-columns: repeat(2, 1fr) !important;
+	}
+}
+
+/* ===== AJUSTES ESPECÍFICOS TABLET (768px - 1023px) ===== */
+@media (min-width: 768px) and (max-width: 1023px) {
+	.content {
+		padding: 70px 20px 20px 20px !important;
+	}
+
+	/* KPIs en 2 columnas en tablet */
+	.kpi-grid {
+		grid-template-columns: repeat(2, 1fr) !important;
+	}
+
+	/* Grids en 2 columnas */
+	.program-grid,
+	.course-grid {
+		grid-template-columns: repeat(2, 1fr) !important;
+	}
+
+	/* Calendario ajustado */
+	#calendar-days {
+		grid-template-columns: repeat(7, minmax(60px, 1fr)) !important;
+		gap: 6px !important;
+	}
+
+	.calendar-day {
+		min-height: 85px !important;
+		padding: 8px !important;
+	}
+	
+}
+
+/* ===== UTILIDADES RESPONSIVE ===== */
+
+/* Sistema de tarjetas reutilizable */
+.responsive-card {
+	background: var(--plg-cardBg);
+	border: 1px solid var(--plg-border);
+	border-radius: 12px;
+	padding: 16px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+	transition: all 0.2s;
+}
+
+.responsive-card:hover {
+	box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+	transform: translateY(-2px);
+}
+
+.responsive-card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 12px;
+	padding-bottom: 12px;
+	border-bottom: 2px solid var(--plg-border);
+}
+
+.responsive-card-title {
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--plg-text);
+}
+
+.responsive-card-body {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.responsive-card-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.responsive-card-field-label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--plg-mutedText);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.responsive-card-field-value {
+	font-size: 15px;
+	color: var(--plg-text);
+	font-weight: 500;
+}
+
+.responsive-card-actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 12px;
+	flex-wrap: wrap;
+}
+
+/* Clases de ayuda responsive */
+.show-mobile {
+	display: none;
+}
+
+@media (max-width: 767px) {
+	.show-mobile {
+		display: block;
+	}
+	
+	.show-mobile-flex {
+		display: flex !important;
+	}
+	
+	.hide-mobile {
+		display: none !important;
+	}
+}
+
+/* ===== DESKTOP (>= 1024px) ===== */
+@media (min-width: 1024px) {
+	.hide-desktop {
+		display: none !important;
+	}
+	
+	/* Menú hamburguesa oculto en desktop */
+	.menu-toggle {
+		display: none !important;
+	}
+	
+	/* Sidebar visible normal en desktop */
+	.sidebar {
+		position: sticky !important;
+		transform: translateX(0) !important;
+	}
+	
+	/* Content sin padding extra */
+	.content {
+		padding: 24px !important;
+	}
+	
+	/* En desktop: restaurar tabla normal */
+	.table {
+		display: table !important;
+		width: 100% !important;
+	}
+
+	.table thead {
+		display: table-header-group !important;
+	}
+
+	.table tbody {
+		display: table-row-group !important;
+	}
+
+	.table tr {
+		display: table-row !important;
+		margin-bottom: 0 !important;
+		border: none !important;
+		border-radius: 0 !important;
+		padding: 0 !important;
+		box-shadow: none !important;
+	}
+
+	.table td {
+		display: table-cell !important;
+		padding: 0.75rem !important;
+		border-bottom: 1px solid var(--plg-border, #e2e8f0) !important;
+	}
+
+	.table td::before {
+		content: none !important;
+	}
+
+	.show-mobile {
+		display: none !important;
+	}
+	
+	/* Asegurar que elementos ocupen 100% */
+	.card, #view > * {
+		max-width: 100% !important;
+		width: 100% !important;
+		box-sizing: border-box;
+		overflow: hidden;
+	}
+	
+	#s-table {
+		width: 100% !important;
+		max-width: 100% !important;
+		overflow-x: auto;
+	}
+	
+	/* KPIs en 4 columnas en desktop */
+	.kpi-grid {
+		grid-template-columns: repeat(4, 1fr) !important;
+	}
+}
+
+/* Scroll horizontal para tablas en mobile (alternativa) */
+.table-scroll {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767px) {
+	.table-scroll {
+		margin: 0 -16px;
+		padding: 0 16px;
+	}
+
+	.table-scroll .table {
+		min-width: 600px;
+	}
+}
+
+/* Espaciado responsive */
+@media (max-width: 767px) {
+	.u-mt-16 { margin-top: 12px !important; }
+	.u-mt-8 { margin-top: 6px !important; }
+	.u-mb-8 { margin-bottom: 6px !important; }
+	.u-mb-12 { margin-bottom: 10px !important; }
+	.section { margin-top: 16px !important; }
+}
+

@@ -4,13 +4,13 @@ import { createTable, createModal } from '../../components/ui/index.js';
 export function mount(container) {
     container.innerHTML = `
         <div class="card">
-            <div class="u-flex u-gap" style="justify-content:space-between;align-items:center;">
+            <div class="u-flex u-gap" style="justify-content:space-between;align-items:center;flex-wrap:wrap;">
                 <div class="card-title">Estudiantes</div>
-                <a class="btn" href="#/estudiantes/nuevo">Nuevo estudiante</a>
+                <a class="btn" href="#/estudiantes/nuevo">+ Nuevo estudiante</a>
             </div>
-            <div class="u-flex u-gap">
-                <input id="s-q" class="input" type="text" placeholder="Buscar por código, nombre, documento, celular o email" style="flex:1;">
-                <button id="s-btn" class="btn btn-primary">Buscar</button>
+            <div class="u-flex u-gap" style="flex-wrap: wrap;">
+                <input id="s-q" class="input" type="text" placeholder="Buscar por código, nombre, documento, celular o email" style="flex:1; min-width: 200px;">
+                <button id="s-btn" class="btn btn-primary">🔍 Buscar</button>
             </div>
             <div id="s-table" class="u-mt-8"></div>
             <div id="s-pag" class="u-flex u-gap u-mt-8" style="justify-content:space-between;align-items:center"></div>
@@ -41,7 +41,7 @@ export function mount(container) {
             const obs = p.ultima_observacion||null;
 			const contacto = st.contacto||{};
 			const body = `
-				<div class="u-grid u-gap" style="grid-template-columns: 1fr 1fr;">
+				<div class="u-grid u-gap estudiante-detail-grid">
 					<div class="card">
 						<div class="card-title is-info">Información Personal</div>
 						<div class="detail-grid">
@@ -98,6 +98,9 @@ export function mount(container) {
     }
 
     function renderTable(){
+        $table.innerHTML='';
+        
+        // Crear tabla con data-labels para responsive
         const rows = (items||[]).map(st=>[
             st.idEstudiante||'',
             st.nombreCompleto||'',
@@ -105,10 +108,23 @@ export function mount(container) {
             st.celular||'',
             st.email||''
         ]);
-        $table.innerHTML='';
         const tbl = createTable({ columns:['Código','Nombre','Documento','Celular','Email'], rows });
+        
+        // Agregar data-labels a cada td para mobile
+        const tbody = tbl.querySelector('tbody');
+        if (tbody) {
+            const labels = ['Código', 'Nombre', 'Documento', 'Celular', 'Email'];
+            Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+                Array.from(tr.querySelectorAll('td')).forEach((td, idx) => {
+                    td.setAttribute('data-label', labels[idx]);
+                });
+            });
+        }
+        
         $table.appendChild(tbl);
-        Array.from(tbl.querySelectorAll('tbody tr')).forEach((tr, idx)=>{
+        
+        // Event listeners para la tabla
+        Array.from(tbody.querySelectorAll('tr')).forEach((tr, idx)=>{
             const id = items[idx] && items[idx].idEstudiante;
             tr.style.cursor='pointer';
             tr.addEventListener('click', ()=>{ if (id) openDetailModal(id); });

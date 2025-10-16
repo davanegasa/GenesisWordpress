@@ -38,46 +38,90 @@ export function showToast(message, type = 'info', duration = 5000) {
 	const toast = document.createElement('div');
 	toast.className = `toast toast-${type}`;
 	
-	const colors = {
-		success: '#10b981',
-		error: '#ef4444',
-		warning: '#f59e0b',
-		info: '#3b82f6',
-		forbidden: '#f97316', // Naranja para 403
+	// Usar variables CSS del tema
+	const styles = {
+		success: {
+			bg: 'var(--plg-success, #3fab49)',
+			icon: '✓',
+			iconBg: 'rgba(255, 255, 255, 0.2)'
+		},
+		error: {
+			bg: 'var(--plg-danger, #e11d48)',
+			icon: '✕',
+			iconBg: 'rgba(255, 255, 255, 0.2)'
+		},
+		warning: {
+			bg: 'var(--plg-warning, #f59e0b)',
+			icon: '⚠',
+			iconBg: 'rgba(0, 0, 0, 0.1)'
+		},
+		info: {
+			bg: 'var(--plg-accent, #0c497a)',
+			icon: 'ℹ',
+			iconBg: 'rgba(255, 255, 255, 0.2)'
+		},
+		forbidden: {
+			bg: '#f97316',
+			icon: '🚫',
+			iconBg: 'rgba(255, 255, 255, 0.2)'
+		},
 	};
 	
-	const icons = {
-		success: '✓',
-		error: '✕',
-		warning: '⚠',
-		info: 'ℹ',
-		forbidden: '🚫',
-	};
+	const style = styles[type] || styles.info;
 	
 	toast.style.cssText = `
-		background: ${colors[type] || colors.info} !important;
+		background: ${style.bg} !important;
 		color: white !important;
-		padding: 16px 20px !important;
-		border-radius: 8px !important;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+		padding: 16px 18px !important;
+		border-radius: 12px !important;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1) !important;
 		display: flex !important;
 		align-items: center !important;
-		gap: 12px !important;
-		font-size: 14px !important;
+		gap: 14px !important;
+		font-size: 15px !important;
 		font-weight: 500 !important;
-		animation: slideIn 0.3s ease-out !important;
+		line-height: 1.4 !important;
+		animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
 		cursor: pointer !important;
 		max-width: 100% !important;
 		word-wrap: break-word !important;
 		pointer-events: auto !important;
 		position: relative !important;
 		z-index: 1000000 !important;
+		backdrop-filter: blur(10px) !important;
+		border: 1px solid rgba(255, 255, 255, 0.1) !important;
 	`;
 	
 	toast.innerHTML = `
-		<span style="font-size: 18px; flex-shrink: 0;">${icons[type] || icons.info}</span>
-		<span style="flex: 1;">${message}</span>
-		<button style="background: transparent; border: none; color: white; cursor: pointer; font-size: 18px; padding: 0; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.1)'" onmouseout="this.style.background='transparent'">×</button>
+		<div style="
+			width: 36px;
+			height: 36px;
+			background: ${style.iconBg};
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 20px;
+			font-weight: 700;
+			flex-shrink: 0;
+		">${style.icon}</div>
+		<div style="flex: 1; line-height: 1.5;">${message}</div>
+		<button style="
+			background: rgba(255, 255, 255, 0.15);
+			border: none;
+			color: white;
+			cursor: pointer;
+			font-size: 20px;
+			padding: 0;
+			width: 28px;
+			height: 28px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 6px;
+			transition: all 0.2s ease;
+			flex-shrink: 0;
+		" onmouseover="this.style.background='rgba(255,255,255,0.25)'; this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='scale(1)'">×</button>
 	`;
 	
 	// Cerrar al hacer click en la X o en el toast
@@ -119,30 +163,40 @@ export const toast = {
 	forbidden: (message, duration = 7000) => showToast(message, 'forbidden', duration),
 };
 
-// Agregar animaciones CSS
+// Agregar animaciones CSS mejoradas
 if (!document.getElementById('toast-animations')) {
 	const style = document.createElement('style');
 	style.id = 'toast-animations';
 	style.textContent = `
 		@keyframes slideIn {
 			from {
-				transform: translateX(400px);
+				transform: translateX(calc(100% + 40px)) scale(0.9);
 				opacity: 0;
 			}
 			to {
-				transform: translateX(0);
+				transform: translateX(0) scale(1);
 				opacity: 1;
 			}
 		}
 		
 		@keyframes slideOut {
 			from {
-				transform: translateX(0);
+				transform: translateX(0) scale(1);
 				opacity: 1;
 			}
 			to {
-				transform: translateX(400px);
+				transform: translateX(calc(100% + 40px)) scale(0.9);
 				opacity: 0;
+			}
+		}
+		
+		/* Responsive: posicionar toasts mejor en mobile */
+		@media (max-width: 768px) {
+			#toast-container {
+				top: 10px !important;
+				right: 10px !important;
+				left: 10px !important;
+				max-width: none !important;
 			}
 		}
 	`;

@@ -4,6 +4,8 @@
  */
 import { api as apiClient } from '../../api/client.js';
 import { createTable, createButton } from '../../components/ui/index.js';
+import { showToast } from '../../components/ui/toast.js';
+import { showConfirm } from '../../components/ui/confirm.js';
 
 export function mount(root) {
 	return render(root);
@@ -234,11 +236,11 @@ function showMigrateModal(user) {
 				throw new Error(response.error?.message || 'Error al migrar usuario');
 			}
 
-			alert(`✓ Usuario ${user.login} migrado exitosamente`);
+			showToast(`✓ Usuario ${user.login} migrado exitosamente`, 'success');
 			modal.remove();
 			loadUsers();
 		} catch (error) {
-			alert('Error: ' + error.message);
+			showToast('Error al migrar: ' + error.message, 'error');
 		}
 	});
 
@@ -262,9 +264,16 @@ function suggestNewRole(currentRole) {
 }
 
 async function makeMeAdmin() {
-	if (!confirm('¿Quieres convertirte en Super Admin? Tendrás acceso total a todas las oficinas.')) {
-		return;
-	}
+	const confirmed = await showConfirm({
+		title: '¿Convertirte en Super Admin?',
+		message: 'Tendrás acceso total a todas las oficinas y permisos completos del sistema.',
+		confirmText: 'Sí, hacerme Super Admin',
+		cancelText: 'Cancelar',
+		icon: '👑',
+		confirmClass: 'primary'
+	});
+
+	if (!confirmed) return;
 
 	try {
 		const response = await apiClient.post('/migration/make-me-admin', {});
@@ -273,23 +282,24 @@ async function makeMeAdmin() {
 			throw new Error(response.error?.message || 'Error al asignar rol');
 		}
 
-		alert('✓ ¡Ahora eres Super Admin! Recarga la página para ver los cambios.');
+		showToast('✓ ¡Ahora eres Super Admin! Recargando página...', 'success', 3000);
 		setTimeout(() => window.location.reload(), 1500);
 	} catch (error) {
-		alert('Error: ' + error.message);
+		showToast('Error al asignar rol: ' + error.message, 'error');
 	}
 }
 
 async function autoMigrate() {
-	if (!confirm('¿Migrar TODOS los usuarios automáticamente?\n\n' +
-		'Mapeo:\n' +
-		'• administrator → Super Admin\n' +
-		'• editor → Office Manager\n' +
-		'• author/contributor → Office Staff\n' +
-		'• subscriber → Office Viewer\n\n' +
-		'Los usuarios sin oficina se asignarán a BOG por defecto.')) {
-		return;
-	}
+	const confirmed = await showConfirm({
+		title: '¿Migrar TODOS los usuarios?',
+		message: `Mapeo automático:\n• administrator → Super Admin\n• editor → Office Manager\n• author/contributor → Office Staff\n• subscriber → Office Viewer\n\nLos usuarios sin oficina se asignarán a BOG por defecto.`,
+		confirmText: 'Sí, Migrar Todos',
+		cancelText: 'Cancelar',
+		icon: '🚀',
+		confirmClass: 'primary'
+	});
+
+	if (!confirmed) return;
 
 	try {
 		const response = await apiClient.post('/migration/auto', {});
@@ -300,14 +310,11 @@ async function autoMigrate() {
 
 		const { migrated, skipped, total } = response.data;
 		
-		alert(`✓ Migración completada!\n\n` +
-			`Migrados: ${total} usuarios\n` +
-			`Omitidos: ${skipped.length} usuarios\n\n` +
-			`Recarga la página para ver los cambios.`);
+		showToast(`✓ Migración completada!\n\nMigrados: ${total} usuarios\nOmitidos: ${skipped.length} usuarios`, 'success', 5000);
 		
 		loadUsers();
 	} catch (error) {
-		alert('Error: ' + error.message);
+		showToast('Error en migración: ' + error.message, 'error');
 	}
 }
 

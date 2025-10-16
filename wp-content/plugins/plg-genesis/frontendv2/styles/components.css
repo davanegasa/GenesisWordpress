@@ -18,10 +18,11 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
 .input.invalid{border-color:var(--plg-danger);box-shadow:0 0 0 3px color-mix(in srgb, var(--plg-danger) 20%, transparent)}
 .error-text{color:var(--plg-danger);font-size:12px;margin-top:4px}
 .hint-text{color:var(--plg-mutedText);font-size:12px;margin-top:4px}
-.table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--plg-border);border-radius:12px;overflow:hidden}
-.table th,.table td{padding:12px;border-bottom:1px solid var(--plg-border);text-align:left}
+.table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--plg-border);border-radius:12px;overflow:hidden;table-layout:auto;min-width:600px;}
+.table th,.table td{padding:12px;border-bottom:1px solid var(--plg-border);text-align:left;white-space:nowrap;}
 .table thead th{background:color-mix(in srgb, var(--plg-accent) 12%, var(--plg-cardBg));font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--plg-text)}
-.table td{max-width:520px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.table td{overflow:hidden;text-overflow:ellipsis;max-width:300px;}
+.table-container{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 
 /* Grid de programas (listado) */
 .program-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
