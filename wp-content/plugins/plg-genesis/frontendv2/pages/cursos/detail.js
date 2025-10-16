@@ -1,5 +1,6 @@
 import { api } from '../../api/client.js';
 import { showToast } from '../../components/ui/index.js';
+import { showConfirm } from '../../components/ui/confirm.js';
 
 export async function mount(container, { id } = {}){
     const load = async ()=>{ const r = await api.get('/cursos/'+encodeURIComponent(id)); return (r && r.data) || {}; };
@@ -31,9 +32,17 @@ export async function mount(container, { id } = {}){
 		catch(e){ showToast(e.details?.message||e.message||'Error', true); }
 	});
 	container.querySelector('#del').addEventListener('click', async ()=>{
-		if (!confirm('¿Eliminar curso?')) return;
-		try{ await api.delete('/cursos/'+encodeURIComponent(id)); showToast('Eliminado'); location.hash = '#/cursos'; }
-		catch(e){ showToast(e.details?.message||e.message||'Error', true); }
+		const confirmed = await showConfirm({
+			title: '¿Eliminar curso?',
+			message: 'Se eliminará permanentemente el curso.\nEsta acción no se puede deshacer.',
+			confirmText: 'Eliminar',
+			cancelText: 'Cancelar',
+			icon: '🗑️',
+			confirmClass: 'danger'
+		});
+		if (!confirmed) return;
+		try{ await api.delete('/cursos/'+encodeURIComponent(id)); showToast('✓ Curso eliminado', 'success'); location.hash = '#/cursos'; }
+		catch(e){ showToast(e.details?.message||e.message||'Error al eliminar', 'error'); }
 	});
 	function $(sel){ return container.querySelector(sel); }
 }

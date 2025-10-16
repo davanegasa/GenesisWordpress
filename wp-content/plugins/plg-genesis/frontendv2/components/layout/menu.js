@@ -2,6 +2,7 @@
  * Constructor del menú del dashboard con filtrado por permisos
  */
 import AuthService from '../../services/auth.js';
+import { showToast } from '../ui/toast.js';
 
 /**
  * Define la estructura completa del menú con sus permisos requeridos
@@ -271,20 +272,20 @@ export function initMenu() {
 				
 				if (response.success) {
 					// Recargar la página para que todos los datos se actualicen
-					// Usamos true para forzar recarga desde el servidor (bypass cache)
-					window.location.reload(true);
-				} else {
-					console.error('Error al cambiar de oficina:', response.error);
-					alert('Error al cambiar de oficina: ' + (response.error?.message || 'Error desconocido'));
-					// Revertir el selector a la oficina anterior
-					officeSelector.value = AuthService.getOffice() || 'BOG';
-				}
-			} catch (error) {
-				console.error('Error al cambiar de oficina:', error);
-				alert('Error al cambiar de oficina');
+				// Usamos true para forzar recarga desde el servidor (bypass cache)
+				window.location.reload(true);
+			} else {
+				console.error('Error al cambiar de oficina:', response.error);
+				showToast('Error al cambiar de oficina: ' + (response.error?.message || 'Error desconocido'), 'error');
 				// Revertir el selector a la oficina anterior
 				officeSelector.value = AuthService.getOffice() || 'BOG';
 			}
+		} catch (error) {
+			console.error('Error al cambiar de oficina:', error);
+			showToast('Error al cambiar de oficina', 'error');
+			// Revertir el selector a la oficina anterior
+			officeSelector.value = AuthService.getOffice() || 'BOG';
+		}
 		});
 	}
 

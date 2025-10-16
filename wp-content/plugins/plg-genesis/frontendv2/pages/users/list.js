@@ -4,6 +4,8 @@
 import { api as apiClient } from '../../api/client.js';
 import { createModal } from '../../components/ui/index.js';
 import AuthService from '../../services/auth.js';
+import { showToast } from '../../components/ui/toast.js';
+import { showConfirm } from '../../components/ui/confirm.js';
 
 let currentPage = 1;
 const limit = 20;
@@ -210,24 +212,31 @@ window.editUser = async (userId) => {
 		}
 		showEditModal(response.data);
 	} catch (error) {
-		alert('Error: ' + error.message);
+		showToast('Error al cargar usuario: ' + error.message, 'error');
 	}
 };
 
 window.deleteUser = async (userId, username) => {
-	if (!confirm(`¿Estás seguro de eliminar al usuario "${username}"?`)) {
-		return;
-	}
+	const confirmed = await showConfirm({
+		title: '¿Eliminar usuario?',
+		message: `Se eliminará permanentemente el usuario "${username}".\nEsta acción no se puede deshacer.`,
+		confirmText: 'Eliminar',
+		cancelText: 'Cancelar',
+		icon: '🗑️',
+		confirmClass: 'danger'
+	});
+
+	if (!confirmed) return;
 
 	try {
 		const response = await apiClient.delete(`/user-management/${userId}`);
 		if (!response.success) {
 			throw new Error(response.error?.message || 'Error al eliminar usuario');
 		}
-		alert('Usuario eliminado exitosamente');
+		showToast('✓ Usuario eliminado exitosamente', 'success');
 		loadUsers();
 	} catch (error) {
-		alert('Error: ' + error.message);
+		showToast('Error al eliminar: ' + error.message, 'error');
 	}
 };
 
@@ -304,7 +313,7 @@ async function showCreateModal() {
 		const office = document.getElementById('modal-office')?.value;
 
 		if (!username || !email || !password || !role) {
-			alert('Por favor completa todos los campos requeridos');
+			showToast('Por favor completa todos los campos requeridos', 'warning');
 			return;
 		}
 
@@ -317,11 +326,11 @@ async function showCreateModal() {
 				throw new Error(response.error?.message || 'Error al crear usuario');
 			}
 
-			alert('Usuario creado exitosamente');
+			showToast('✓ Usuario creado exitosamente', 'success');
 			modal.remove();
 			loadUsers();
 		} catch (error) {
-			alert('Error: ' + error.message);
+			showToast('Error al crear usuario: ' + error.message, 'error');
 		}
 	});
 }
@@ -405,11 +414,11 @@ async function showEditModal(user) {
 				throw new Error(response.error?.message || 'Error al actualizar usuario');
 			}
 
-			alert('Usuario actualizado exitosamente');
+			showToast('✓ Usuario actualizado exitosamente', 'success');
 			overlay.remove();
 			loadUsers();
 		} catch (error) {
-			alert('Error: ' + error.message);
+			showToast('Error al actualizar: ' + error.message, 'error');
 		}
 	});
 

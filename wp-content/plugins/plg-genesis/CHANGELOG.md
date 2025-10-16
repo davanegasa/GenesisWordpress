@@ -9,17 +9,76 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Agregado
 
-- **Modal de Confirmación para Eliminación de Cursos:**
-  - Reemplaza `alert()` y `confirm()` nativos del calendario
-  - Diseño moderno con animaciones suaves
-  - Icono de advertencia animado ⚠️ con bounce effect
+- **Nuevo Preset de Tema "emmausModal":**
+  - Basado en la paleta de colores del modal "Cursos del Día"
+  - Paleta de colores:
+    - Accent (azul oscuro): #0c497a
+    - Success (verde): #3fab49
+    - Warning (naranja): #f59e0b
+    - Danger (rojo): #e11d48
+    - Info (azul): #3b82f6
+    - Background: #f9fafb (gris muy claro)
+    - Card Background: #ffffff (blanco)
+    - Text: #1e293b (gris oscuro)
+    - Muted Text: #64748b (gris medio)
+    - Border: #e2e8f0 (gris claro)
+    - Sidebar Background: #0a1224 (azul muy oscuro)
+    - Sidebar Text: #f1f5f9 (gris muy claro)
+  - Distribución visual limpia y moderna
+  - Alto contraste y legibilidad
+  - Disponible en página de personalización de tema
+
+- **Eliminación de Colores Hardcodeados - Uso de Variables del Tema:**
+  - **Componentes actualizados para usar variables CSS del tema:**
+    - `components/ui/confirm.js`: Todos los colores ahora usan variables del tema
+      - Overlay, modal, botones, títulos, textos
+      - Gradientes dinámicos con color-mix() basados en --plg-danger, --plg-success, --plg-accent, --plg-warning
+      - Sombras con color-mix() para transparencias
+    - `pages/cursos/calendario.js`: 100% con variables del tema
+      - Calendar grids, días, modales, botones
+      - Gradientes en headers del modal
+      - Estados hover con color-mix()
+      - Notas de cursos usan --plg-success/--plg-danger
+    - No más #hex, rgba() o colores literales hardcodeados
+  - **Beneficios:**
+    - Cambio de tema instantáneo en toda la aplicación
+    - Consistencia visual garantizada
+    - Personalización por oficina funcional
+    - Fácil mantenimiento y extensión
+    - Dark mode compatible en el futuro
+  - **Técnica usada:** `color-mix(in srgb, var(--plg-color) X%, base)` para variaciones de color dinámicas
+
+- **Sistema de Confirmación y Toasts Unificado:**
+  - **Componente `confirm.js` reutilizable:** Reemplaza todos los `alert()` y `confirm()` nativos
+  - Modal de confirmación personalizable con opciones:
+    - title, message, confirmText, cancelText
+    - icon (personalizable por contexto)
+    - confirmClass: danger, success, primary, warning
+    - Gradientes y colores según el tipo de acción
+  - Diseño moderno con animaciones suaves (fadeIn, fadeOut, slideUp, bounce)
   - Backdrop blur(4px) para mejor enfoque
-  - Botones con gradientes y hover effects
-  - Animaciones: fadeIn, fadeOut, slideUp con cubic-bezier
-  - Toast de éxito/error después de la acción
   - z-index: 10000 para estar sobre todo
-  - Cierre al hacer clic fuera del modal
-  - Recarga automática del calendario y vista del día
+  - Cierre con ESC, clic fuera o botón cancelar
+  - Promise-based para async/await fácil
+  
+  - **Archivos actualizados:**
+    - `pages/users/list.js`: Eliminación de usuarios, validaciones, CRUD
+    - `pages/migration/roles.js`: Migraciones, hacerse admin
+    - `pages/cursos/detail.js`: Eliminación de cursos
+    - `pages/cursos/calendario.js`: Eliminación de cursos del calendario
+    - `components/layout/menu.js`: Errores al cambiar oficina
+  
+  - **Toasts consistentes:**
+    - ✓ Success (verde) para acciones exitosas
+    - ⚠️ Warning (naranja) para validaciones
+    - ❌ Error (rojo) para fallos
+    - ℹ️ Info (azul) para información general
+  
+  - **Resultado:**
+    - Experiencia de usuario profesional y consistente
+    - Sin alerts/confirms nativos feos
+    - Feedback visual claro y bonito
+    - Confirmaciones claras antes de acciones destructivas
 
 - **Página de Personalización de Tema Rediseñada:**
   - Header centrado con emoji 🎨 y descripción
