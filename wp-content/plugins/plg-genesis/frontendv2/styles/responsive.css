@@ -132,15 +132,16 @@
 		width: 100% !important;
 		max-width: 100% !important;
 		box-sizing: border-box;
-		font-size: 0.95rem;
+		font-size: 1rem;
 		line-height: 1.5;
 		border-bottom: 1px solid #f1f5f9 !important;
-		gap: 1rem;
+		gap: 0.5rem;
 		align-items: center;
 	}
 
 	.table td:last-child {
 		border-bottom: none !important;
+		padding-bottom: 1.25rem !important;
 	}
 
 	/* Primer campo (Código) con fondo especial */
@@ -175,12 +176,41 @@
 	.table td::before {
 		content: attr(data-label);
 		font-weight: 600;
-		min-width: 100px;
+		min-width: 30px;
+		width: 30px;
 		flex-shrink: 0;
-		color: #64748b;
-		font-size: 0.75rem;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
+		font-size: 1.2rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* Solo emojis para cada campo (sin texto) */
+	.table td:nth-child(3)::before {
+		content: "📄"; /* Documento */
+	}
+
+	.table td:nth-child(4)::before {
+		content: "📱"; /* Celular */
+	}
+
+	.table td:nth-child(5)::before {
+		content: "📧"; /* Email */
+	}
+
+	/* El valor del campo ocupa el resto del espacio disponible */
+	.table tbody tr td {
+		justify-content: space-between;
+	}
+
+	/* Asegurar que el texto del valor use todo el espacio */
+	.table td > * {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.table td {
+		flex-wrap: nowrap;
 	}
 
 	/* Ocultar elementos con clase hide-mobile */
