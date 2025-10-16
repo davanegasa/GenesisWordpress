@@ -103,6 +103,27 @@ const menuStructure = [
 				href: '#/cursos/nuevo',
 				requires: 'plg_create_courses',
 			},
+			{
+				id: 'cursos-calendario',
+				label: 'Calendario',
+				href: '#/cursos/calendario',
+				requires: 'plg_view_courses',
+			},
+		],
+	},
+	{
+		id: 'informes',
+		label: 'Informes',
+		icon: '📊',
+		href: '#/informes/anual',
+		requires: 'plg_view_stats',
+		submenu: [
+			{
+				id: 'informes-anual',
+				label: 'Informe Anual',
+				href: '#/informes/anual',
+				requires: 'plg_view_stats',
+			},
 		],
 	},
 	{
@@ -281,6 +302,7 @@ function setupAccordions() {
 		{ triggerId: 'nav-congresos', submenuSelector: '.sidebar a.submenu[data-group="congresos"]' },
 		{ triggerId: 'nav-programas', submenuSelector: '.sidebar a.submenu[data-group="programas"]' },
 		{ triggerId: 'nav-cursos', submenuSelector: '.sidebar a.submenu[data-group="cursos"]' },
+		{ triggerId: 'nav-informes', submenuSelector: '.sidebar a.submenu[data-group="informes"]' },
 		{ triggerId: 'nav-ajustes', submenuSelector: '.sidebar a.submenu[data-group="ajustes"]' },
 	];
 

@@ -64,4 +64,117 @@ class PlgGenesis_EstadisticasRepository {
 			'actividades' => $actividad,
 		];
 	}
+
+	/**
+	 * Obtiene el informe anual de estudiantes activos, cursos corregidos y contactos
+	 * @param int $year Año del informe
+	 * @return array|WP_Error
+	 */
+	public function getInformeAnual($year) {
+		$year = intval($year);
+		$currentYear = intval(date('Y'));
+		$currentMonth = date('m');
+
+		// Validar que el año no sea mayor al actual
+		if ($year > $currentYear) {
+			return new WP_Error('invalid_year', 'No se permiten informes para años futuros.', ['status' => 400]);
+		}
+
+		// Restringir la generación de meses si es el año actual
+		$endDate = $year === $currentYear ? "$year-$currentMonth-01" : "$year-12-01";
+
+		$query = "
+WITH meses AS (
+    SELECT GENERATE_SERIES($1::DATE, $2::DATE, '1 month'::INTERVAL) AS mes
+),
+estudiantes_activos AS (
+    SELECT 
+        TO_CHAR(mes, 'YYYY-MM') AS mes,
+        COUNT(DISTINCT ec.estudiante_id) AS activos
+    FROM 
+        meses
+    LEFT JOIN 
+        estudiantes_cursos ec ON ec.fecha BETWEEN (mes - INTERVAL '1 year') AND (mes + INTERVAL '1 month' - INTERVAL '1 day')
+    GROUP BY mes
+),
+cursos_correjidos AS (
+    SELECT 
+        TO_CHAR(ec.fecha, 'YYYY-MM') AS mes,
+        COUNT(ec.id) AS corregidos
+    FROM 
+        estudiantes_cursos ec
+    WHERE 
+        ec.fecha BETWEEN $1::DATE AND $2::DATE + INTERVAL '1 month' - INTERVAL '1 day'
+    GROUP BY TO_CHAR(ec.fecha, 'YYYY-MM')
+),
+estudiantes_registrados AS (
+    SELECT 
+        TO_CHAR(estudiantes.fecha_registro, 'YYYY-MM') AS mes,
+        COUNT(*) AS nuevos_estudiantes
+    FROM 
+        estudiantes
+    WHERE 
+        estudiantes.fecha_registro BETWEEN $1::DATE AND $2::DATE + INTERVAL '1 month' - INTERVAL '1 day'
+    GROUP BY TO_CHAR(estudiantes.fecha_registro, 'YYYY-MM')
+),
+contactos_activos AS (
+    SELECT 
+        TO_CHAR(mes, 'YYYY-MM') AS mes,
+        COUNT(DISTINCT c.id) AS contactos_activos
+    FROM 
+        meses
+    LEFT JOIN 
+        estudiantes e ON e.id_contacto IS NOT NULL
+    LEFT JOIN 
+        estudiantes_cursos ec ON ec.estudiante_id = e.id
+    LEFT JOIN 
+        contactos c ON c.id = e.id_contacto
+    WHERE 
+        ec.fecha BETWEEN (mes - INTERVAL '1 year') AND (mes + INTERVAL '1 month' - INTERVAL '1 day')
+    GROUP BY mes
+),
+contactos_nuevos AS (
+    SELECT 
+        TO_CHAR(contactos.fecha_registro, 'YYYY-MM') AS mes,
+        COUNT(*) AS nuevos_contactos
+    FROM 
+        contactos
+    WHERE 
+        contactos.fecha_registro BETWEEN $1::DATE AND $2::DATE + INTERVAL '1 month' - INTERVAL '1 day'
+    GROUP BY TO_CHAR(contactos.fecha_registro, 'YYYY-MM')
+)
+SELECT 
+    COALESCE(ea.mes, cc.mes, er.mes, ca.mes, cn.mes) AS mes,
+    COALESCE(ea.activos, 0) AS estudiantes_activos,
+    COALESCE(cc.corregidos, 0) AS cursos_correjidos,
+    COALESCE(er.nuevos_estudiantes, 0) AS estudiantes_registrados,
+    COALESCE(ca.contactos_activos, 0) AS contactos_activos,
+    COALESCE(cn.nuevos_contactos, 0) AS contactos_registrados
+FROM 
+    estudiantes_activos ea
+FULL OUTER JOIN 
+    cursos_correjidos cc ON ea.mes = cc.mes
+FULL OUTER JOIN 
+    estudiantes_registrados er ON COALESCE(ea.mes, cc.mes) = er.mes
+FULL OUTER JOIN 
+    contactos_activos ca ON COALESCE(ea.mes, cc.mes, er.mes) = ca.mes
+FULL OUTER JOIN 
+    contactos_nuevos cn ON COALESCE(ea.mes, cc.mes, er.mes, ca.mes) = cn.mes
+ORDER BY 
+    mes;
+		";
+
+		$startDate = "$year-01-01";
+		$result = pg_query_params($this->conn, $query, [$startDate, $endDate]);
+
+		if (!$result) {
+			$error = pg_last_error($this->conn);
+			return new WP_Error('query_error', 'Error al ejecutar la consulta: ' . $error, ['status' => 500]);
+		}
+
+		$data = pg_fetch_all($result);
+		pg_free_result($result);
+
+		return $data ?: [];
+	}
 }

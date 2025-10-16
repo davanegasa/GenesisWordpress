@@ -69,6 +69,19 @@ REST (nuevo):
 
 Retiro: cuando el dashboard v2 quede 100% en uso.
 
+### Informes de Oficina
+Legacy actual (Dashboard v1):
+- `backend/informes/estudiantes_activos_cursos_corregidos.php` [ACTIVO - mantener para compatibilidad v1]
+- `frontend/informes/oficina/ADC.php` [ACTIVO - mantener para compatibilidad v1]
+
+REST (nuevo - Dashboard v2):
+- [OK] `GET /v1/estadisticas/informe-anual?year=YYYY`
+
+Frontend v2:
+- [OK] `frontendv2/pages/informes/informe-anual.js`
+
+Nota: Los archivos legacy se mantienen para el Dashboard v1. El Dashboard v2 usa exclusivamente la nueva API.
+
 ### Infra y seguridad
 - Reemplazar `backend/db_public.php` (contiene credenciales hardcodeadas) →
   - [PLAN] Endpoints públicos solo de lectura con rate limiting, sin secretos, o eliminar si no es imprescindible.
