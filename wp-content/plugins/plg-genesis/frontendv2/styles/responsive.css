@@ -780,3 +780,168 @@
 	.section { margin-top: 16px !important; }
 }
 
+/* ===== HEADER RESPONSIVE ===== */
+@media (max-width: 1023px) {
+	/* Header en mobile */
+	.top-header {
+		padding: 8px 12px 8px 52px !important; /* Espacio a la izquierda para el botón hamburguesa */
+		gap: 8px !important;
+		position: fixed !important;
+		left: 0;
+		right: 0;
+		top: 0;
+		z-index: 101 !important; /* Mayor que el botón hamburguesa */
+		margin-left: 0 !important;
+		justify-content: flex-end !important; /* Todo a la derecha */
+		display: flex !important;
+		align-items: center !important;
+	}
+
+	/* Botón hamburguesa visible y ajustado */
+	.menu-toggle {
+		display: flex !important;
+		position: fixed !important;
+		top: 8px !important;
+		left: 8px !important;
+		width: 40px !important;
+		height: 40px !important;
+		z-index: 102 !important; /* Por encima del header */
+		background: var(--plg-accent, #0c497a) !important;
+	}
+
+	/* Info de usuario más compacta */
+	.user-info {
+		gap: 8px !important;
+		display: flex !important;
+		align-items: center !important;
+	}
+
+	.user-avatar {
+		width: 32px !important;
+		height: 32px !important;
+		font-size: 12px !important;
+	}
+
+	.user-name {
+		font-size: 13px !important;
+	}
+
+	.user-role {
+		font-size: 11px !important;
+	}
+
+	/* Toggle más pequeño en mobile */
+	.dashboard-toggle {
+		padding: 6px 8px !important;
+		gap: 6px !important;
+		display: flex !important;
+		align-items: center !important;
+		flex-shrink: 0 !important;
+	}
+
+	.dashboard-toggle label {
+		font-size: 11px !important;
+		white-space: nowrap !important;
+	}
+
+	/* Asegurar que el toggle sea clickeable */
+	.toggle-switch {
+		position: relative !important;
+		z-index: 1 !important;
+		flex-shrink: 0 !important;
+	}
+
+	.toggle-switch input {
+		cursor: pointer !important;
+	}
+
+	.toggle-slider {
+		cursor: pointer !important;
+	}
+
+	/* Ajustar content para no quedar debajo del header */
+	.content {
+		padding-top: 70px !important;
+	}
+}
+
+@media (max-width: 640px) {
+	/* En pantallas muy pequeñas, layout más compacto */
+	.top-header {
+		flex-direction: row !important;
+		flex-wrap: nowrap !important;
+		align-items: center !important;
+		gap: 6px !important;
+		padding: 8px 8px 8px 50px !important; /* Espacio para el botón hamburguesa */
+		min-height: 56px;
+		justify-content: flex-end !important;
+	}
+
+	/* Ocultar solo el label de texto, no el contenedor del switch */
+	.dashboard-toggle > label:not(.toggle-switch) {
+		display: none !important;
+	}
+
+	.dashboard-toggle {
+		padding: 4px !important;
+		background: transparent !important;
+		border: none !important;
+	}
+
+	/* Asegurar que el toggle-switch sea visible */
+	.toggle-switch {
+		display: inline-block !important;
+		width: 40px !important;
+		height: 22px !important;
+	}
+
+	.toggle-slider:before {
+		height: 16px !important;
+		width: 16px !important;
+		left: 3px !important;
+		bottom: 3px !important;
+	}
+
+	.toggle-switch input:checked + .toggle-slider:before {
+		transform: translateX(18px) !important;
+	}
+
+	/* Usuario más compacto */
+	.user-info {
+		flex-shrink: 1 !important;
+		min-width: 0 !important;
+	}
+
+	.user-details {
+		overflow: hidden !important;
+	}
+
+	.user-name {
+		font-size: 12px !important;
+		white-space: nowrap !important;
+		overflow: hidden !important;
+		text-overflow: ellipsis !important;
+	}
+
+	.user-role {
+		font-size: 10px !important;
+		white-space: nowrap !important;
+	}
+
+	.user-avatar {
+		flex-shrink: 0 !important;
+	}
+
+	/* Ajustar content para header */
+	.content {
+		padding-top: 65px !important;
+	}
+}
+
+@media (min-width: 1024px) {
+	/* En desktop, el header ocupa el espacio después del sidebar */
+	.top-header {
+		margin-left: 0;
+	}
+}
+

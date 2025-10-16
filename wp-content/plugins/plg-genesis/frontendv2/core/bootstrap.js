@@ -4,6 +4,7 @@ import { mountLayout } from '../components/layout/Layout.js';
 import { startRouter } from '../core/router.js';
 import AuthService from '../services/auth.js';
 import { initMenu, updateActiveMenuItem } from '../components/layout/menu.js';
+import { initHeader } from '../components/layout/header.js';
 
 export async function bootstrap() {
 	// 1. Inicializar servicio de autenticación
@@ -19,6 +20,9 @@ export async function bootstrap() {
 	
 	// 3. Construir menú según permisos
 	initMenu();
+	
+	// 3.1 Inicializar header con info de usuario
+	initHeader();
 	
 	// 4. Montar layout
 	const appRoot = document.getElementById('view') || document.body;
