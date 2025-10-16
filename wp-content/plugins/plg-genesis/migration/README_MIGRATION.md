@@ -38,7 +38,7 @@ Copia y pega **SOLO las primeras líneas** (migración de tu usuario):
 ```sql
 -- Actualizar tu usuario a Super Admin
 UPDATE edgen_usermeta 
-SET meta_value = 'a:1:{s:16:"plg_super_admin";b:1;}'
+SET meta_value = 'a:1:{s:15:"plg_super_admin";b:1;}'
 WHERE user_id = (SELECT ID FROM edgen_users WHERE user_login = 'daniel.vanegas')
   AND meta_key = 'edgen_capabilities';
 
@@ -72,7 +72,7 @@ WHERE u.user_login = 'daniel.vanegas';
 ```
 
 Deberías ver:
-- **roles:** `a:1:{s:16:"plg_super_admin";b:1;}`
+- **roles:** `a:1:{s:15:"plg_super_admin";b:1;}`
 - **oficina:** `BOG`
 
 ---
