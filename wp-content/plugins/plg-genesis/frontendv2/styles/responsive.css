@@ -1,10 +1,12 @@
 /**
  * Sistema Responsive Dashboard v2
- * Breakpoints: < 768px (mobile), 768-1024px (tablet), > 1024px (desktop)
+ * Breakpoints: 
+ * - Mobile + Tablet: < 1024px (hamburguesa + tarjetas)
+ * - Desktop: >= 1024px (sidebar fijo + tabla)
  */
 
-/* ===== MOBILE FIRST (< 768px) ===== */
-@media (max-width: 767px) {
+/* ===== MOBILE Y TABLET (< 1024px) ===== */
+@media (max-width: 1023px) {
 	/* Layout base */
 	body {
 		margin: 0;
@@ -28,18 +30,27 @@
 	}
 
 	.card {
-		width: 100%;
+		width: 100% !important;
+		max-width: 100% !important;
 		margin: 0 0 16px 0;
 		box-sizing: border-box;
 		overflow: hidden;
 	}
+
+	/* Contenedor principal */
+	#view,
+	#view > * {
+		width: 100% !important;
+		max-width: 100% !important;
+		box-sizing: border-box;
+	}
 	
-	/* Contenedor de tabla con overflow */
+	/* Contenedor de tabla sin overflow (las tarjetas se muestran vertical) */
 	#s-table {
-		width: 100%;
-		max-width: 100%;
-		overflow-x: auto;
-		-webkit-overflow-scrolling: touch;
+		width: 100% !important;
+		max-width: 100% !important;
+		overflow-x: visible !important;
+		box-sizing: border-box;
 	}
 
 	/* Menú hamburguesa visible */
@@ -73,17 +84,113 @@
 		display: block !important;
 	}
 
-	/* Ocultar tabla en mobile, mostrar tarjetas */
-	.table-wrapper {
+	/* Transformar tabla a tarjetas en mobile/tablet */
+	.table {
+		display: block !important;
+		width: 100% !important;
+		max-width: 100% !important;
+		min-width: 0 !important; /* Sobrescribir min-width:600px de components.css */
+		table-layout: auto !important;
+		border: none !important;
+		border-radius: 0 !important;
+		overflow: visible !important;
+	}
+
+	.table thead {
+		display: none !important; /* Ocultar encabezados en mobile */
+	}
+
+	.table tbody,
+	.table tr {
+		display: block !important;
+		width: 100% !important;
+		max-width: 100% !important;
+	}
+
+	.table tr {
+		margin-bottom: 1.25rem;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		background: white;
+		padding: 0;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		overflow: hidden;
+		transition: all 0.2s ease;
+		width: 100%;
+	}
+
+	.table tr:hover {
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+		transform: translateY(-2px);
+	}
+
+	.table td {
+		display: flex !important;
+		padding: 1rem 1.25rem !important;
+		text-align: left;
+		border: none !important;
+		width: 100% !important;
+		max-width: 100% !important;
+		box-sizing: border-box;
+		font-size: 0.95rem;
+		line-height: 1.5;
+		border-bottom: 1px solid #f1f5f9 !important;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.table td:last-child {
+		border-bottom: none !important;
+	}
+
+	/* Primer campo (Código) con fondo especial */
+	.table td:first-child {
+		background: linear-gradient(135deg, #1a3b89 0%, #2563eb 100%);
+		color: white !important;
+		font-size: 1.5rem;
+		font-weight: 700;
+		padding: 1.5rem 1.25rem !important;
+		justify-content: flex-start;
+		border-bottom: 2px solid #1e40af !important;
+	}
+
+	.table td:first-child::before {
+		display: none; /* Ocultar label en el código */
+	}
+
+	/* Segundo campo (Nombre) destacado */
+	.table td:nth-child(2) {
+		background: #f8fafc;
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: #1e293b;
+		padding: 1.25rem !important;
+		justify-content: flex-start;
+	}
+
+	.table td:nth-child(2)::before {
+		display: none; /* Ocultar label en el nombre */
+	}
+
+	.table td::before {
+		content: attr(data-label);
+		font-weight: 600;
+		min-width: 100px;
+		flex-shrink: 0;
+		color: #64748b;
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	/* Ocultar elementos con clase hide-mobile */
+	.hide-mobile {
 		display: none !important;
 	}
 
-	/* Tarjetas en mobile */
-	.card-list {
-		display: flex !important;
-		flex-direction: column;
-		gap: 12px;
-		width: 100%;
+	/* Mostrar elementos con clase show-mobile */
+	.show-mobile {
+		display: block !important;
 	}
 
 	.data-card {
@@ -384,13 +491,25 @@
 	}
 }
 
-/* ===== TABLET (768px - 1024px) ===== */
-@media (min-width: 768px) and (max-width: 1024px) {
+/* ===== AJUSTES ESPECÍFICOS MOBILE (< 768px) ===== */
+@media (max-width: 767px) {
 	.content {
-		padding: 20px !important;
+		padding: 70px 12px 12px 12px !important;
+	}
+	
+	/* KPIs en 2 columnas en mobile pequeño */
+	.kpi-grid {
+		grid-template-columns: repeat(2, 1fr) !important;
+	}
+}
+
+/* ===== AJUSTES ESPECÍFICOS TABLET (768px - 1023px) ===== */
+@media (min-width: 768px) and (max-width: 1023px) {
+	.content {
+		padding: 70px 20px 20px 20px !important;
 	}
 
-	/* KPIs en 2 columnas */
+	/* KPIs en 2 columnas en tablet */
 	.kpi-grid {
 		grid-template-columns: repeat(2, 1fr) !important;
 	}
@@ -399,16 +518,6 @@
 	.program-grid,
 	.course-grid {
 		grid-template-columns: repeat(2, 1fr) !important;
-	}
-
-	/* Form grid en 1 columna para mejor usabilidad */
-	.form-grid {
-		grid-template-columns: 1fr !important;
-	}
-
-	/* Sidebar ajustado */
-	.sidebar {
-		width: 220px;
 	}
 
 	/* Calendario ajustado */
@@ -421,6 +530,7 @@
 		min-height: 85px !important;
 		padding: 8px !important;
 	}
+	
 }
 
 /* ===== UTILIDADES RESPONSIVE ===== */
@@ -507,29 +617,61 @@
 	}
 }
 
-@media (min-width: 768px) {
+/* ===== DESKTOP (>= 1024px) ===== */
+@media (min-width: 1024px) {
 	.hide-desktop {
 		display: none !important;
 	}
 	
-	/* En desktop: mostrar tabla, ocultar tarjetas */
-	.table-wrapper {
-		display: block !important;
-		width: 100%;
-		max-width: 100%;
-		overflow-x: auto;
-		-webkit-overflow-scrolling: touch;
-		margin: 0;
-		padding: 0;
+	/* Menú hamburguesa oculto en desktop */
+	.menu-toggle {
+		display: none !important;
 	}
 	
-	.table-wrapper .table {
-		width: 100%;
-		max-width: none;
-		min-width: 800px;
+	/* Sidebar visible normal en desktop */
+	.sidebar {
+		position: sticky !important;
+		transform: translateX(0) !important;
 	}
 	
-	.card-list,
+	/* Content sin padding extra */
+	.content {
+		padding: 24px !important;
+	}
+	
+	/* En desktop: restaurar tabla normal */
+	.table {
+		display: table !important;
+		width: 100% !important;
+	}
+
+	.table thead {
+		display: table-header-group !important;
+	}
+
+	.table tbody {
+		display: table-row-group !important;
+	}
+
+	.table tr {
+		display: table-row !important;
+		margin-bottom: 0 !important;
+		border: none !important;
+		border-radius: 0 !important;
+		padding: 0 !important;
+		box-shadow: none !important;
+	}
+
+	.table td {
+		display: table-cell !important;
+		padding: 0.75rem !important;
+		border-bottom: 1px solid var(--plg-border, #e2e8f0) !important;
+	}
+
+	.table td::before {
+		content: none !important;
+	}
+
 	.show-mobile {
 		display: none !important;
 	}
@@ -546,6 +688,11 @@
 		width: 100% !important;
 		max-width: 100% !important;
 		overflow-x: auto;
+	}
+	
+	/* KPIs en 4 columnas en desktop */
+	.kpi-grid {
+		grid-template-columns: repeat(4, 1fr) !important;
 	}
 }
 

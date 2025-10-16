@@ -122,11 +122,11 @@ if (!defined('ABSPATH')) { exit; }
 			overlay?.addEventListener('click', toggleMenu);
 
 			// Cerrar menú al hacer clic en un link (solo en mobile)
-			sidebar?.addEventListener('click', (e) => {
-				if (e.target.tagName === 'A' && window.innerWidth < 768) {
-					toggleMenu();
-				}
-			});
+		sidebar?.addEventListener('click', (e) => {
+			if (e.target.tagName === 'A' && window.innerWidth < 1024) {
+				toggleMenu();
+			}
+		});
 		});
 	</script>
 

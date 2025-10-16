@@ -10,22 +10,28 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Agregado
 
 - **Sistema Responsive Dashboard v2:**
-  - Archivo `frontendv2/styles/responsive.css` con breakpoints mobile (<768px) y tablet (768-1024px)
+  - Archivo `frontendv2/styles/responsive.css` con breakpoints optimizados:
+    - Mobile + Tablet: < 1024px (menú hamburguesa + tarjetas)
+    - Desktop: >= 1024px (sidebar fijo + tabla)
   - Menú hamburguesa funcional con overlay y animaciones (z-index: 1001)
-  - Sistema de tarjetas reutilizable para listas en mobile
+  - Sistema de tarjetas reutilizable para listas en mobile/tablet
   - Clases de utilidad responsive (`.show-mobile`, `.hide-mobile`, `.hide-desktop`)
   - Media queries para todos los componentes principales
   - Botón hamburguesa flotante con icono SVG
-  - Toggle automático de menú al hacer clic en links (mobile)
+  - Toggle automático de menú al hacer clic en links (< 1024px)
   - Content con padding-top (70px) para evitar solapamiento con botón
   - Card con overflow:hidden para contener contenido
 
-- **Lista de Estudiantes Responsive:**
-  - Vista desktop: tabla con scroll horizontal dentro del card
-  - Vista mobile: tarjetas verticales tipo card
-  - Wrapper `.table-wrapper` con overflow-x: auto
-  - Tarjetas con diseño campo-valor horizontal
-  - Botón "Ver Información" ancho completo en mobile
+- **Lista de Estudiantes Responsive (patrón v1 exacto):**
+  - Vista desktop (>= 1024px): tabla normal
+  - Vista mobile/tablet (< 1024px): tabla transformada a tarjetas con CSS
+  - Usa `data-label` en `<td>` para mostrar labels con `::before`
+  - Diseño simple: label (110px, azul primario) + valor
+  - Border-radius 8px, padding 0.75rem
+  - Box-shadow sutil (0 1px 3px rgba 0.08)
+  - Font-size label: 0.8rem, weight: 600
+  - Sin duplicación de HTML, todo manejado por CSS
+  - Réplica exacta del diseño v1
 
 - **Calendario Responsive:**
   - Modal fullscreen en mobile
