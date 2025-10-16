@@ -7,7 +7,53 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+### Corregido
+
+- **Fix: Acordeones del menú mobile se cerraban al hacer click:**
+  - El menú lateral completo se cerraba al hacer click en items con sub-menús
+  - Impedía desplegar/colapsar los acordeones en mobile
+  - Ahora solo cierra el menú al hacer click en sub-items (`.submenu`)
+  - Los items principales abren/cierran sus acordeones correctamente
+
+- **Fix: Iconos incorrectos en tabla de contactos mobile:**
+  - Selector `.table:not(.users-table)` aplicaba iconos de estudiantes a contactos
+  - Cambiado a `.table:not(.users-table):not(.contactos-table)` 
+  - Ahora cada tabla tiene sus propios iconos correctos en mobile
+
 ### Agregado
+
+- **Responsive Unificado para Todas las Listas (Estudiantes, Usuarios, Contactos):**
+  - **Estrategia común:** Patrón tabla-a-tarjetas con `createTable` + `data-label`
+  - **Implementación consistente en 3 páginas:**
+    
+    1. **Estudiantes (pages/estudiantes/list.js):** ✓ Ya implementado
+       - Columnas: Código, Nombre, Documento, Celular, Email
+       - Iconos: ID (gradiente azul), Nombre (destacado), 🆔 Documento, 📱 Celular, ✉️ Email
+    
+    2. **Usuarios (pages/users/list.js):** ✓ Refactorizado
+       - Ahora usa `createTable` (antes renderizaba HTML manualmente)
+       - Columnas: Usuario, Nombre, Email, Oficina, Rol, Acciones
+       - Iconos: 👤 Usuario (gradiente azul), 📝 Nombre (destacado), ✉️ Email, 🏢 Oficina, 👤 Rol, ⚙️ Acciones
+       - Clase específica: `.users-table`
+    
+    3. **Contactos (pages/contactos/list.js):** ✓ Mejorado
+       - Ya usaba `createTable`, agregado data-labels
+       - Columnas: ID, Nombre, Iglesia, Email
+       - Iconos: ID (gradiente azul), Nombre (destacado), ⛪ Iglesia, ✉️ Email
+       - Clase específica: `.contactos-table`
+  
+  - **CSS responsive compartido (styles/responsive.css):**
+    - Estilos base en `.table` (aplican a todas)
+    - Personalizaciones específicas con `.users-table` y `.contactos-table`
+    - Iconos contextuales por tipo de tabla
+    - Transformación automática < 1024px
+    - Variables del tema 100%
+  
+  - **Resultado:**
+    - Experiencia consistente en todas las listas
+    - Mismo comportamiento en mobile/tablet
+    - Código base compartido y mantenible
+    - Fácil agregar nuevas tablas responsive
 
 - **Nuevo Preset de Tema "emmausModal":**
   - Basado en la paleta de colores del modal "Cursos del Día"
