@@ -103,6 +103,12 @@ const menuStructure = [
 				href: '#/cursos/nuevo',
 				requires: 'plg_create_courses',
 			},
+			{
+				id: 'cursos-calendario',
+				label: 'Calendario',
+				href: '#/cursos/calendario',
+				requires: 'plg_view_courses',
+			},
 		],
 	},
 	{

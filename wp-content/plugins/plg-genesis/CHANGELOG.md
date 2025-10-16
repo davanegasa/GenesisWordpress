@@ -9,14 +9,21 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Agregado
 
-- Endpoint REST `GET /plg-genesis/v1/estadisticas/informe-anual?year=YYYY` para obtener informe anual de oficina
-- Página de informe anual en Dashboard v2: `frontendv2/pages/informes/informe-anual.js`
-  - Sistema de pestañas con 3 vistas: Tabla, Tendencias y Comparativa
-  - Gráfica de líneas "Tendencias" con evolución mensual de 4 métricas (Chart.js)
-  - Gráfica de barras "Comparativa" con actividad mensual de 3 métricas (Chart.js)
-  - Diseño responsivo con soporte para cambio dinámico de año
-- Nueva sección "Informes" en el menú del Dashboard v2 con submenú "Informe Anual"
-- Ruta `#/informes/anual` en el router del Dashboard v2
+- **Informe Anual:**
+  - Endpoint REST `GET /plg-genesis/v1/estadisticas/informe-anual?year=YYYY`
+  - Página `frontendv2/pages/informes/informe-anual.js` con sistema de pestañas
+  - Gráficas interactivas con Chart.js (Tendencias y Comparativa)
+  - Nueva sección "Informes" en menú Dashboard v2
+
+- **Calendario de Cursos:**
+  - Endpoints REST:
+    - `GET /plg-genesis/v1/cursos-calendario/mes?mes=1&anio=2025` (cursos por día del mes)
+    - `GET /plg-genesis/v1/cursos-calendario/dia?dia=15&mes=1&anio=2025` (detalles de cursos del día)
+    - `DELETE /plg-genesis/v1/estudiantes-cursos/{id}` (eliminar registro de curso)
+  - Página `frontendv2/pages/cursos/calendario.js` con vista mensual
+  - Modal de detalles con acciones: generar certificados y eliminar
+  - Navegación entre meses
+  - Integración en submenú "Cursos" del Dashboard v2
 
 ### Modificado
 
