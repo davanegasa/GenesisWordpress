@@ -9,6 +9,48 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Agregado
 
+- **Modal de Confirmación para Eliminación de Cursos:**
+  - Reemplaza `alert()` y `confirm()` nativos del calendario
+  - Diseño moderno con animaciones suaves
+  - Icono de advertencia animado ⚠️ con bounce effect
+  - Backdrop blur(4px) para mejor enfoque
+  - Botones con gradientes y hover effects
+  - Animaciones: fadeIn, fadeOut, slideUp con cubic-bezier
+  - Toast de éxito/error después de la acción
+  - z-index: 10000 para estar sobre todo
+  - Cierre al hacer clic fuera del modal
+  - Recarga automática del calendario y vista del día
+
+- **Página de Personalización de Tema Rediseñada:**
+  - Header centrado con emoji 🎨 y descripción
+  - Secciones organizadas por categoría (Colores Base, Sidebar/Menú, Estados y Feedback, Presets Rápidos)
+  - Tarjetas de color interactivas:
+    - Fondo con gradiente del color seleccionado (15%-25% opacidad)
+    - Overlay blanco semitransparente (85%) para legibilidad
+    - Borde dinámico con el color seleccionado (40% opacidad)
+    - Color picker circular de 48px + input de texto monospace
+    - Sincronización bidireccional automática picker↔input
+    - Actualización en tiempo real del fondo al cambiar color
+    - Hover elevado con transform translateY(-3px)
+  - Campos con etiquetas uppercase, descripciones y tooltips
+  - Grid responsive: auto-fill minmax(200px, 1fr)
+  - Botones de acción con emojis: 👁️ Vista Previa, 💾 Guardar, 🔄 Restablecer
+  - Presets con hover effect y feedback visual
+  - Toasts en lugar de mensajes <pre>
+  - Responsive: 1 columna en mobile, botones stacked
+
+- **Sistema de Toasts/Notificaciones Mejorado:**
+  - Diseño moderno y consistente con el tema
+  - Colores del tema: `--plg-success` (verde), `--plg-warning` (naranja), `--plg-danger` (rojo), `--plg-accent` (azul)
+  - Icono circular con fondo semitransparente (36px)
+  - Border-radius 12px, sombras elevadas
+  - Backdrop-filter blur(10px) para efecto glassmorphism
+  - Animaciones suaves con cubic-bezier
+  - Botón cerrar con hover effect (scale 1.1)
+  - Responsive: full width en mobile con padding 10px
+  - Auto-cierre configurable por tipo
+  - Tipos: success, error, warning, info, forbidden
+
 - **Sistema Responsive Dashboard v2:**
   - Archivo `frontendv2/styles/responsive.css` con breakpoints optimizados:
     - Mobile + Tablet: < 1024px (menú hamburguesa + tarjetas)
@@ -22,16 +64,16 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Content con padding-top (70px) para evitar solapamiento con botón
   - Card con overflow:hidden para contener contenido
 
-- **Lista de Estudiantes Responsive (patrón v1 exacto):**
+- **Lista de Estudiantes Responsive (patrón v1 con tema):**
   - Vista desktop (>= 1024px): tabla normal
   - Vista mobile/tablet (< 1024px): tabla transformada a tarjetas con CSS
   - Usa `data-label` en `<td>` para mostrar labels con `::before`
-  - Diseño simple: label (110px, azul primario) + valor
-  - Border-radius 8px, padding 0.75rem
-  - Box-shadow sutil (0 1px 3px rgba 0.08)
-  - Font-size label: 0.8rem, weight: 600
-  - Sin duplicación de HTML, todo manejado por CSS
-  - Réplica exacta del diseño v1
+  - Código: gradiente con `var(--plg-accent)`, texto blanco
+  - Nombre: fondo `color-mix` sutil con accent
+  - Iconos: 🆔 Documento, 📱 Celular, ✉️ Email
+  - Colores del tema: `--plg-border`, `--plg-cardBg`, `--plg-text`, `--plg-shadow`
+  - Sin colores hardcoded, todo usa variables CSS del tema
+  - Hover con elevación y transform
 
 - **Calendario Responsive:**
   - Modal fullscreen en mobile

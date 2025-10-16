@@ -109,11 +109,11 @@
 
 	.table tr {
 		margin-bottom: 1.25rem;
-		border: 1px solid #e2e8f0;
+		border: 1px solid var(--plg-border);
 		border-radius: 12px;
-		background: white;
+		background: var(--plg-cardBg);
 		padding: 0;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		box-shadow: var(--plg-shadow);
 		overflow: hidden;
 		transition: all 0.2s ease;
 		width: 100%;
@@ -134,9 +134,10 @@
 		box-sizing: border-box;
 		font-size: 1rem;
 		line-height: 1.5;
-		border-bottom: 1px solid #f1f5f9 !important;
+		border-bottom: 1px solid var(--plg-border) !important;
 		gap: 0.5rem;
 		align-items: center;
+		color: var(--plg-text);
 	}
 
 	.table td:last-child {
@@ -146,13 +147,13 @@
 
 	/* Primer campo (Código) con fondo especial */
 	.table td:first-child {
-		background: linear-gradient(135deg, #1a3b89 0%, #2563eb 100%);
+		background: linear-gradient(135deg, var(--plg-accent) 0%, color-mix(in srgb, var(--plg-accent) 90%, #ffffff) 100%);
 		color: white !important;
 		font-size: 1.5rem;
 		font-weight: 700;
 		padding: 1.5rem 1.25rem !important;
 		justify-content: flex-start;
-		border-bottom: 2px solid #1e40af !important;
+		border-bottom: 2px solid var(--plg-accent) !important;
 	}
 
 	.table td:first-child::before {
@@ -161,10 +162,10 @@
 
 	/* Segundo campo (Nombre) destacado */
 	.table td:nth-child(2) {
-		background: #f8fafc;
+		background: color-mix(in srgb, var(--plg-accent) 3%, var(--plg-cardBg));
 		font-size: 1.1rem;
 		font-weight: 600;
-		color: #1e293b;
+		color: var(--plg-text);
 		padding: 1.25rem !important;
 		justify-content: flex-start;
 	}
@@ -183,11 +184,12 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		opacity: 0.8;
 	}
 
-	/* Solo emojis para cada campo (sin texto) */
+	/* Iconos mejorados para cada campo */
 	.table td:nth-child(3)::before {
-		content: "📄"; /* Documento */
+		content: "🆔"; /* Documento de Identidad */
 	}
 
 	.table td:nth-child(4)::before {
@@ -195,7 +197,7 @@
 	}
 
 	.table td:nth-child(5)::before {
-		content: "📧"; /* Email */
+		content: "✉️"; /* Email */
 	}
 
 	/* El valor del campo ocupa el resto del espacio disponible */

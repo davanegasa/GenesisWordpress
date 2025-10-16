@@ -4,6 +4,7 @@
  */
 import { api } from '../../api/client.js';
 import AuthService from '../../services/auth.js';
+import { showToast } from '../../components/ui/toast.js';
 
 let currentMonth = new Date().getMonth() + 1;
 let currentYear = new Date().getFullYear();
@@ -144,21 +145,156 @@ function filterCursos() {
 }
 
 async function deleteCourse(id) {
-	if (!confirm('¿Estás seguro de eliminar este registro? Esta acción no se puede deshacer.')) {
-		return;
+	// Crear modal de confirmación bonito
+	const confirmModal = document.createElement('div');
+	confirmModal.className = 'confirm-modal-overlay';
+	confirmModal.innerHTML = `
+		<div class="confirm-modal">
+			<div class="confirm-icon">⚠️</div>
+			<h3 class="confirm-title">¿Eliminar curso?</h3>
+			<p class="confirm-message">Esta acción eliminará permanentemente el registro del curso. No se puede deshacer.</p>
+			<div class="confirm-actions">
+				<button class="btn-cancel" id="confirm-cancel">Cancelar</button>
+				<button class="btn-confirm-delete" id="confirm-delete">Eliminar</button>
+			</div>
+		</div>
+	`;
+	document.body.appendChild(confirmModal);
+	
+	// Agregar estilos inline si no existen
+	if (!document.getElementById('confirm-modal-styles')) {
+		const styles = document.createElement('style');
+		styles.id = 'confirm-modal-styles';
+		styles.textContent = `
+			.confirm-modal-overlay {
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: rgba(0,0,0,0.6);
+				z-index: 10000;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				backdrop-filter: blur(4px);
+				animation: fadeIn 0.2s ease;
+			}
+			.confirm-modal {
+				background: white;
+				border-radius: 16px;
+				padding: 32px;
+				max-width: 420px;
+				width: 90%;
+				box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+				animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+				text-align: center;
+			}
+			.confirm-icon {
+				font-size: 56px;
+				margin-bottom: 16px;
+				animation: bounce 0.6s ease;
+			}
+			.confirm-title {
+				font-size: 24px;
+				font-weight: 700;
+				color: #1e293b;
+				margin: 0 0 12px 0;
+			}
+			.confirm-message {
+				font-size: 15px;
+				color: #64748b;
+				line-height: 1.6;
+				margin: 0 0 28px 0;
+			}
+			.confirm-actions {
+				display: flex;
+				gap: 12px;
+			}
+			.btn-cancel, .btn-confirm-delete {
+				flex: 1;
+				padding: 14px 20px;
+				border: none;
+				border-radius: 10px;
+				font-weight: 600;
+				font-size: 15px;
+				cursor: pointer;
+				transition: all 0.2s;
+			}
+			.btn-cancel {
+				background: #f1f5f9;
+				color: #475569;
+			}
+			.btn-cancel:hover {
+				background: #e2e8f0;
+				transform: translateY(-1px);
+			}
+			.btn-confirm-delete {
+				background: linear-gradient(135deg, #e11d48 0%, #dc2626 100%);
+				color: white;
+				box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+			}
+			.btn-confirm-delete:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 6px 20px rgba(225, 29, 72, 0.4);
+			}
+			@keyframes fadeIn {
+				from { opacity: 0; }
+				to { opacity: 1; }
+			}
+			@keyframes fadeOut {
+				from { opacity: 1; }
+				to { opacity: 0; }
+			}
+			@keyframes slideUp {
+				from { transform: translateY(20px); opacity: 0; }
+				to { transform: translateY(0); opacity: 1; }
+			}
+			@keyframes bounce {
+				0%, 100% { transform: scale(1); }
+				50% { transform: scale(1.1); }
+			}
+		`;
+		document.head.appendChild(styles);
 	}
 
-	try {
-		await api.delete(`/estudiantes-cursos/${id}`);
-		alert('Curso eliminado correctamente');
-		
-		// Recargar calendario y cerrar modal
-		loadCalendarData();
-		closeModal();
-	} catch (error) {
-		console.error('Error al eliminar:', error);
-		alert('Error al eliminar el curso: ' + (error.message || 'Error desconocido'));
-	}
+	// Manejo de respuesta
+	return new Promise((resolve) => {
+		const handleCancel = () => {
+			confirmModal.style.animation = 'fadeOut 0.2s ease';
+			setTimeout(() => {
+				document.body.removeChild(confirmModal);
+				resolve(false);
+			}, 200);
+		};
+
+		const handleConfirm = async () => {
+			document.body.removeChild(confirmModal);
+			
+			try {
+				await api.delete(`/estudiantes-cursos/${id}`);
+				showToast('✓ Curso eliminado correctamente', 'success');
+				
+				// Recargar calendario y actualizar vista
+				loadCalendarData();
+				
+				// Recargar la vista del día si está abierta
+				if (selectedDate) {
+					loadDayDetails(selectedDate.day);
+				}
+			} catch (error) {
+				console.error('Error al eliminar:', error);
+				showToast('Error al eliminar el curso: ' + (error.message || 'Error desconocido'), 'error');
+			}
+			resolve(true);
+		};
+
+		document.getElementById('confirm-cancel').addEventListener('click', handleCancel);
+		document.getElementById('confirm-delete').addEventListener('click', handleConfirm);
+		confirmModal.addEventListener('click', (e) => {
+			if (e.target === confirmModal) handleCancel();
+		});
+	});
 }
 
 function generateDayCertificates(day, month, year) {
