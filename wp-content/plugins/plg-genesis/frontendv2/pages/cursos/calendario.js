@@ -220,6 +220,26 @@ export function mount(container) {
 			.search-input { width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; transition: all 0.2s; }
 			.search-input:focus { outline: none; border-color: #0c497a; box-shadow: 0 0 0 3px rgba(12, 73, 122, 0.1); }
 			.modal-body { padding: 24px; overflow-y: auto; flex: 1; background: #f9fafb; }
+			
+			/* Responsive mobile */
+			@media (max-width: 767px) {
+				.modal-dialog { max-width: 100%; width: 100%; max-height: 100vh; border-radius: 0; }
+				.modal-header { padding: 16px 20px; }
+				.modal-header h3 { font-size: 18px; }
+				.modal-search { padding: 12px 16px; display: block; }
+				.search-input { font-size: 16px; padding: 10px 14px; }
+				.modal-body { padding: 16px; }
+				.modal-footer { padding: 16px; }
+				.curso-card { padding: 16px; }
+				.curso-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+				.curso-header h4 { font-size: 16px; }
+				.curso-actions { width: 100%; justify-content: flex-end; }
+				.curso-info { grid-template-columns: 1fr; gap: 8px; }
+				.curso-info p { padding: 10px; font-size: 14px; }
+				.btn-success { padding: 14px 16px; font-size: 14px; }
+				.calendar-stats { padding: 12px; margin-bottom: 16px; }
+				.total-courses { font-size: 15px; }
+			}
 			.modal-footer { padding: 20px 24px; background: white; border-top: 1px solid #e5e7eb; }
 			.btn-close { background: rgba(255,255,255,0.2); border: none; font-size: 24px; cursor: pointer; color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 			.btn-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }

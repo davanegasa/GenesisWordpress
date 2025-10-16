@@ -9,6 +9,38 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Agregado
 
+- **Sistema Responsive Dashboard v2:**
+  - Archivo `frontendv2/styles/responsive.css` con breakpoints mobile (<768px) y tablet (768-1024px)
+  - Menú hamburguesa funcional con overlay y animaciones (z-index: 1001)
+  - Sistema de tarjetas reutilizable para listas en mobile
+  - Clases de utilidad responsive (`.show-mobile`, `.hide-mobile`, `.hide-desktop`)
+  - Media queries para todos los componentes principales
+  - Botón hamburguesa flotante con icono SVG
+  - Toggle automático de menú al hacer clic en links (mobile)
+  - Content con padding-top (70px) para evitar solapamiento con botón
+  - Card con overflow:hidden para contener contenido
+
+- **Lista de Estudiantes Responsive:**
+  - Vista desktop: tabla con scroll horizontal dentro del card
+  - Vista mobile: tarjetas verticales tipo card
+  - Wrapper `.table-wrapper` con overflow-x: auto
+  - Tarjetas con diseño campo-valor horizontal
+  - Botón "Ver Información" ancho completo en mobile
+
+- **Calendario Responsive:**
+  - Modal fullscreen en mobile
+  - Grid de calendario adaptable (7 columnas compactas en mobile)
+  - Tarjetas de cursos con layout vertical en mobile
+  - Buscador responsive
+  - Botones táctiles optimizados (min 44px)
+
+- **Informe Anual Responsive:**
+  - KPIs en 1 columna (mobile) y 2 columnas (tablet)
+  - Tabs apilados verticalmente en mobile
+  - Gráficas con altura adaptable (300px mobile, 350px tablet, 400px desktop)
+  - Tabla con scroll horizontal en mobile
+  - Controles de año en columna (mobile)
+
 - **Informe Anual:**
   - Endpoint REST `GET /plg-genesis/v1/estadisticas/informe-anual?year=YYYY`
   - Página `frontendv2/pages/informes/informe-anual.js` con sistema de pestañas
@@ -27,14 +59,22 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Modificado
 
+- **Layout Base:**
+  - `dashboard.php`: agregado menú hamburguesa, overlay y script de toggle
+  - Sidebar con transición y comportamiento overlay en mobile
+  - Padding adaptable del content (16px mobile, 20px tablet, 24px desktop)
+
+- `components.css`: agregados estilos responsive para grids, formularios y tablas
 - Extendido `EstadisticasRepository` con método `getInformeAnual()` usando queries parametrizadas (pg_query_params)
 - Extendido `EstadisticasService` con método `informeAnual()` con validación de año
 - Extendido `EstadisticasController` con ruta `/estadisticas/informe-anual`
 
 ### Notas
 
-- Dashboard v1 (`frontend/informes/oficina/ADC.php`) se mantiene sin cambios para compatibilidad
-- Dashboard v2 implementa la nueva arquitectura API-first con la página `frontendv2/pages/informes/informe-anual.js`
+- Dashboard v1 se mantiene sin cambios para compatibilidad
+- Dashboard v2 ahora es 100% responsive en mobile, tablet y desktop
+- Inputs con `font-size: 16px` en mobile para prevenir zoom en iOS
+- Todos los botones tienen altura mínima de 44px para mejor accesibilidad táctil
 
 ## [1.0.0] - 2024-04-05
 

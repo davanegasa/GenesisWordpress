@@ -625,6 +625,77 @@ export function mount(container) {
 				height: 400px;
 				width: 100%;
 			}
+			
+			/* Responsive mobile */
+			@media (max-width: 767px) {
+				.informe-header {
+					flex-direction: column;
+					align-items: stretch;
+					gap: 12px;
+				}
+				.informe-title {
+					font-size: 22px;
+					text-align: center;
+				}
+				.informe-controls {
+					flex-direction: column;
+					gap: 8px;
+				}
+				.informe-select,
+				.btn-reload {
+					width: 100%;
+					padding: 12px 16px;
+					font-size: 16px;
+				}
+				#informe-stats {
+					grid-template-columns: 1fr;
+					gap: 12px;
+				}
+				.stat-card {
+					padding: 16px;
+				}
+				.stat-value {
+					font-size: 26px;
+				}
+				.tabs-header {
+					flex-direction: column;
+				}
+				.tab-button {
+					padding: 14px 16px;
+					font-size: 14px;
+				}
+				.tab-content {
+					padding: 16px;
+				}
+				.table-header {
+					padding: 16px;
+					font-size: 18px;
+				}
+				/* Tabla responsive con scroll horizontal */
+				.data-table {
+					font-size: 13px;
+				}
+				.data-table th,
+				.data-table td {
+					padding: 10px 12px;
+					white-space: nowrap;
+				}
+				.data-table th {
+					font-size: 11px;
+				}
+				.chart-container {
+					height: 300px;
+				}
+			}
+			
+			@media (min-width: 768px) and (max-width: 1024px) {
+				#informe-stats {
+					grid-template-columns: repeat(2, 1fr);
+				}
+				.chart-container {
+					height: 350px;
+				}
+			}
 		</style>
 
 		<div class="card">

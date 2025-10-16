@@ -4,13 +4,13 @@ import { createTable, createModal } from '../../components/ui/index.js';
 export function mount(container) {
     container.innerHTML = `
         <div class="card">
-            <div class="u-flex u-gap" style="justify-content:space-between;align-items:center;">
+            <div class="u-flex u-gap" style="justify-content:space-between;align-items:center;flex-wrap:wrap;">
                 <div class="card-title">Estudiantes</div>
-                <a class="btn" href="#/estudiantes/nuevo">Nuevo estudiante</a>
+                <a class="btn" href="#/estudiantes/nuevo">+ Nuevo estudiante</a>
             </div>
-            <div class="u-flex u-gap">
-                <input id="s-q" class="input" type="text" placeholder="Buscar por código, nombre, documento, celular o email" style="flex:1;">
-                <button id="s-btn" class="btn btn-primary">Buscar</button>
+            <div class="u-flex u-gap" style="flex-wrap: wrap;">
+                <input id="s-q" class="input" type="text" placeholder="Buscar por código, nombre, documento, celular o email" style="flex:1; min-width: 200px;">
+                <button id="s-btn" class="btn btn-primary">🔍 Buscar</button>
             </div>
             <div id="s-table" class="u-mt-8"></div>
             <div id="s-pag" class="u-flex u-gap u-mt-8" style="justify-content:space-between;align-items:center"></div>
@@ -41,7 +41,7 @@ export function mount(container) {
             const obs = p.ultima_observacion||null;
 			const contacto = st.contacto||{};
 			const body = `
-				<div class="u-grid u-gap" style="grid-template-columns: 1fr 1fr;">
+				<div class="u-grid u-gap estudiante-detail-grid">
 					<div class="card">
 						<div class="card-title is-info">Información Personal</div>
 						<div class="detail-grid">
@@ -98,6 +98,11 @@ export function mount(container) {
     }
 
     function renderTable(){
+        $table.innerHTML='';
+        
+        // Vista desktop: tabla con wrapper
+        const tableWrapper = document.createElement('div');
+        tableWrapper.className = 'table-wrapper hide-mobile';
         const rows = (items||[]).map(st=>[
             st.idEstudiante||'',
             st.nombreCompleto||'',
@@ -105,10 +110,55 @@ export function mount(container) {
             st.celular||'',
             st.email||''
         ]);
-        $table.innerHTML='';
         const tbl = createTable({ columns:['Código','Nombre','Documento','Celular','Email'], rows });
-        $table.appendChild(tbl);
-        Array.from(tbl.querySelectorAll('tbody tr')).forEach((tr, idx)=>{
+        tableWrapper.appendChild(tbl);
+        $table.appendChild(tableWrapper);
+        
+        // Vista mobile: tarjetas
+        const cardList = document.createElement('div');
+        cardList.className = 'card-list';
+        (items||[]).forEach((st, idx)=>{
+            const card = document.createElement('div');
+            card.className = 'data-card';
+            card.innerHTML = `
+                <div class="data-card-header">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 600; color: #0c497a; margin-bottom: 4px;">ID</div>
+                        <div style="font-size: 18px; font-weight: 700;">${st.idEstudiante||''}</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 6px;">Nombre</div>
+                    <div style="font-size: 16px; font-weight: 600; color: #1e293b;">${st.nombreCompleto||'Sin nombre'}</div>
+                </div>
+                <div class="data-card-body">
+                    <div class="data-card-field">
+                        <div class="data-card-field-label">Documento</div>
+                        <div class="data-card-field-value">${st.docIdentidad||'-'}</div>
+                    </div>
+                    <div class="data-card-field">
+                        <div class="data-card-field-label">Celular</div>
+                        <div class="data-card-field-value">${st.celular||'-'}</div>
+                    </div>
+                    <div class="data-card-field">
+                        <div class="data-card-field-label">Email</div>
+                        <div class="data-card-field-value">${st.email||'-'}</div>
+                    </div>
+                </div>
+                <div class="data-card-actions">
+                    <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 15px; border-radius: 8px;">
+                        <span style="margin-right: 8px;">ℹ️</span>
+                        <span>Ver Información</span>
+                    </button>
+                </div>
+            `;
+            card.querySelector('.btn-primary').addEventListener('click', ()=>{ openDetailModal(st.idEstudiante); });
+            cardList.appendChild(card);
+        });
+        $table.appendChild(cardList);
+        
+        // Event listeners para la tabla (solo desktop)
+        Array.from(tableWrapper.querySelectorAll('tbody tr')).forEach((tr, idx)=>{
             const id = items[idx] && items[idx].idEstudiante;
             tr.style.cursor='pointer';
             tr.addEventListener('click', ()=>{ if (id) openDetailModal(id); });
