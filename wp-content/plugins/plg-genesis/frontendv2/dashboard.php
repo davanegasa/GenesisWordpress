@@ -112,11 +112,11 @@ if (!defined('ABSPATH')) { exit; }
 			const sidebar = document.getElementById('sidebar');
 			const overlay = document.getElementById('sidebar-overlay');
 
-			function toggleMenu() {
-				sidebar.classList.toggle('open');
-				overlay.classList.toggle('active');
-				document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
-			}
+		function toggleMenu() {
+			sidebar.classList.toggle('open');
+			overlay.classList.toggle('active');
+			document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+		}
 
 		menuToggle?.addEventListener('click', toggleMenu);
 		overlay?.addEventListener('click', toggleMenu);
@@ -131,7 +131,7 @@ if (!defined('ABSPATH')) { exit; }
 				}
 			}
 		});
-		});
+	});
 	</script>
 
 	<?php wp_footer(); ?>
