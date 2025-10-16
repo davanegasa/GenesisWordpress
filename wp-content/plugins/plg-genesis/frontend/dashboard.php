@@ -238,6 +238,147 @@
         margin: 20px;
       }
     }
+
+    /* Estilos del header superior */
+    .main-wrapper-v1 { 
+      flex:1; 
+      display: flex; 
+      flex-direction: column; 
+      margin-left: var(--sidebar-width);
+    }
+    .top-header-v1 { 
+      background: white; 
+      border-bottom: 1px solid #e5e7eb; 
+      padding: 12px 24px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: flex-end; 
+      gap: 24px; 
+      position: sticky; 
+      top: 0; 
+      z-index: 100; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+    }
+    .user-info-v1 { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+    }
+    .user-avatar-v1 { 
+      width: 36px; 
+      height: 36px; 
+      border-radius: 50%; 
+      background: #0c497a; 
+      color: white; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-weight: 600; 
+      font-size: 14px; 
+    }
+    .user-details-v1 { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 2px; 
+    }
+    .user-name-v1 { 
+      font-weight: 600; 
+      font-size: 14px; 
+      color: #111827; 
+    }
+    .user-role-v1 { 
+      font-size: 12px; 
+      color: #6b7280; 
+      text-transform: capitalize; 
+    }
+    .dashboard-toggle-v1 { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      padding: 8px 12px; 
+      border-radius: 8px; 
+      background: #f7f7fb; 
+      border: 1px solid #e5e7eb; 
+    }
+    .dashboard-toggle-v1 label { 
+      font-size: 13px; 
+      font-weight: 500; 
+      color: #111827; 
+      cursor: pointer; 
+      user-select: none; 
+    }
+    .toggle-switch-v1 { 
+      position: relative; 
+      display: inline-block; 
+      width: 44px; 
+      height: 24px; 
+      cursor: pointer; 
+    }
+    .toggle-switch-v1 input { 
+      position: absolute; 
+      opacity: 0; 
+      width: 100%; 
+      height: 100%; 
+      top: 0; 
+      left: 0; 
+      cursor: pointer; 
+      z-index: 2; 
+      margin: 0; 
+    }
+    .toggle-slider-v1 { 
+      position: absolute; 
+      cursor: pointer; 
+      top: 0; 
+      left: 0; 
+      right: 0; 
+      bottom: 0; 
+      background-color: #ccc; 
+      transition: .3s; 
+      border-radius: 24px; 
+      z-index: 1; 
+    }
+    .toggle-slider-v1:before { 
+      position: absolute; 
+      content: ""; 
+      height: 18px; 
+      width: 18px; 
+      left: 3px; 
+      bottom: 3px; 
+      background-color: white; 
+      transition: .3s; 
+      border-radius: 50%; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+    }
+    .toggle-switch-v1 input:checked + .toggle-slider-v1 { 
+      background-color: #0c497a; 
+    }
+    .toggle-switch-v1 input:checked + .toggle-slider-v1:before { 
+      transform: translateX(20px); 
+    }
+
+    @media (max-width: 768px) {
+      .main-wrapper-v1 {
+        margin-left: 0;
+      }
+      .top-header-v1 {
+        padding: 8px 12px;
+        gap: 8px;
+      }
+      .user-avatar-v1 {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+      }
+      .user-name-v1 {
+        font-size: 13px;
+      }
+      .user-role-v1 {
+        font-size: 11px;
+      }
+      .dashboard-toggle-v1 label {
+        font-size: 11px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -396,9 +537,65 @@
     </a>
   </nav>
 
-  <!-- Contenido principal -->
-  <div id="content">
-    <iframe id="contentFrame" src="<?php echo plugin_dir_url(__FILE__); ?>main.html"></iframe>
+  <!-- Main Wrapper con Header y Contenido -->
+  <div class="main-wrapper-v1">
+    <!-- Header con info de usuario y toggle -->
+    <header class="top-header-v1">
+      <?php
+      $current_user = wp_get_current_user();
+      $user_roles = $current_user->roles;
+      $is_admin_or_super = in_array('administrator', $user_roles) || in_array('plg_super_admin', $user_roles);
+      
+      // Obtener nombre del rol
+      $role_map = array(
+        'administrator' => 'Administrador',
+        'plg_super_admin' => 'Super Admin',
+        'plg_office_manager' => 'Office Manager',
+        'plg_staff' => 'Staff',
+      );
+      
+      $display_role = 'Usuario';
+      foreach (array('administrator', 'plg_super_admin', 'plg_office_manager', 'plg_staff') as $role) {
+        if (in_array($role, $user_roles)) {
+          $display_role = $role_map[$role];
+          break;
+        }
+      }
+      
+      // Obtener iniciales
+      $name_parts = explode(' ', trim($current_user->display_name));
+      if (count($name_parts) === 1) {
+        $initials = strtoupper(substr($name_parts[0], 0, 2));
+      } else {
+        $initials = strtoupper($name_parts[0][0] . $name_parts[count($name_parts) - 1][0]);
+      }
+      ?>
+      
+      <div class="user-info-v1">
+        <div class="user-avatar-v1" title="<?php echo esc_attr($current_user->display_name); ?>">
+          <?php echo $initials; ?>
+        </div>
+        <div class="user-details-v1">
+          <div class="user-name-v1"><?php echo esc_html($current_user->display_name); ?></div>
+          <div class="user-role-v1"><?php echo esc_html($display_role); ?></div>
+        </div>
+      </div>
+      
+      <?php if ($is_admin_or_super): ?>
+      <div class="dashboard-toggle-v1">
+        <label for="dashboard-version-toggle-v1">Dashboard V1 / V2</label>
+        <label class="toggle-switch-v1">
+          <input type="checkbox" id="dashboard-version-toggle-v1">
+          <span class="toggle-slider-v1"></span>
+        </label>
+      </div>
+      <?php endif; ?>
+    </header>
+
+    <!-- Contenido principal -->
+    <div id="content">
+      <iframe id="contentFrame" src="<?php echo plugin_dir_url(__FILE__); ?>main.html"></iframe>
+    </div>
   </div>
 </div>
 
@@ -468,6 +665,21 @@
         document.getElementById('overlay').classList.remove('active');
       }
     });
+
+    // Manejar el toggle de dashboard V1/V2
+    const dashboardToggle = document.getElementById('dashboard-version-toggle-v1');
+    if (dashboardToggle) {
+      dashboardToggle.addEventListener('change', function(event) {
+        if (event.target.checked) {
+          // Cambiar a V2
+          const baseUrl = window.location.origin;
+          const pathPrefix = window.location.pathname.includes('/genesis/') ? '/genesis' : '';
+          
+          // Redirigir al dashboard v2
+          window.location.href = baseUrl + pathPrefix + '/dashboard-v2';
+        }
+      });
+    }
   });
 </script>
 

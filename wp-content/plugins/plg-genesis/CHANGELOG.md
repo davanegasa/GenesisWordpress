@@ -7,6 +7,36 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+### Agregado
+
+- **Header con información de usuario y toggle de dashboard V1/V2:**
+  - **Nuevo componente `frontendv2/components/layout/header.js`:**
+    - Muestra avatar circular con iniciales del usuario
+    - Muestra nombre completo y rol del usuario (Admin, Super Admin, Office Manager, Staff)
+    - Toggle "Dashboard V1 / V2" visible solo para administradores y super admin
+    - Función de redirección entre versiones de dashboard
+  - **Dashboard V2 (`frontendv2/dashboard.php`):**
+    - Header sticky en la parte superior con diseño moderno
+    - Toggle en estado ON (checked) indicando versión V2 activa
+    - Al desactivar el toggle redirige a Dashboard V1
+    - Estilos CSS completos para el header y toggle switch
+  - **Dashboard V1 (`frontend/dashboard.php`):**
+    - Header superior con misma funcionalidad que V2
+    - Toggle en estado OFF indicando versión V1 activa
+    - Al activar el toggle redirige a Dashboard V2
+    - Clases CSS con sufijo `-v1` para evitar conflictos
+  - **Integración en bootstrap (`frontendv2/core/bootstrap.js`):**
+    - Inicialización automática del header después del AuthService
+  - **Responsive completo (`frontendv2/styles/responsive.css`):**
+    - Desktop (>1024px): Header completo con espacio, toggle con texto
+    - Tablet/Mobile (<1024px): Header compacto, botón hamburguesa sin solapamiento
+    - Pantallas pequeñas (<640px): Solo switch visible, label de texto oculto
+    - Ajustes de z-index para correcta superposición de elementos
+  - **Navegación bidireccional:**
+    - V1 → activar toggle → V2
+    - V2 → desactivar toggle → V1
+    - Facilita el cambio entre versiones para admin y super admin
+
 ### Corregido
 
 - **Fix: Acordeones del menú mobile se cerraban al hacer click:**

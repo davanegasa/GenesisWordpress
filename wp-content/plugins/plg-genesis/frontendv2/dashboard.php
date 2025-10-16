@@ -22,6 +22,22 @@ if (!defined('ABSPATH')) { exit; }
 		.sidebar { position:sticky; top:0; align-self:flex-start; height:100vh; overflow:auto; width:260px; background: var(--plg-sidebarBg, #111827); color: var(--plg-sidebarText, #e5e7eb); padding:16px; transition: transform 0.3s ease; z-index: 1000; }
         .sidebar a { color: var(--plg-sidebarText, #e5e7eb); text-decoration:none; display:block; padding:10px 12px; border-radius:6px; }
         .sidebar a.active, .sidebar a:hover { background: var(--plg-accent, #1f2937); color:#fff; }
+		.main-wrapper { flex:1; display: flex; flex-direction: column; width: 100%; box-sizing: border-box; }
+		.top-header { background: var(--plg-cardBg, #fff); border-bottom: 1px solid var(--plg-border, #e5e7eb); padding: 12px 24px; display: flex; align-items: center; justify-content: flex-end; gap: 24px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+		.user-info { display: flex; align-items: center; gap: 12px; }
+		.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--plg-accent, #0c497a); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
+		.user-details { display: flex; flex-direction: column; gap: 2px; }
+		.user-name { font-weight: 600; font-size: 14px; color: var(--plg-text, #111827); }
+		.user-role { font-size: 12px; color: var(--plg-textSecondary, #6b7280); text-transform: capitalize; }
+		.dashboard-toggle { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; background: var(--plg-bg, #f7f7fb); border: 1px solid var(--plg-border, #e5e7eb); }
+		.dashboard-toggle label { font-size: 13px; font-weight: 500; color: var(--plg-text, #111827); cursor: pointer; user-select: none; }
+		.toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; }
+		.toggle-switch input { position: absolute; opacity: 0; width: 100%; height: 100%; top: 0; left: 0; cursor: pointer; z-index: 2; margin: 0; }
+		.toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 24px; z-index: 1; }
+		.toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+		.toggle-switch input:checked + .toggle-slider { background-color: var(--plg-accent, #0c497a); }
+		.toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+		.toggle-switch input:focus + .toggle-slider { box-shadow: 0 0 0 2px rgba(12, 73, 122, 0.2); }
 		.content { flex:1; padding:24px; width: 100%; box-sizing: border-box; }
 		.kpi { background: var(--plg-cardBg, #fff); border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
 		.kpi-grid { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:16px; }
@@ -31,6 +47,11 @@ if (!defined('ABSPATH')) { exit; }
 		.menu-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 1001; background: var(--plg-accent); color: white; border: none; border-radius: 8px; width: 44px; height: 44px; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(12, 73, 122, 0.3); }
 		.menu-toggle:hover { background: #0a3a5f; }
 		.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+		
+		/* En desktop: ocultar el botón */
+		@media (min-width: 1024px) {
+			.menu-toggle { display: none !important; }
+		}
 
         /* Ocultar cabeceras/títulos del tema WP solo en esta página */
 		.wp-block-site-title, .wp-block-post-title, .site-header, .wp-block-template-part, .entry-title, .page-title {
@@ -70,9 +91,14 @@ if (!defined('ABSPATH')) { exit; }
 			<a href="#/docs" class="submenu" data-group="ajustes">API Docs</a>
 			<a href="<?php echo esc_url( wp_logout_url( home_url('/dashboard-v2/') ) ); ?>" class="submenu" data-group="ajustes">Cerrar sesión</a>
 		</nav>
-		<main class="content">
-			<div id="view"></div>
-		</main>
+		<div class="main-wrapper">
+			<header class="top-header" id="top-header">
+				<!-- Se llenará dinámicamente con JS -->
+			</header>
+			<main class="content">
+				<div id="view"></div>
+			</main>
+		</div>
 	</div>
 
 	<script>
