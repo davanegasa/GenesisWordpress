@@ -5,6 +5,37 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [No publicado]
+
+### Agregado
+
+- **Informe Anual:**
+  - Endpoint REST `GET /plg-genesis/v1/estadisticas/informe-anual?year=YYYY`
+  - Página `frontendv2/pages/informes/informe-anual.js` con sistema de pestañas
+  - Gráficas interactivas con Chart.js (Tendencias y Comparativa)
+  - Nueva sección "Informes" en menú Dashboard v2
+
+- **Calendario de Cursos:**
+  - Endpoints REST:
+    - `GET /plg-genesis/v1/cursos-calendario/mes?mes=1&anio=2025` (cursos por día del mes)
+    - `GET /plg-genesis/v1/cursos-calendario/dia?dia=15&mes=1&anio=2025` (detalles de cursos del día)
+    - `DELETE /plg-genesis/v1/estudiantes-cursos/{id}` (eliminar registro de curso)
+  - Página `frontendv2/pages/cursos/calendario.js` con vista mensual
+  - Modal de detalles con acciones: generar certificados y eliminar
+  - Navegación entre meses
+  - Integración en submenú "Cursos" del Dashboard v2
+
+### Modificado
+
+- Extendido `EstadisticasRepository` con método `getInformeAnual()` usando queries parametrizadas (pg_query_params)
+- Extendido `EstadisticasService` con método `informeAnual()` con validación de año
+- Extendido `EstadisticasController` con ruta `/estadisticas/informe-anual`
+
+### Notas
+
+- Dashboard v1 (`frontend/informes/oficina/ADC.php`) se mantiene sin cambios para compatibilidad
+- Dashboard v2 implementa la nueva arquitectura API-first con la página `frontendv2/pages/informes/informe-anual.js`
+
 ## [1.0.0] - 2024-04-05
 
 ### Agregado

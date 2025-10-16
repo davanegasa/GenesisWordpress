@@ -13,6 +13,12 @@ class PlgGenesis_EstadisticasController {
 			'callback'            => [ __CLASS__, 'get_resumen' ],
 			'permission_callback' => plg_genesis_can('plg_view_stats')
 		]);
+
+		register_rest_route('plg-genesis/v1', '/estadisticas/informe-anual', [
+			'methods'             => 'GET',
+			'callback'            => [ __CLASS__, 'get_informe_anual' ],
+			'permission_callback' => plg_genesis_can('plg_view_stats')
+		]);
 	}
 
 	public static function get_resumen($request) {
@@ -27,6 +33,22 @@ class PlgGenesis_EstadisticasController {
 		$repo = new PlgGenesis_EstadisticasRepository($conn);
 		$svc  = new PlgGenesis_EstadisticasService($repo);
 		$result = $svc->resumen($month, $year);
+		if (is_wp_error($result)) { return self::error($result); }
+
+		return new WP_REST_Response([ 'success' => true, 'data' => $result ], 200);
+	}
+
+	public static function get_informe_anual($request) {
+		$year = $request->get_param('year');
+
+		$office = PlgGenesis_OfficeResolver::resolve_user_office(get_current_user_id());
+		if (is_wp_error($office)) { return self::error($office); }
+		$conn = PlgGenesis_ConnectionProvider::get_connection_for_office($office);
+		if (is_wp_error($conn)) { return self::error($conn); }
+
+		$repo = new PlgGenesis_EstadisticasRepository($conn);
+		$svc  = new PlgGenesis_EstadisticasService($repo);
+		$result = $svc->informeAnual($year);
 		if (is_wp_error($result)) { return self::error($result); }
 
 		return new WP_REST_Response([ 'success' => true, 'data' => $result ], 200);

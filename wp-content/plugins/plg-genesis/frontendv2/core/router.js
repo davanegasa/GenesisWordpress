@@ -58,6 +58,7 @@ function resolveLoader(hash) {
     if (hash.startsWith('#/programas/nuevo')) return () => import('../pages/programas/create.js').then(m => m.mount(container));
     if (hash.startsWith('#/programa/')) { let id = hash.split('/')[2] || ''; if (id.includes('?')) id=id.split('?')[0]; id=decodeURIComponent(id); return () => import('../pages/programas/detail.js').then(m=> m.mount(container,{ id })); }
     if (hash.startsWith('#/programas')) return () => import('../pages/programas/list.js').then(m => m.mount(container));
+    if (hash.startsWith('#/cursos/calendario')) return () => import('../pages/cursos/calendario.js').then(m => m.mount(container));
     if (hash.startsWith('#/cursos/nuevo')) return () => import('../pages/cursos/create.js').then(m => m.mount(container));
     if (hash.startsWith('#/curso/')) { let id = hash.split('/')[2] || ''; if (id.includes('?')) id=id.split('?')[0]; id=decodeURIComponent(id); return () => import('../pages/cursos/detail.js').then(m=> m.mount(container,{ id })); }
     if (hash.startsWith('#/cursos')) return () => import('../pages/cursos/list.js').then(m => m.mount(container));
@@ -67,5 +68,6 @@ function resolveLoader(hash) {
 	if (hash.startsWith('#/usuarios')) return () => import('../pages/users/list.js').then(m => m.mount(container));
 	if (hash.startsWith('#/migration')) return () => import('../pages/migration/roles.js').then(m => m.mount(container));
 	if (hash.startsWith('#/docs')) return () => import('../pages/docs/swagger.js').then(m => m.mount(container));
+	if (hash.startsWith('#/informes/anual')) return () => import('../pages/informes/informe-anual.js').then(m => m.mount(container));
 	return () => import('../pages/dashboard/index.js').then(m => m.mount(container));
 }
