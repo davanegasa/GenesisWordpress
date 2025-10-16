@@ -118,13 +118,17 @@ if (!defined('ABSPATH')) { exit; }
 				document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
 			}
 
-			menuToggle?.addEventListener('click', toggleMenu);
-			overlay?.addEventListener('click', toggleMenu);
+		menuToggle?.addEventListener('click', toggleMenu);
+		overlay?.addEventListener('click', toggleMenu);
 
-			// Cerrar menú al hacer clic en un link (solo en mobile)
+		// Cerrar menú al hacer clic en un sub-item (solo en mobile)
+		// No cerrar si es un item principal con acordeón
 		sidebar?.addEventListener('click', (e) => {
 			if (e.target.tagName === 'A' && window.innerWidth < 1024) {
-				toggleMenu();
+				// Solo cerrar si es un submenu, no un trigger de acordeón
+				if (e.target.classList.contains('submenu')) {
+					toggleMenu();
+				}
 			}
 		});
 		});

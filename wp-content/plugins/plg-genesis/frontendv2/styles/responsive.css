@@ -187,16 +187,42 @@
 		opacity: 0.8;
 	}
 
-	/* Iconos mejorados para cada campo */
-	.table td:nth-child(3)::before {
+	/* Iconos mejorados para cada campo - Estudiantes */
+	.table:not(.users-table):not(.contactos-table) td:nth-child(3)::before {
 		content: "🆔"; /* Documento de Identidad */
 	}
 
-	.table td:nth-child(4)::before {
+	.table:not(.users-table):not(.contactos-table) td:nth-child(4)::before {
 		content: "📱"; /* Celular */
 	}
 
-	.table td:nth-child(5)::before {
+	.table:not(.users-table):not(.contactos-table) td:nth-child(5)::before {
+		content: "✉️"; /* Email */
+	}
+
+	/* Iconos para tabla de usuarios */
+	.users-table td:nth-child(3)::before {
+		content: "✉️"; /* Email */
+	}
+
+	.users-table td:nth-child(4)::before {
+		content: "🏢"; /* Oficina */
+	}
+
+	.users-table td:nth-child(5)::before {
+		content: "👤"; /* Rol */
+	}
+
+	.users-table td:nth-child(6)::before {
+		content: "⚙️"; /* Acciones */
+	}
+
+	/* Iconos para tabla de contactos (ID, Nombre, Iglesia, Email) */
+	.contactos-table td:nth-child(3)::before {
+		content: "⛪"; /* Iglesia */
+	}
+
+	.contactos-table td:nth-child(4)::before {
 		content: "✉️"; /* Email */
 	}
 

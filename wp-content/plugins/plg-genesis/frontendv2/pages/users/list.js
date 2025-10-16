@@ -2,7 +2,7 @@
  * Vista de listado y gestión de usuarios
  */
 import { api as apiClient } from '../../api/client.js';
-import { createModal } from '../../components/ui/index.js';
+import { createModal, createTable } from '../../components/ui/index.js';
 import AuthService from '../../services/auth.js';
 import { showToast } from '../../components/ui/toast.js';
 import { showConfirm } from '../../components/ui/confirm.js';
@@ -93,17 +93,32 @@ async function loadUsers() {
 			return;
 		}
 
-		// Crear tabla
-		const columns = [
-			{ key: 'login', label: 'Usuario' },
-			{ key: 'name', label: 'Nombre' },
-			{ key: 'email', label: 'Email' },
-			{ key: 'office', label: 'Oficina' },
-			{ key: 'roles', label: 'Rol', render: (roles) => formatRole(roles[0]) },
-			{ key: 'actions', label: 'Acciones', render: (_, user) => renderActions(user) },
-		];
-
-		tableContainer.innerHTML = renderUsersTable(columns, users);
+		// Crear tabla con data-labels para responsive (patrón de estudiantes)
+		const rows = users.map(user => [
+			user.login || '',
+			user.name || '',
+			user.email || '',
+			user.office || '',
+			formatRole(user.roles[0]),
+			{ html: renderActions(user) }
+		]);
+		
+		const columnLabels = ['Usuario', 'Nombre', 'Email', 'Oficina', 'Rol', 'Acciones'];
+		const tbl = createTable({ columns: columnLabels, rows });
+		
+		// Agregar data-labels a cada td para mobile (igual que estudiantes)
+		const tbody = tbl.querySelector('tbody');
+		if (tbody) {
+			Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+				Array.from(tr.querySelectorAll('td')).forEach((td, idx) => {
+					td.setAttribute('data-label', columnLabels[idx]);
+				});
+			});
+		}
+		
+		// Limpiar y agregar tabla
+		tableContainer.innerHTML = '';
+		tableContainer.appendChild(tbl);
 
 		// Paginación
 		renderPagination(pagination);
@@ -112,33 +127,6 @@ async function loadUsers() {
 		console.error('Error cargando usuarios:', error);
 		tableContainer.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
 	}
-}
-
-function renderUsersTable(columns, users) {
-	const headerHtml = columns.map(col => `<th>${col.label}</th>`).join('');
-	const rowsHtml = users.map(user => {
-		const cellsHtml = columns.map(col => {
-			let value;
-			if (col.render) {
-				value = col.render(user[col.key], user);
-			} else {
-				value = user[col.key] || '';
-			}
-			return `<td>${value}</td>`;
-		}).join('');
-		return `<tr>${cellsHtml}</tr>`;
-	}).join('');
-
-	return `
-		<table class="table">
-			<thead>
-				<tr>${headerHtml}</tr>
-			</thead>
-			<tbody>
-				${rowsHtml}
-			</tbody>
-		</table>
-	`;
 }
 
 function formatRole(roleSlug) {

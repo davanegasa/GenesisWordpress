@@ -94,8 +94,23 @@ export async function mount(container){
         const endIdx = Math.min(startIdx + pageSize, total);
         const visible = contactsData.slice(startIdx, endIdx);
         const rows = visible.map(it => [it.id || '', it.nombre || '', it.iglesia || '', it.email || '']);
+        const columnLabels = ['ID','Nombre','Iglesia','Email'];
+        const tbl = createTable({ columns: columnLabels, rows });
+        
+        // Agregar clase específica para contactos
+        tbl.classList.add('contactos-table');
+        
+        // Agregar data-labels a cada td para mobile (patrón de estudiantes)
+        const tbody = tbl.querySelector('tbody');
+        if (tbody) {
+            Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+                Array.from(tr.querySelectorAll('td')).forEach((td, idx) => {
+                    td.setAttribute('data-label', columnLabels[idx]);
+                });
+            });
+        }
+        
         $table.innerHTML = '';
-        const tbl = createTable({ columns: ['ID','Nombre','Iglesia','Email'], rows });
         $table.appendChild(tbl);
         Array.from(tbl.querySelectorAll('tbody tr')).forEach((tr, idx) => {
             tr.style.cursor = 'pointer';
