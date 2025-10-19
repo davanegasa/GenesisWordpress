@@ -20,13 +20,27 @@ class PlgGenesis_ContactosController {
 			'permission_callback' => plg_genesis_can('plg_create_contacts')
 		]);
 
-		register_rest_route('plg-genesis/v1', '/contactos/(?P<id>[0-9]+)', [
+		// Endpoint por code (recomendado - identificador público)
+		register_rest_route('plg-genesis/v1', '/contactos/(?P<code>[a-zA-Z0-9]+)', [
+			'methods'             => 'GET',
+			'callback'            => [ __CLASS__, 'obtener_por_code' ],
+			'permission_callback' => plg_genesis_can('plg_view_contacts')
+		]);
+
+		register_rest_route('plg-genesis/v1', '/contactos/(?P<code>[a-zA-Z0-9]+)', [
+			'methods'             => 'PUT',
+			'callback'            => [ __CLASS__, 'actualizar_por_code' ],
+			'permission_callback' => plg_genesis_can('plg_edit_contacts')
+		]);
+
+		// Endpoints por ID (deprecated - mantener temporalmente por compatibilidad)
+		register_rest_route('plg-genesis/v1', '/contactos/id/(?P<id>[0-9]+)', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'obtener' ],
 			'permission_callback' => plg_genesis_can('plg_view_contacts')
 		]);
 
-		register_rest_route('plg-genesis/v1', '/contactos/(?P<id>[0-9]+)', [
+		register_rest_route('plg-genesis/v1', '/contactos/id/(?P<id>[0-9]+)', [
 			'methods'             => 'PUT',
 			'callback'            => [ __CLASS__, 'actualizar' ],
 			'permission_callback' => plg_genesis_can('plg_edit_contacts')
@@ -87,6 +101,31 @@ class PlgGenesis_ContactosController {
 		$repo = new PlgGenesis_ContactosRepository($conn);
 		$svc  = new PlgGenesis_ContactosService($repo);
 		$result = $svc->actualizar($id, is_array($payload) ? $payload : []);
+		if (is_wp_error($result)) { return self::error($result); }
+		return new WP_REST_Response([ 'success' => true, 'data' => [ 'updated' => true ] ], 200);
+	}
+
+	public static function obtener_por_code($request) {
+		$code = $request->get_param('code');
+		$office = PlgGenesis_OfficeResolver::resolve_user_office(get_current_user_id());
+		if (is_wp_error($office)) { return self::error($office); }
+		$conn = PlgGenesis_ConnectionProvider::get_connection_for_office($office);
+		if (is_wp_error($conn)) { return self::error($conn); }
+		$repo = new PlgGenesis_ContactosRepository($conn);
+		$result = $repo->getByCode($code);
+		if (is_wp_error($result)) { return self::error($result); }
+		return new WP_REST_Response([ 'success' => true, 'data' => $result ], 200);
+	}
+
+	public static function actualizar_por_code($request) {
+		$code = $request->get_param('code');
+		$payload = $request->get_json_params();
+		$office = PlgGenesis_OfficeResolver::resolve_user_office(get_current_user_id());
+		if (is_wp_error($office)) { return self::error($office); }
+		$conn = PlgGenesis_ConnectionProvider::get_connection_for_office($office);
+		if (is_wp_error($conn)) { return self::error($conn); }
+		$repo = new PlgGenesis_ContactosRepository($conn);
+		$result = $repo->updateByCode($code, is_array($payload) ? $payload : []);
 		if (is_wp_error($result)) { return self::error($result); }
 		return new WP_REST_Response([ 'success' => true, 'data' => [ 'updated' => true ] ], 200);
 	}
