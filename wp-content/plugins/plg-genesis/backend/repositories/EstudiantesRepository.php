@@ -85,6 +85,17 @@ class PlgGenesis_EstudiantesRepository {
 		return $total;
 	}
 
+	public function getContactCodeByContactCode($contactCode) {
+		// Simplemente validar y retornar el code (el code ES el code)
+		$res = pg_query_params($this->conn, 'SELECT TRIM(code) as code FROM contactos WHERE code = $1', [ trim($contactCode) ]);
+		if (!$res) { return new WP_Error('db_query_failed', 'Error validando código del contacto', [ 'status' => 500 ]); }
+		$row = pg_fetch_assoc($res);
+		pg_free_result($res);
+		if (!$row) { return new WP_Error('not_found', 'Contacto no encontrado', [ 'status' => 404 ]); }
+		return trim($row['code'] ?? '');
+	}
+
+	// Deprecated: usar getContactCodeByContactCode
 	public function getContactCode($contactId) {
 		$res = pg_query_params($this->conn, 'SELECT TRIM(code) as code FROM contactos WHERE id = $1', [ intval($contactId) ]);
 		if (!$res) { return new WP_Error('db_query_failed', 'Error obteniendo código del contacto', [ 'status' => 500 ]); }
@@ -92,6 +103,15 @@ class PlgGenesis_EstudiantesRepository {
 		pg_free_result($res);
 		if (!$row) { return new WP_Error('not_found', 'Contacto no encontrado', [ 'status' => 404 ]); }
 		return trim($row['code'] ?? '');
+	}
+
+	public function getContactIdByCode($contactCode) {
+		$res = pg_query_params($this->conn, 'SELECT id FROM contactos WHERE code = $1', [ trim($contactCode) ]);
+		if (!$res) { return new WP_Error('db_query_failed', 'Error obteniendo ID del contacto', [ 'status' => 500 ]); }
+		$row = pg_fetch_assoc($res);
+		pg_free_result($res);
+		if (!$row) { return new WP_Error('not_found', 'Contacto no encontrado', [ 'status' => 404 ]); }
+		return intval($row['id']);
 	}
 
 	public function existsStudentId($idEstudiante) {

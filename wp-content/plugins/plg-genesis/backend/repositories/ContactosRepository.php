@@ -22,14 +22,13 @@ class PlgGenesis_ContactosRepository {
 		$items = [];
 		while ($row = pg_fetch_assoc($res)) {
 			$items[] = [
-				'id'       => intval($row['id']),
+				'code'     => $row['code'],
 				'nombre'   => $row['nombre'],
 				'iglesia'  => $row['iglesia'],
 				'email'    => $row['email'],
 				'celular'  => $row['celular'],
 				'direccion'=> $row['direccion'],
 				'ciudad'   => $row['ciudad'],
-				'code'     => $row['code'],
 			];
 		}
 		pg_free_result($res);
@@ -70,14 +69,13 @@ class PlgGenesis_ContactosRepository {
 		pg_free_result($res);
 		if (!$row) return new WP_Error('not_found', 'Contacto no encontrado', [ 'status' => 404 ]);
 		return [
-			'id'       => intval($row['id']),
+			'code'     => $row['code'],
 			'nombre'   => $row['nombre'],
 			'iglesia'  => $row['iglesia'],
 			'email'    => $row['email'],
 			'celular'  => $row['celular'],
 			'direccion'=> $row['direccion'],
 			'ciudad'   => $row['ciudad'],
-			'code'     => $row['code'],
 		];
 	}
 
@@ -89,14 +87,13 @@ class PlgGenesis_ContactosRepository {
 		pg_free_result($res);
 		if (!$row) return new WP_Error('not_found', 'Contacto no encontrado', [ 'status' => 404 ]);
 		return [
-			'id'       => intval($row['id']),
+			'code'     => $row['code'],
 			'nombre'   => $row['nombre'],
 			'iglesia'  => $row['iglesia'],
 			'email'    => $row['email'],
 			'celular'  => $row['celular'],
 			'direccion'=> $row['direccion'],
 			'ciudad'   => $row['ciudad'],
-			'code'     => $row['code'],
 		];
 	}
 
