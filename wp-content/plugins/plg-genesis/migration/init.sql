@@ -14,5 +14,6 @@ $do$;
 GRANT ALL PRIVILEGES ON DATABASE emmaus_estudiantes TO emmaus;
 ALTER USER emmaus WITH SUPERUSER;
 
--- Ejecutar el archivo con el esquema y datos de producción
-\i /docker-entrypoint-initdb.d/migrations/dump20250805.sql; 
+-- NOTA: Los datos se cargan mediante scripts separados:
+-- - load-bog-data.sh carga dump20250805.sql en emmaus_estudiantes
+-- - load-fdl-data.sh carga fuentedeLuz.sql en fuentedeluz_estudiantes 

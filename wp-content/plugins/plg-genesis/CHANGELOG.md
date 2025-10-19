@@ -9,6 +9,27 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Agregado
 
+- **Sistema Multi-Base de Datos PostgreSQL por Oficina:**
+  - **Configuración de desarrollo replica producción** con múltiples bases de datos PostgreSQL
+  - **Base de datos BOG (Bogotá)**: `emmaus_estudiantes` - usando `dump20250805.sql`
+  - **Base de datos FDL (Fuente de Luz)**: `fuentedeluz_estudiantes` - usando `fuentedeLuz.sql`
+  - **Variables de entorno por oficina**: `BOG_DB_*`, `FDL_DB_*` configuradas en `docker-compose.yml`
+  - **Códigos de oficina alineados con producción**: BOG, FDL (3 letras)
+  - **Scripts de inicialización automática**:
+    - `migration/init-postgres-multidb.sh` - Crea bases de datos adicionales
+    - `migration/load-bog-data.sh` - Carga datos de Bogotá
+    - `migration/load-fdl-data.sh` - Carga datos de Fuente de Luz
+  - **Documentación completa**:
+    - [`migration/MULTIDB_SETUP.md`](migration/MULTIDB_SETUP.md) - Guía de configuración y uso
+    - [`migration/ARCHITECTURE.md`](migration/ARCHITECTURE.md) - Diagramas y arquitectura
+  - **ConnectionProvider debe resolver DB por oficina**: 
+    - Lee metadato `office` del usuario actual
+    - Resuelve credenciales desde variables de entorno según código de oficina
+    - Ejemplo: Usuario con `office='FDL'` → conecta a `fuentedeluz_estudiantes`
+  - **Aislamiento total de datos**: Cada oficina ve únicamente sus propios datos
+  - **Extensible**: Documentado cómo agregar nuevas oficinas/bases de datos
+  - Ver README principal para detalles de variables de entorno y configuración
+
 - **Header con información de usuario y toggle de dashboard V1/V2:**
   - **Nuevo componente `frontendv2/components/layout/header.js`:**
     - Muestra avatar circular con iniciales del usuario

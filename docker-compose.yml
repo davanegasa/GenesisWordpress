@@ -12,10 +12,16 @@ services:
       WORDPRESS_DB_PASSWORD: emmaus_wpgenesis
       WORDPRESS_DB_NAME: emmaus_wpgenesis
       WORDPRESS_TABLE_PREFIX: edgen_
+      # Configuración base de datos Bogotá (BOG)
       BOG_DB_HOST: postgres
       BOG_DB_NAME: emmaus_estudiantes
       BOG_DB_USER: emmaus_admin
       BOG_DB_PASSWORD: emmaus1234+
+      # Configuración base de datos Fuente de Luz (FDL)
+      FDL_DB_HOST: postgres
+      FDL_DB_NAME: fuentedeluz_estudiantes
+      FDL_DB_USER: emmaus_admin
+      FDL_DB_PASSWORD: emmaus1234+
     volumes:
       - ./wp-content:/var/www/html/wp-content
     depends_on:
@@ -54,8 +60,16 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./wp-content/plugins/plg-genesis/migration/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./wp-content/plugins/plg-genesis/migration/dump20250805.sql:/docker-entrypoint-initdb.d/migrations/dump20250805.sql
+      # Script de inicialización de esquema
+      - ./wp-content/plugins/plg-genesis/migration/init.sql:/docker-entrypoint-initdb.d/01-init-schema.sql
+      # Script para crear múltiples bases de datos (se ejecuta primero por orden alfabético)
+      - ./migration/init-postgres-multidb.sh:/docker-entrypoint-initdb.d/02-create-databases.sh
+      # Dumps SQL de datos por oficina
+      - ./wp-content/plugins/plg-genesis/migration/dump20250805.sql:/docker-entrypoint-initdb.d/data/dump20250805.sql
+      - ./wp-content/plugins/plg-genesis/migration/examples/fuentedeLuz.sql:/docker-entrypoint-initdb.d/data/fuentedeLuz.sql
+      # Scripts de carga de datos por base de datos
+      - ./migration/load-bog-data.sh:/docker-entrypoint-initdb.d/03-load-bog-data.sh
+      - ./migration/load-fdl-data.sh:/docker-entrypoint-initdb.d/04-load-fdl-data.sh
 
 volumes:
   mysql_data:

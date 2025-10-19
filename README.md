@@ -36,11 +36,13 @@ cd GenesisWordpress
      - Contraseña: `emmaus_wpgenesis`
      - Puerto: 3306
 
-   - PostgreSQL (servicio `postgres`)
-     - Base de datos: `emmaus_estudiantes`
+   - PostgreSQL (servicio `postgres`) - **Multi-base de datos por oficina**
+     - **BOG (Bogotá)**: `emmaus_estudiantes`
+     - **FDL (Fuente de Luz)**: `fuentedeluz_estudiantes`
      - Usuario: `emmaus_admin`
      - Contraseña: `emmaus1234+`
      - Puerto: 5432
+     - Ver [`migration/MULTIDB_SETUP.md`](migration/MULTIDB_SETUP.md) para detalles completos
 
 3. Iniciar los contenedores:
 
@@ -210,12 +212,23 @@ Definidas en el servicio `wordpress` de `docker-compose.yml`:
 - `WORDPRESS_DB_NAME=emmaus_wpgenesis`
 - `WORDPRESS_TABLE_PREFIX=edgen_`
 
-Variables para el plugin (PostgreSQL):
+Variables para el plugin (PostgreSQL - **Multi-base de datos por oficina**):
 
+**Bogotá (BOG):**
 - `BOG_DB_HOST=postgres`
 - `BOG_DB_NAME=emmaus_estudiantes`
 - `BOG_DB_USER=emmaus_admin`
 - `BOG_DB_PASSWORD=emmaus1234+`
+
+**Fuente de Luz (FDL):**
+- `FDL_DB_HOST=postgres`
+- `FDL_DB_NAME=fuentedeluz_estudiantes`
+- `FDL_DB_USER=emmaus_admin`
+- `FDL_DB_PASSWORD=emmaus1234+`
+
+El sistema resuelve automáticamente la base de datos correcta según el metadato `office` del usuario actual.
+
+📚 **Guía completa**: [`migration/MULTIDB_SETUP.md`](migration/MULTIDB_SETUP.md)
 
 Asegúrate de mantener estas credenciales fuera de commits públicos si cambian a valores sensibles en producción.
 
@@ -230,14 +243,32 @@ Al primer arranque, el contenedor `mariadb` ejecuta automáticamente los archivo
 
 Para re-aplicar desde cero, elimina el volumen `mysql_data` y vuelve a levantar los servicios.
 
-### PostgreSQL (Plugin Genesis)
+### PostgreSQL (Plugin Genesis) - Sistema Multi-Base de Datos
 
-El contenedor `postgres` ejecuta migraciones/semillas montadas desde el plugin:
+El contenedor `postgres` ejecuta scripts de inicialización en orden alfabético para **crear y poblar múltiples bases de datos** (una por oficina):
 
-- `wp-content/plugins/plg-genesis/migration/init.sql`
-- `wp-content/plugins/plg-genesis/migration/dump20250805.sql`
+1. **01-init-schema.sql** - Crea el esquema base
+2. **02-create-databases.sh** - Crea las bases de datos adicionales (BOG, FDL, etc.)
+3. **03-load-bog-data.sh** - Carga datos de Bogotá desde `dump20250805.sql`
+4. **04-load-fdl-data.sh** - Carga datos de Fuente de Luz desde `fuentedeLuz.sql`
 
-Adecua/ordena estas migraciones según el flujo del plugin (p. ej. versiones fechadas en subcarpeta `migrations/`).
+#### Bases de datos por oficina:
+
+| Oficina | Código | Base de Datos | Dump SQL |
+|---------|--------|---------------|----------|
+| Bogotá | BOG | `emmaus_estudiantes` | `dump20250805.sql` |
+| Fuente de Luz | FDL | `fuentedeluz_estudiantes` | `fuentedeLuz.sql` |
+
+El `ConnectionProvider` del plugin resuelve automáticamente la conexión correcta según el metadato `office` del usuario autenticado.
+
+**Para agregar nuevas oficinas o entender el sistema completo**, consulta la guía detallada: [`migration/MULTIDB_SETUP.md`](migration/MULTIDB_SETUP.md)
+
+Para re-aplicar desde cero, elimina el volumen `postgres_data` y vuelve a levantar los servicios:
+
+```bash
+docker-compose down -v
+docker-compose up -d
+```
 
 ## Convenciones de Git
 
