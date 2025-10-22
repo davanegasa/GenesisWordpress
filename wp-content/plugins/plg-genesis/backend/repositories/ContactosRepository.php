@@ -22,14 +22,13 @@ class PlgGenesis_ContactosRepository {
 		$items = [];
 		while ($row = pg_fetch_assoc($res)) {
 			$items[] = [
-				'id'       => intval($row['id']),
+				'code'     => $row['code'],
 				'nombre'   => $row['nombre'],
 				'iglesia'  => $row['iglesia'],
 				'email'    => $row['email'],
 				'celular'  => $row['celular'],
 				'direccion'=> $row['direccion'],
 				'ciudad'   => $row['ciudad'],
-				'code'     => $row['code'],
 			];
 		}
 		pg_free_result($res);
@@ -70,14 +69,31 @@ class PlgGenesis_ContactosRepository {
 		pg_free_result($res);
 		if (!$row) return new WP_Error('not_found', 'Contacto no encontrado', [ 'status' => 404 ]);
 		return [
-			'id'       => intval($row['id']),
+			'code'     => $row['code'],
 			'nombre'   => $row['nombre'],
 			'iglesia'  => $row['iglesia'],
 			'email'    => $row['email'],
 			'celular'  => $row['celular'],
 			'direccion'=> $row['direccion'],
 			'ciudad'   => $row['ciudad'],
+		];
+	}
+
+	public function getByCode($code) {
+		$sql = "SELECT id, nombre, iglesia, email, celular, direccion, ciudad, code FROM contactos WHERE code = $1";
+		$res = pg_query_params($this->conn, $sql, [ trim($code) ]);
+		if (!$res) return new WP_Error('db_query_failed', 'Error al obtener contacto', [ 'status' => 500 ]);
+		$row = pg_fetch_assoc($res);
+		pg_free_result($res);
+		if (!$row) return new WP_Error('not_found', 'Contacto no encontrado', [ 'status' => 404 ]);
+		return [
 			'code'     => $row['code'],
+			'nombre'   => $row['nombre'],
+			'iglesia'  => $row['iglesia'],
+			'email'    => $row['email'],
+			'celular'  => $row['celular'],
+			'direccion'=> $row['direccion'],
+			'ciudad'   => $row['ciudad'],
 		];
 	}
 
@@ -91,6 +107,20 @@ class PlgGenesis_ContactosRepository {
 
 		$sql = "UPDATE contactos SET nombre=$1, iglesia=$2, email=$3, celular=$4, direccion=$5, ciudad=$6 WHERE id=$7";
 		$res = pg_query_params($this->conn, $sql, [ $nombre, $iglesia, $email, $celular, $direccion, $ciudad, intval($id) ]);
+		if (!$res) return new WP_Error('db_update_failed', 'Error al actualizar contacto', [ 'status' => 500 ]);
+		return true;
+	}
+
+	public function updateByCode($code, $data) {
+		$nombre    = isset($data['nombre']) ? trim($data['nombre']) : '';
+		$iglesia   = isset($data['iglesia']) ? trim($data['iglesia']) : '';
+		$email     = isset($data['email']) ? trim($data['email']) : '';
+		$celular   = isset($data['celular']) ? trim($data['celular']) : '';
+		$direccion = isset($data['direccion']) ? trim($data['direccion']) : '';
+		$ciudad    = isset($data['ciudad']) ? trim($data['ciudad']) : '';
+
+		$sql = "UPDATE contactos SET nombre=$1, iglesia=$2, email=$3, celular=$4, direccion=$5, ciudad=$6 WHERE code=$7";
+		$res = pg_query_params($this->conn, $sql, [ $nombre, $iglesia, $email, $celular, $direccion, $ciudad, trim($code) ]);
 		if (!$res) return new WP_Error('db_update_failed', 'Error al actualizar contacto', [ 'status' => 500 ]);
 		return true;
 	}

@@ -48,10 +48,10 @@ function resolveLoader(hash) {
     if (hash.startsWith('#/estudiantes')) return () => import('../pages/estudiantes/assign.js').then(m => m.mount(container));
     if (hash.startsWith('#/contactos/nuevo')) return () => import('../pages/contactos/create.js').then(m => m.mount(container));
     if (hash.startsWith('#/contacto/')) {
-        let id = hash.split('/')[2] || '';
-        if (id.includes('?')) id = id.split('?')[0];
-        id = decodeURIComponent(id);
-        return () => import('../pages/contactos/detail.js').then(m => m.mount(container, { id }));
+        let code = hash.split('/')[2] || '';
+        if (code.includes('?')) code = code.split('?')[0];
+        code = decodeURIComponent(code);
+        return () => import('../pages/contactos/detail.js').then(m => m.mount(container, { code }));
     }
     if (hash.startsWith('#/contactos')) return () => import('../pages/contactos/list.js').then(m => m.mount(container));
     if (hash.startsWith('#/congresos')) return () => import('../pages/congresos/list.js').then(m => m.mount(container));

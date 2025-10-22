@@ -41,6 +41,14 @@ class PlgGenesis_EstudiantesService {
         if (!isset($e['escolaridad']) || $e['escolaridad'] === '') {
             $e['escolaridad'] = 'Ninguno';
         }
+
+		// Soportar contacto_code (nuevo) o id_contacto (deprecated)
+		if (isset($e['contacto_code']) && !empty($e['contacto_code'])) {
+			$contactId = $this->repository->getContactIdByCode($e['contacto_code']);
+			if ($contactId instanceof WP_Error) return $contactId;
+			$e['id_contacto'] = $contactId;
+		}
+
 		$required = ['id_contacto','doc_identidad','nombre1','apellido1','estado_civil','escolaridad'];
 		foreach ($required as $k) {
 			if (!isset($e[$k]) || $e[$k] === '') {
@@ -88,6 +96,17 @@ class PlgGenesis_EstudiantesService {
         $total = $this->repository->countEstudiantes();
         if ($total instanceof WP_Error) return $total;
         $code = $this->repository->getContactCode($contactId);
+        if ($code instanceof WP_Error) return $code;
+        return trim($code) . $total;
+    }
+
+    public function nextCodeForContactByCode($contactCode) {
+        if (empty($contactCode)) {
+            return new WP_Error('invalid_contacto_code', 'El código del contacto es inválido', [ 'status' => 400 ]);
+        }
+        $total = $this->repository->countEstudiantes();
+        if ($total instanceof WP_Error) return $total;
+        $code = $this->repository->getContactCodeByContactCode($contactCode);
         if ($code instanceof WP_Error) return $code;
         return trim($code) . $total;
     }

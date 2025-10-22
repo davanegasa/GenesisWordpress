@@ -197,13 +197,24 @@ class PlgGenesis_EstudiantesController {
 	}
 
 	public static function next_code($request) {
+		// Intentar obtener primero por code (nuevo método)
+		$contactCode = $request->get_param('contactoCode') ?: $request->get_param('contactCode');
+		// Fallback a contactoId para compatibilidad (deprecated)
 		$contactId = $request->get_param('contactoId');
+		
 		$office = PlgGenesis_OfficeResolver::resolve_user_office(get_current_user_id());
 		if (is_wp_error($office)) return self::error($office);
 		$conn = PlgGenesis_ConnectionProvider::get_connection_for_office($office);
 		if (is_wp_error($conn)) return self::error($conn);
 		$svc  = new PlgGenesis_EstudiantesService(new PlgGenesis_EstudiantesRepository($conn));
-		$result = $svc->nextCodeForContact($contactId);
+		
+		// Usar code si está disponible, sino usar id (deprecated)
+		if ($contactCode) {
+			$result = $svc->nextCodeForContactByCode($contactCode);
+		} else {
+			$result = $svc->nextCodeForContact($contactId);
+		}
+		
 		if (is_wp_error($result)) return self::error($result);
 		return new WP_REST_Response([ 'success' => true, 'data' => [ 'code' => $result ] ], 200);
 	}

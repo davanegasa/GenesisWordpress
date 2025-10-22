@@ -1,10 +1,10 @@
 import { api } from '../../api/client.js';
 
-export async function mount(container, { id } = {}){
+export async function mount(container, { code } = {}){
     container.innerHTML = `
         <div class="card">
             <div class="u-flex u-gap" style="justify-content:space-between;align-items:center;">
-                <div class="card-title">Contacto <span class="badge">${id||''}</span></div>
+                <div class="card-title">Contacto <span class="badge">${code||''}</span></div>
                 <div class="u-flex u-gap">
                     <a id="c-back" class="btn btn-secondary" href="#/contactos">Volver</a>
                     <button id="c-save" class="btn btn-primary">Guardar cambios</button>
@@ -16,7 +16,7 @@ export async function mount(container, { id } = {}){
 
     const $ct = container.querySelector('#ct');
     try{
-        const res = await api.get('/contactos/'+encodeURIComponent(id));
+        const res = await api.get('/contactos/'+encodeURIComponent(code));
         const d = (res && res.data) || {};
         $ct.innerHTML = `
             <div id="c-view">
@@ -24,7 +24,7 @@ export async function mount(container, { id } = {}){
                     <div class="contact-avatar">${(d.nombre||'C').slice(0,1)}</div>
                     <div class="contact-body">
                         <div class="contact-title">${d.nombre||'-'}</div>
-                        <div class="contact-sub">ID ${id} · ${d.iglesia||''}</div>
+                        <div class="contact-sub">Código ${d.code||code} · ${d.iglesia||''}</div>
                         <div class="contact-sub">${d.email||''} · ${d.celular||''}</div>
                     </div>
                 </div>
@@ -71,11 +71,11 @@ export async function mount(container, { id } = {}){
                 ciudad: container.querySelector('#c-ciudad').value,
             };
             try{
-                await api.put('/contactos/'+encodeURIComponent(id), payload);
+                await api.put('/contactos/'+encodeURIComponent(code), payload);
                 msg.textContent = 'Guardado';
                 // Sync view
                 container.querySelector('#c-view .contact-title').textContent = payload.nombre || '-';
-                container.querySelectorAll('#c-view .contact-sub')[0].textContent = 'ID '+id+' · '+(payload.iglesia||'');
+                container.querySelectorAll('#c-view .contact-sub')[0].textContent = 'Código '+code+' · '+(payload.iglesia||'');
                 container.querySelectorAll('#c-view .contact-sub')[1].textContent = (payload.email||'')+' · '+(payload.celular||'');
                 const values = container.querySelectorAll('#c-view .field-view .field-value');
                 values[0].textContent = payload.direccion || '-';

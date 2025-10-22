@@ -40,7 +40,7 @@ export async function mount(container){
                     <div class="contact-avatar">${(ct.nombre||'C').slice(0,1)}</div>
                     <div class="contact-body">
                         <div class="contact-title">${ct.nombre || '-'}</div>
-                        <div class="contact-sub">ID ${ct.id||''} · ${ct.iglesia||''}</div>
+                        <div class="contact-sub">Código ${ct.code||''} · ${ct.iglesia||''}</div>
                         <div class="contact-sub">${ct.email||''}${ct.celular?(' · '+ct.celular):''}</div>
                     </div>
                 </div>
@@ -56,13 +56,13 @@ export async function mount(container){
         modal.querySelector('#q-close2').addEventListener('click', close);
         modal.querySelector('#q-ver').addEventListener('click', ()=>{
             close();
-            location.hash = '#/estudiantes?contactoId='+encodeURIComponent(ct.id||'');
+            location.hash = '#/estudiantes?contactoCode='+encodeURIComponent(ct.code||'');
         });
 
-        // Botón Editar -> navegar a detalle contacto
+        // Botón Editar -> navegar a detalle contacto usando code
         const editBtn = document.createElement('button'); editBtn.className='btn'; editBtn.textContent='Editar';
         modal.querySelector('.modal-footer').insertBefore(editBtn, modal.querySelector('#q-ver'));
-        editBtn.addEventListener('click', ()=>{ close(); location.hash = '#/contacto/'+encodeURIComponent(ct.id||''); });
+        editBtn.addEventListener('click', ()=>{ close(); location.hash = '#/contacto/'+encodeURIComponent(ct.code||''); });
     }
 
     function renderPagination(total, startIdx, endIdx){
@@ -93,8 +93,8 @@ export async function mount(container){
         const startIdx = (currentPage - 1) * pageSize;
         const endIdx = Math.min(startIdx + pageSize, total);
         const visible = contactsData.slice(startIdx, endIdx);
-        const rows = visible.map(it => [it.id || '', it.nombre || '', it.iglesia || '', it.email || '']);
-        const columnLabels = ['ID','Nombre','Iglesia','Email'];
+        const rows = visible.map(it => [it.code || '', it.nombre || '', it.iglesia || '', it.email || '']);
+        const columnLabels = ['Código','Nombre','Iglesia','Email'];
         const tbl = createTable({ columns: columnLabels, rows });
         
         // Agregar clase específica para contactos

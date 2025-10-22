@@ -13,7 +13,7 @@ export function mount(container){
 							<input id="e-contact-display" class="input" type="text" placeholder="Ninguno" readonly style="flex:1;">
 							<button id="e-contact-open" class="btn">Buscar</button>
 						</div>
-						<input id="e-id_contacto" type="hidden">
+						<input id="e-contacto-code" type="hidden">
 						<span class="hint-text">Usa "Buscar" para escoger un contacto</span>
 					</label>
 				</div>
@@ -107,8 +107,8 @@ function openContactPicker(){
 	overlay.appendChild(modal); document.body.appendChild(overlay);
 	const $q = modal.querySelector('#c-q'); const $btn = modal.querySelector('#c-buscar'); const $list = modal.querySelector('#c-list');
 	function select(it){
-		$('#e-id_contacto').value = String(it.id);
-		$('#e-contact-display').value = `${it.id} - ${it.nombre}${it.iglesia?(' — '+it.iglesia):''}`;
+		$('#e-contacto-code').value = String(it.code);
+		$('#e-contact-display').value = `${it.code} - ${it.nombre}${it.iglesia?(' — '+it.iglesia):''}`;
 		overlay.remove();
 	}
 	async function search(){
@@ -144,10 +144,10 @@ document.getElementById('e-contact-open').addEventListener('click', openContactP
 	// Sugerir código
 	$('#e-sugerir').addEventListener('click', async ()=>{
 		const msg = $('#e-msg');
-		if (!$('#e-id_contacto').value) { msg.textContent = 'Ingrese Contacto ID para sugerir'; return; }
+		if (!$('#e-contacto-code').value) { msg.textContent = 'Selecciona un contacto para sugerir código'; return; }
 		msg.textContent = 'Calculando...';
 		try {
-			const r = await api.get('/estudiantes/next-code?contactoId='+encodeURIComponent($('#e-id_contacto').value));
+			const r = await api.get('/estudiantes/next-code?contactoCode='+encodeURIComponent($('#e-contacto-code').value));
 			const code = r && r.data && r.data.code; if (code) { $('#e-id_estudiante').value = code; $('#e-usetoggle').checked = true; $('#row-code').classList.remove('u-hidden'); }
 			msg.textContent = 'Sugerido: '+code;
 		} catch(e){ msg.textContent = e.message || 'Error sugiriendo'; }
@@ -178,7 +178,7 @@ document.getElementById('e-contact-open').addEventListener('click', openContactP
 		if (hasError) { msg.textContent = 'Por favor completa los campos requeridos'; showToast('Por favor completa los campos requeridos', true); return; }
 
 		const payload = {
-			id_contacto: $('#e-id_contacto').value,
+			contacto_code: $('#e-contacto-code').value,
 			doc_identidad: $('#e-doc_identidad').value,
 			nombre1: $('#e-nombre1').value,
 			nombre2: $('#e-nombre2').value,
