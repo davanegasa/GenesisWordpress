@@ -382,4 +382,251 @@ class PlgGenesis_EstudiantesRepository {
         pg_free_result($res);
         return $count > 0;
     }
+
+	/**
+	 * Obtiene el historial académico completo de un estudiante
+	 * con detección automática de programas y organización inteligente
+	 */
+	public function getAcademicHistory($idEstudiante) {
+		// 1. Obtener programas asignados (directo o por herencia)
+		$programs = $this->getStudentPrograms($idEstudiante);
+		
+		// 2. Obtener cursos por cada programa
+		$coursesByProgram = [];
+		foreach ($programs as $prog) {
+			$coursesByProgram[$prog['id']] = $this->getCoursesByProgram($idEstudiante, $prog['id']);
+		}
+		
+		// 3. Obtener cursos sin programa
+		$standaloneCourses = $this->getStandaloneCourses($idEstudiante, array_column($programs, 'id'));
+		
+		// 4. Estadísticas generales
+		$stats = $this->getOverallStats($idEstudiante);
+		
+		return [
+			'has_programs' => count($programs) > 0,
+			'programs' => $programs,
+			'courses_by_program' => $coursesByProgram,
+			'standalone_courses' => $standaloneCourses,
+			'statistics' => $stats
+		];
+	}
+
+	/**
+	 * Obtiene programas asignados al estudiante (directo o heredado del contacto)
+	 */
+	private function getStudentPrograms($idEstudiante) {
+		$sql = "
+			SELECT DISTINCT 
+				p.id,
+				p.nombre,
+				p.descripcion,
+				pa.fecha_asignacion,
+				CASE 
+					WHEN pa.estudiante_id IS NOT NULL THEN 'directo'
+					ELSE 'heredado'
+				END as tipo_asignacion
+			FROM programas_asignaciones pa
+			INNER JOIN programas p ON pa.programa_id = p.id
+			LEFT JOIN estudiantes e ON e.id_estudiante = $1
+			WHERE pa.estudiante_id = (SELECT id FROM estudiantes WHERE id_estudiante = $1)
+			   OR (pa.contacto_id = (SELECT id_contacto FROM estudiantes WHERE id_estudiante = $1))
+			ORDER BY pa.fecha_asignacion
+		";
+		
+		$result = pg_query_params($this->conn, $sql, [$idEstudiante]);
+		if (!$result) {
+			return [];
+		}
+		
+		$programs = [];
+		while ($row = pg_fetch_assoc($result)) {
+			$programs[] = [
+				'id' => intval($row['id']),
+				'nombre' => $row['nombre'],
+				'descripcion' => $row['descripcion'],
+				'fecha_asignacion' => $row['fecha_asignacion'],
+				'tipo_asignacion' => $row['tipo_asignacion']
+			];
+		}
+		pg_free_result($result);
+		
+		return $programs;
+	}
+
+	/**
+	 * Obtiene cursos de un estudiante organizados por niveles de un programa específico
+	 */
+	private function getCoursesByProgram($idEstudiante, $programaId) {
+		$sql = "
+			SELECT 
+				pc.id as programa_curso_id,
+				c.id as curso_id,
+				c.nombre as curso_nombre,
+				c.descripcion as curso_descripcion,
+				np.id as nivel_id,
+				np.nombre as nivel_nombre,
+				pc.consecutivo,
+				ec.id as inscripcion_id,
+				ec.porcentaje,
+				ec.fecha as fecha_curso,
+				CASE 
+					WHEN ec.id IS NOT NULL THEN 'inscrito'
+					ELSE 'disponible'
+				END as estado
+			FROM programas_cursos pc
+			INNER JOIN cursos c ON pc.curso_id = c.id
+			INNER JOIN programas p ON pc.programa_id = p.id
+			LEFT JOIN niveles_programas np ON pc.nivel_id = np.id
+			LEFT JOIN estudiantes_cursos ec ON ec.curso_id = c.id 
+				AND ec.estudiante_id = (SELECT id FROM estudiantes WHERE id_estudiante = $1)
+			WHERE pc.programa_id = $2
+			ORDER BY 
+				COALESCE(np.id, 999),
+				pc.consecutivo
+		";
+		
+		$result = pg_query_params($this->conn, $sql, [$idEstudiante, intval($programaId)]);
+		if (!$result) {
+			return [];
+		}
+		
+		// Agrupar por niveles
+		$byLevel = [];
+		while ($row = pg_fetch_assoc($result)) {
+			$nivelKey = $row['nivel_id'] ? intval($row['nivel_id']) : 'sin_nivel';
+			
+			if (!isset($byLevel[$nivelKey])) {
+				$byLevel[$nivelKey] = [
+					'nivel_id' => $row['nivel_id'] ? intval($row['nivel_id']) : null,
+					'nivel_nombre' => $row['nivel_nombre'] ?: 'Sin nivel',
+					'cursos' => []
+				];
+			}
+			
+			$byLevel[$nivelKey]['cursos'][] = [
+				'curso_id' => intval($row['curso_id']),
+				'curso_nombre' => $row['curso_nombre'],
+				'curso_descripcion' => $row['curso_descripcion'],
+				'consecutivo' => intval($row['consecutivo']),
+				'inscripcion_id' => $row['inscripcion_id'] ? intval($row['inscripcion_id']) : null,
+				'porcentaje' => $row['porcentaje'] ? floatval($row['porcentaje']) : null,
+				'fecha_curso' => $row['fecha_curso'],
+				'estado' => $row['estado']
+			];
+		}
+		pg_free_result($result);
+		
+		return array_values($byLevel);
+	}
+
+	/**
+	 * Obtiene cursos del estudiante que NO están en ningún programa asignado
+	 */
+	private function getStandaloneCourses($idEstudiante, $excludeProgramIds = []) {
+		$excludeClause = '';
+		$params = [$idEstudiante];
+		
+		if (!empty($excludeProgramIds)) {
+			$placeholders = [];
+			$idx = 2;
+			foreach ($excludeProgramIds as $progId) {
+				$placeholders[] = '$' . $idx;
+				$params[] = intval($progId);
+				$idx++;
+			}
+			$excludeClause = "AND c.id NOT IN (
+				SELECT curso_id FROM programas_cursos 
+				WHERE programa_id IN (" . implode(',', $placeholders) . ")
+			)";
+		}
+		
+		$sql = "
+			SELECT 
+				c.id as curso_id,
+				c.nombre as curso_nombre,
+				c.descripcion as curso_descripcion,
+				n.id as nivel_global_id,
+				n.nombre as nivel_global_nombre,
+				ec.id as inscripcion_id,
+				ec.porcentaje,
+				ec.fecha as fecha_curso,
+				c.consecutivo
+			FROM estudiantes_cursos ec
+			INNER JOIN cursos c ON ec.curso_id = c.id
+			LEFT JOIN niveles n ON c.nivel_id = n.id
+			WHERE ec.estudiante_id = (SELECT id FROM estudiantes WHERE id_estudiante = $1)
+			{$excludeClause}
+			ORDER BY 
+				COALESCE(n.id, 999),
+				c.consecutivo
+		";
+		
+		$result = pg_query_params($this->conn, $sql, $params);
+		if (!$result) {
+			return [];
+		}
+		
+		// Agrupar por nivel global
+		$byLevel = [];
+		while ($row = pg_fetch_assoc($result)) {
+			$nivelKey = $row['nivel_global_id'] ? intval($row['nivel_global_id']) : 'sin_nivel';
+			
+			if (!isset($byLevel[$nivelKey])) {
+				$byLevel[$nivelKey] = [
+					'nivel_id' => $row['nivel_global_id'] ? intval($row['nivel_global_id']) : null,
+					'nivel_nombre' => $row['nivel_global_nombre'] ?: 'Sin nivel',
+					'cursos' => []
+				];
+			}
+			
+			$byLevel[$nivelKey]['cursos'][] = [
+				'curso_id' => intval($row['curso_id']),
+				'curso_nombre' => $row['curso_nombre'],
+				'curso_descripcion' => $row['curso_descripcion'],
+				'inscripcion_id' => intval($row['inscripcion_id']),
+				'porcentaje' => floatval($row['porcentaje']),
+				'fecha_curso' => $row['fecha_curso'],
+				'consecutivo' => intval($row['consecutivo'])
+			];
+		}
+		pg_free_result($result);
+		
+		return array_values($byLevel);
+	}
+
+	/**
+	 * Obtiene estadísticas generales del estudiante
+	 */
+	private function getOverallStats($idEstudiante) {
+		$sql = "
+			SELECT 
+				COUNT(ec.id) as total_cursos,
+				COALESCE(AVG(ec.porcentaje), 0) as promedio_porcentaje,
+				COUNT(CASE WHEN ec.porcentaje >= 70 THEN 1 END) as cursos_aprobados,
+				MAX(ec.fecha) as ultima_actividad
+			FROM estudiantes_cursos ec
+			WHERE ec.estudiante_id = (SELECT id FROM estudiantes WHERE id_estudiante = $1)
+		";
+		
+		$result = pg_query_params($this->conn, $sql, [$idEstudiante]);
+		if (!$result || pg_num_rows($result) === 0) {
+			return [
+				'total_cursos' => 0,
+				'promedio_porcentaje' => 0,
+				'cursos_aprobados' => 0,
+				'ultima_actividad' => null
+			];
+		}
+		
+		$row = pg_fetch_assoc($result);
+		pg_free_result($result);
+		
+		return [
+			'total_cursos' => intval($row['total_cursos']),
+			'promedio_porcentaje' => round(floatval($row['promedio_porcentaje']), 1),
+			'cursos_aprobados' => intval($row['cursos_aprobados']),
+			'ultima_actividad' => $row['ultima_actividad']
+		];
+	}
 }

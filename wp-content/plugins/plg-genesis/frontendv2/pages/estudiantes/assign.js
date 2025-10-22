@@ -1,5 +1,7 @@
 import { api } from '../../api/client.js';
-import { createTable, createModal, showToast } from '../../components/ui/index.js';
+import { createTable, showToast } from '../../components/ui/index.js';
+import { createModal } from '../../components/ui/index.js';
+import { openAssignCourseModal } from '../../components/estudiantes/assignCourse.js';
 
 export async function mount(container){
 	container.innerHTML = `
@@ -65,39 +67,7 @@ export async function mount(container){
 	}
 
 	async function openAssign(id, studentName){
-        const m = createModal({ title: `Asignar Curso — ${studentName||id}`, bodyHtml: `
-            <div class="u-flex u-gap"><input id="cq" class="input" placeholder="Escribe para buscar un curso..." style="flex:1"><input id="cp" class="input" type="number" min="1" max="100" placeholder="Ingrese el porcentaje obtenido (1-100)" style="width:220px"></div>
-            <div id="cl" class="listbox u-mt-8"></div>
-            <div id="cm" class="hint-text u-mt-8"></div>
-        `, primaryLabel: 'Asignar Curso', onPrimary: async (close)=>{
-            const pct=parseInt(document.querySelector('#cp').value||'',10); if (!selected){ document.querySelector('#cm').textContent='Selecciona un curso'; return; } if (!(pct>=1 && pct<=100)){ document.querySelector('#cm').textContent='Porcentaje 1-100'; return; }
-            try{ await api.post('/estudiantes/'+encodeURIComponent(id)+'/cursos', { cursoId:selected, porcentaje:pct }); showToast('Curso asignado'); close(); }
-            catch(e){ const err = e && (e.details||e.error) || {}; const extra = (e && e.payload && e.payload.curso_anterior) ? e.payload.curso_anterior : (err.curso_anterior||{}); if (e && (e.status===409 || err.code==='course_already_assigned')){
-                // Mostrar modal rico de confirmación con detalles
-                const anterior = extra || {};
-                const m2 = createModal({ title: 'Curso ya asignado', bodyHtml: `
-                    <div class=\"alert alert-warning\"><strong>¡Atención!</strong> Este estudiante ya tiene asignado el curso seleccionado</div>
-                    <div style=\"font-weight:600;margin:12px 0 4px;\">Nuevo intento</div>
-                    <div class=\"detail-grid\">
-                        <div class=\"field-view\"><div class=\"field-label\">Estudiante</div><div class=\"field-value\">${studentName||id}</div></div>
-                        <div class=\"field-view\"><div class=\"field-label\">Curso</div><div class=\"field-value\">${(cursos.find(c=>c.id===selected)?.nombre)||selected}</div></div>
-                        <div class=\"field-view\"><div class=\"field-label\">Nueva nota</div><div class=\"field-value\">${pct}%</div></div>
-                    </div>
-                    <div class=\"divider\"></div>
-                    <div style=\"font-weight:600;margin:12px 0 4px;\">Registro anterior</div>
-                    <div class=\"detail-grid\">
-                        <div class=\"field-view\"><div class=\"field-label\">Nota anterior</div><div class=\"field-value\">${(anterior.porcentaje!=null?anterior.porcentaje+'%':'N/A')}</div></div>
-                        <div class=\"field-view\"><div class=\"field-label\">Fecha anterior</div><div class=\"field-value\">${anterior.fecha?String(anterior.fecha).substring(0,10):'N/A'}</div></div>
-                    </div>
-                    <div class=\"hint-text u-mt-8\">Al confirmar, se creará un nuevo registro para este intento del curso.</div>
-                `, primaryLabel: 'Repetir Curso', onPrimary: async (close2)=>{ try{ await api.post('/estudiantes/'+encodeURIComponent(id)+'/cursos', { cursoId:selected, porcentaje:pct, forzar:true }); showToast('Repetido'); close2(); close(); }catch(_){ document.querySelector('#cm').textContent='Error'; } }, secondaryLabel: 'Cancelar' });
-                document.body.appendChild(m2.overlay);
-            } else { document.querySelector('#cm').textContent='Error'; } }
-        }, secondaryLabel: 'Cancelar' });
-        document.body.appendChild(m.overlay);
-        const $cq=document.querySelector('#cq'), $cl=document.querySelector('#cl'); let cursos=[], selected=null;
-        async function l(f=''){ const r=await api.get('/cursos?q='+encodeURIComponent(f)); cursos=(r&&r.data&&r.data.items)||[]; $cl.innerHTML=''; cursos.forEach(c=>{ const el=document.createElement('div'); el.className='listbox-item'; el.textContent=c.nombre; el.onclick=()=>{ selected=c.id; Array.from($cl.children).forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); }; $cl.appendChild(el); }); if(!$cl.children.length){ $cl.innerHTML='<div class="listbox-item">Sin resultados</div>'; } }
-        $cq.oninput = ()=> l($cq.value||''); l(''); $cq.focus();
+		openAssignCourseModal(id, studentName);
 	}
 
 	async function openObs(id, studentName){
@@ -124,7 +94,10 @@ export async function mount(container){
 	}
 
 	async function openQuickView(id, studentName){
-		const m = createModal({ title: `Detalle — ${studentName||id}`, bodyHtml: '<div id="qv-body">Cargando...</div>', secondaryLabel: 'Cerrar', primaryLabel: 'Editar', onPrimary: ()=>{ location.hash = '#/estudiante/'+encodeURIComponent(id); } });
+		const m = createModal({ 
+			title: `Detalle — ${studentName||id}`, 
+			bodyHtml: '<div id="qv-body">Cargando...</div>'
+		});
 		document.body.appendChild(m.overlay);
 		// Modal más compacto
 		if (m && m.modal) { m.modal.style.width = 'min(560px, 94vw)'; }
@@ -132,6 +105,9 @@ export async function mount(container){
 			const r = await api.get('/estudiantes/'+encodeURIComponent(id)+'/quickview');
 			const p = r && r.data ? r.data : {}; const st = p.estudiante||{}; const stats=p.estadisticas||{}; const ultimo=p.ultimo_curso||null; const obs=p.ultima_observacion||null; const contacto=st.contacto||{};
 			const body = `
+				<div style="margin-bottom:16px;">
+					<button id="qv-btn-detail" class="btn btn-primary" style="width:100%;">📋 Ver Detalle Completo</button>
+				</div>
 				<div class=\"card\">
 					<div class=\"card-title is-info\">${studentName||'-'} <span class=\"badge\">${st.codigo||id}</span></div>
 					<div class=\"detail-grid\" style=\"grid-template-columns:1fr;\">
@@ -156,6 +132,17 @@ export async function mount(container){
 				${obs?`<div class=\"card\"><div class=\"card-title is-muted\">Última Observación</div><div class=\"detail-grid\" style=\"grid-template-columns:1fr;\"><div class=\"field-view\"><div class=\"field-label\">${obs.tipo||'General'}</div><div class=\"field-value\">${obs.observacion}</div></div><div class=\"field-view\"><div class=\"field-label\">Fecha</div><div class=\"field-value\">${obs.fecha?String(obs.fecha).substring(0,10):'-'}</div></div></div></div>`:''}
 			`;
 			const el = document.querySelector('#qv-body'); if (el) el.innerHTML = body; else m.setBody(body);
+			
+			// Configurar evento del botón para cerrar modal antes de navegar
+			const btnDetail = document.querySelector('#qv-btn-detail');
+			if (btnDetail) {
+				btnDetail.addEventListener('click', () => {
+					if (m && m.overlay && m.overlay.parentNode) {
+						m.overlay.parentNode.removeChild(m.overlay);
+					}
+					location.hash = '#/estudiante/' + encodeURIComponent(id);
+				});
+			}
 		}catch(_){ const el=document.querySelector('#qv-body'); if (el) el.textContent='Error cargando'; }
 	}
 

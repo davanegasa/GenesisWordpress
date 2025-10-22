@@ -57,6 +57,12 @@ class PlgGenesis_EstudiantesController {
 			'permission_callback' => plg_genesis_can('plg_view_students')
 		]);
 
+		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)/academic-history', [
+			'methods'             => 'GET',
+			'callback'            => [ __CLASS__, 'get_academic_history' ],
+			'permission_callback' => plg_genesis_can('plg_view_students')
+		]);
+
 		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)', [
 			'methods'             => 'PUT',
 			'callback'            => [ __CLASS__, 'put_estudiante' ],
@@ -217,6 +223,20 @@ class PlgGenesis_EstudiantesController {
 		
 		if (is_wp_error($result)) return self::error($result);
 		return new WP_REST_Response([ 'success' => true, 'data' => [ 'code' => $result ] ], 200);
+	}
+
+	public static function get_academic_history($request) {
+		$id = $request->get_param('id');
+		$office = PlgGenesis_OfficeResolver::resolve_user_office(get_current_user_id());
+		if (is_wp_error($office)) return self::error($office);
+		$conn = PlgGenesis_ConnectionProvider::get_connection_for_office($office);
+		if (is_wp_error($conn)) return self::error($conn);
+		$repo = new PlgGenesis_EstudiantesRepository($conn);
+		
+		$result = $repo->getAcademicHistory($id);
+		if (is_wp_error($result)) return self::error($result);
+		
+		return new WP_REST_Response([ 'success' => true, 'data' => $result ], 200);
 	}
 
 	private static function error($wp_error) {

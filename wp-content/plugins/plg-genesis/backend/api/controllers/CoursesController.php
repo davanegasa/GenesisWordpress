@@ -75,10 +75,13 @@ class PlgGenesis_CoursesController {
         $include = strval($request->get_param('include') ?? '');
         $params = []; $idx=1; $where=[];
         if ($include !== 'all'){ $where[] = 'c.deleted_at IS NULL'; }
-        if ($q !== ''){ $where[] = "(c.nombre ILIKE $${idx} OR COALESCE(c.descripcion,'') ILIKE $${idx})"; $params[] = '%'.$q.'%'; $idx++; }
+        if ($q !== ''){ $where[] = "(c.nombre ILIKE $".$idx." OR COALESCE(c.descripcion,'') ILIKE $".$idx.")"; $params[] = '%'.$q.'%'; $idx++; }
         $sql = 'SELECT c.id, c.nombre, c.descripcion FROM cursos c ' . (count($where)?('WHERE '.implode(' AND ',$where)):'') . ' ORDER BY c.nombre ASC LIMIT 500';
         $res = pg_query_params($conn, $sql, $params);
-        if (!$res) return self::error('Error listando cursos');
+        if (!$res) {
+            error_log('Error en get_cursos: ' . pg_last_error($conn));
+            return self::error('Error listando cursos: ' . pg_last_error($conn));
+        }
         $items = []; while($row = pg_fetch_assoc($res)){ $items[] = [ 'id'=>intval($row['id']), 'nombre'=>$row['nombre'], 'descripcion'=>$row['descripcion'] ]; }
         pg_free_result($res);
         return new WP_REST_Response([ 'success'=>true, 'data'=>[ 'items'=>$items ] ], 200);
