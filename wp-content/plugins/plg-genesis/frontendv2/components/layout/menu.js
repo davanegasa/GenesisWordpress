@@ -226,7 +226,7 @@ export function buildMenu() {
 				<option value="BAR" ${currentOffice === 'BAR' ? 'selected' : ''}>Barranquilla (BAR)</option>
 				<option value="BUC" ${currentOffice === 'BUC' ? 'selected' : ''}>Bucaramanga (BUC)</option>
 				<option value="PER" ${currentOffice === 'PER' ? 'selected' : ''}>Pereira (PER)</option>
-				<option value="FDL" ${currentOffice === 'FDL' ? 'selected' : ''}>Floridablanca (FDL)</option>
+				<option value="FDL" ${currentOffice === 'FDL' ? 'selected' : ''}>Fuente de Luz (FDL)</option>
 				<option value="PR" ${currentOffice === 'PR' ? 'selected' : ''}>Puerto Rico (PR)</option>
 				<option value="BO" ${currentOffice === 'BO' ? 'selected' : ''}>Bolivia (BO)</option>
 			</select>

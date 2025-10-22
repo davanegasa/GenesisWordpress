@@ -271,7 +271,7 @@ async function showCreateModal() {
 							<option value="BAR">Barranquilla (BAR)</option>
 							<option value="BUC">Bucaramanga (BUC)</option>
 							<option value="PER">Pereira (PER)</option>
-							<option value="FDL">Floridablanca (FDL)</option>
+							<option value="FDL">Fuente de Luz (FDL)</option>
 							<option value="PR">Puerto Rico (PR)</option>
 							<option value="BO">Bolivia (BO)</option>
 						</select>
