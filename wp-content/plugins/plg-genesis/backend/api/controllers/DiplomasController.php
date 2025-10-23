@@ -10,73 +10,68 @@ class PlgGenesis_DiplomasController {
 		register_rest_route('plg-genesis/v1', '/diplomas/elegibles', [
 			'methods' => 'GET',
 			'callback' => [ __CLASS__, 'get_elegibles' ],
-			'permission_callback' => [ __CLASS__, 'check_permissions' ]
+			'permission_callback' => plg_genesis_can('plg_view_students')
 		]);
 
 		register_rest_route('plg-genesis/v1', '/diplomas/emitir', [
 			'methods' => 'POST',
 			'callback' => [ __CLASS__, 'emitir_diploma' ],
-			'permission_callback' => [ __CLASS__, 'check_permissions' ]
+			'permission_callback' => plg_genesis_can('plg_create_students')
 		]);
 
 		register_rest_route('plg-genesis/v1', '/diplomas/emitir-batch', [
 			'methods' => 'POST',
 			'callback' => [ __CLASS__, 'emitir_batch' ],
-			'permission_callback' => [ __CLASS__, 'check_permissions' ]
+			'permission_callback' => plg_genesis_can('plg_create_students')
 		]);
 
 		register_rest_route('plg-genesis/v1', '/diplomas/(?P<id>\d+)/entrega', [
 			'methods' => 'PUT',
 			'callback' => [ __CLASS__, 'registrar_entrega' ],
-			'permission_callback' => [ __CLASS__, 'check_permissions' ]
+			'permission_callback' => plg_genesis_can('plg_edit_students')
 		]);
 
 		register_rest_route('plg-genesis/v1', '/diplomas', [
 			'methods' => 'GET',
 			'callback' => [ __CLASS__, 'listar_diplomas' ],
-			'permission_callback' => [ __CLASS__, 'check_permissions' ]
+			'permission_callback' => plg_genesis_can('plg_view_students')
 		]);
 
 		register_rest_route('plg-genesis/v1', '/diplomas/(?P<id>\d+)', [
 			'methods' => 'GET',
 			'callback' => [ __CLASS__, 'get_diploma' ],
-			'permission_callback' => [ __CLASS__, 'check_permissions' ]
+			'permission_callback' => plg_genesis_can('plg_view_students')
 		]);
 
 		register_rest_route('plg-genesis/v1', '/diplomas/acta-cierre', [
 			'methods' => 'GET',
 			'callback' => [ __CLASS__, 'acta_cierre' ],
-			'permission_callback' => [ __CLASS__, 'check_permissions' ]
+			'permission_callback' => plg_genesis_can('plg_view_students')
 		]);
 
 		register_rest_route('plg-genesis/v1', '/diplomas/emitir-todos', [
 			'methods' => 'POST',
 			'callback' => [ __CLASS__, 'emitir_todos_elegibles' ],
-			'permission_callback' => [ __CLASS__, 'check_permissions' ]
+			'permission_callback' => plg_genesis_can('plg_create_students')
 		]);
 
 		register_rest_route('plg-genesis/v1', '/actas', [
 			'methods' => 'GET',
 			'callback' => [ __CLASS__, 'listar_actas' ],
-			'permission_callback' => [ __CLASS__, 'check_permissions' ]
+			'permission_callback' => plg_genesis_can('plg_view_students')
 		]);
 
 		register_rest_route('plg-genesis/v1', '/actas/(?P<id>\d+)', [
 			'methods' => 'GET',
 			'callback' => [ __CLASS__, 'get_acta' ],
-			'permission_callback' => [ __CLASS__, 'check_permissions' ]
+			'permission_callback' => plg_genesis_can('plg_view_students')
 		]);
 
 		register_rest_route('plg-genesis/v1', '/diplomas/proximos-completar', [
 			'methods' => 'GET',
 			'callback' => [ __CLASS__, 'proximos_completar' ],
-			'permission_callback' => [ __CLASS__, 'check_permissions' ]
+			'permission_callback' => plg_genesis_can('plg_view_students')
 		]);
-	}
-
-	public static function check_permissions() {
-		// TODO: Implementar verificación de roles y capabilities según tu sistema
-		return is_user_logged_in() && current_user_can('edit_posts');
 	}
 
 	private static function get_service() {
