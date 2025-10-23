@@ -61,6 +61,16 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
 .course-badge{display:inline-block;background:color-mix(in srgb, var(--plg-info) 16%, var(--plg-cardBg));border:1px solid color-mix(in srgb, var(--plg-info) 40%, var(--plg-border));color:var(--plg-text);padding:2px 8px;border-radius:999px;font-size:12px}
 .drop-zone{border:2px dashed color-mix(in srgb, var(--plg-accent) 45%, var(--plg-border));border-radius:12px;padding:12px;min-height:64px;background:color-mix(in srgb, var(--plg-accent) 2%, var(--plg-cardBg))}
 .drop-zone.drag-over{background:color-mix(in srgb, var(--plg-accent) 10%, var(--plg-cardBg));box-shadow:0 0 0 3px color-mix(in srgb, var(--plg-accent) 25%, transparent)}
+/* DnD - Cursos en estructura de programas */
+.drop-zone{transition:background .15s ease, box-shadow .15s ease}
+.drop-zone .course-card{user-select:none}
+.drop-zone .course-card[draggable="true"]{cursor:grab}
+.drop-zone .course-card[draggable="true"]:active{cursor:grabbing}
+.btn.btn-quiet{background:transparent;border:none;color:var(--plg-mutedText);padding:2px 6px}
+.btn.btn-quiet:hover{background:color-mix(in srgb, var(--plg-danger,#ef4444) 8%, transparent);color:var(--plg-danger,#ef4444);border-radius:8px}
+.drop-placeholder{height:40px;border:2px dashed color-mix(in srgb, var(--plg-info,#3b82f6) 45%, var(--plg-border));border-radius:8px;margin:6px 0;background:color-mix(in srgb, var(--plg-info,#3b82f6) 6%, transparent)}
+.two-col{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+@media (max-width: 1024px){.two-col{grid-template-columns:1fr}}
 .section-title{font-weight:700;margin:16px 0 10px 0;font-size:16px;letter-spacing:.2px;color:var(--plg-accent)}
 .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--plg-info);color:#fff;font-size:12px}
 .alert{border:1px solid var(--plg-border);border-radius:10px;padding:12px}
