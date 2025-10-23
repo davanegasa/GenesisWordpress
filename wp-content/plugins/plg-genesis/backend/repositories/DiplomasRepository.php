@@ -936,26 +936,25 @@ class PlgGenesis_DiplomasRepository {
 			return new WP_Error('invalid_params', 'Debe proporcionar estudianteId o contactoId', [ 'status' => 422 ]);
 		}
 
-		$idField = $estudianteId ? 'd.estudiante_id' : 'd.contacto_id';
+		$where = $estudianteId ? 'd.estudiante_id = $1' : 'e.id_contacto = $1';
 		$idValue = $estudianteId ? intval($estudianteId) : intval($contactoId);
 
-		$where = "$idField = $1";
 		if ($pendientesOnly) {
 			$where .= " AND d.fecha_entrega IS NULL";
 		}
 
 		$sql = "SELECT d.*, 
-					   p.nombre as programa_nombre, 
-					   p.descripcion as programa_descripcion,
-					   n.nombre as nivel_nombre,
-					   e.id_estudiante as estudiante_codigo,
-					   TRIM(COALESCE(e.nombre1, '') || ' ' || COALESCE(e.apellido1, '')) as estudiante_nombre
-				FROM diplomas_entregados d
-				JOIN programas p ON d.programa_id = p.id
-				LEFT JOIN niveles_programas n ON d.nivel_id = n.id
-				LEFT JOIN estudiantes e ON d.estudiante_id = e.id
-				WHERE $where
-				ORDER BY d.fecha_emision DESC, d.created_at DESC";
+				   p.nombre as programa_nombre, 
+				   p.descripcion as programa_descripcion,
+				   n.nombre as nivel_nombre,
+				   e.id_estudiante as estudiante_codigo,
+				   TRIM(COALESCE(e.nombre1, '') || ' ' || COALESCE(e.apellido1, '')) as estudiante_nombre
+			FROM diplomas_entregados d
+			JOIN programas p ON d.programa_id = p.id
+			LEFT JOIN niveles_programas n ON d.nivel_id = n.id
+			JOIN estudiantes e ON d.estudiante_id = e.id
+			WHERE $where
+			ORDER BY d.fecha_emision DESC, d.created_at DESC";
 
 		$res = pg_query_params($this->conn, $sql, [ $idValue ]);
 		if (!$res) {
