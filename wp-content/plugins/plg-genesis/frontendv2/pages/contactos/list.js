@@ -32,10 +32,13 @@ export async function mount(container){
         const modal = document.createElement('div'); modal.className = 'modal';
         modal.innerHTML = `
             <div class="modal-header">
-                <strong>Detalle del contacto</strong>
-                <button id="q-close" class="btn">Cerrar</button>
+                <strong>Detalle — ${ct.nombre || ct.code}</strong>
+                <button id="q-close" class="btn">×</button>
             </div>
             <div class="modal-body">
+                <div style="margin-bottom:16px;">
+                    <button id="q-detail" class="btn btn-primary" style="width:100%;">📋 Ver Detalle Completo</button>
+                </div>
                 <div class="contact-card">
                     <div class="contact-avatar">${(ct.nombre||'C').slice(0,1)}</div>
                     <div class="contact-body">
@@ -44,25 +47,22 @@ export async function mount(container){
                         <div class="contact-sub">${ct.email||''}${ct.celular?(' · '+ct.celular):''}</div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button id="q-ver" class="btn btn-primary">Ver estudiantes</button>
-                <button id="q-close2" class="btn">Cerrar</button>
+                <div class="divider" style="margin:16px 0"></div>
+                <div class="detail-grid" style="grid-template-columns:1fr;">
+                    <div class="field-view"><div class="field-label">Dirección</div><div class="field-value">${ct.direccion||'-'}</div></div>
+                    <div class="field-view"><div class="field-label">Ciudad</div><div class="field-value">${ct.ciudad||'-'}</div></div>
+                </div>
             </div>
         `;
         overlay.appendChild(modal); document.body.appendChild(overlay);
         const close = ()=> overlay.remove();
         modal.querySelector('#q-close').addEventListener('click', close);
-        modal.querySelector('#q-close2').addEventListener('click', close);
-        modal.querySelector('#q-ver').addEventListener('click', ()=>{
+        
+        // Botón Ver Detalle Completo
+        modal.querySelector('#q-detail').addEventListener('click', ()=> {
             close();
-            location.hash = '#/estudiantes?contactoCode='+encodeURIComponent(ct.code||'');
+            location.hash = '#/contacto/'+encodeURIComponent((ct.code||'').trim());
         });
-
-        // Botón Editar -> navegar a detalle contacto usando code
-        const editBtn = document.createElement('button'); editBtn.className='btn'; editBtn.textContent='Editar';
-        modal.querySelector('.modal-footer').insertBefore(editBtn, modal.querySelector('#q-ver'));
-        editBtn.addEventListener('click', ()=>{ close(); location.hash = '#/contacto/'+encodeURIComponent(ct.code||''); });
     }
 
     function renderPagination(total, startIdx, endIdx){

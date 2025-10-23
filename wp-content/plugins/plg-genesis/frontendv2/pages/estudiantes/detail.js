@@ -6,12 +6,29 @@ function getHashParams(){ const h=location.hash; const q=h.includes('?')?h.split
 
 export async function mount(container, { id } = {}){
 	const hp = getHashParams();
+	
+
+	
+	// Determinar URL de retorno
+	let backUrl = '#/estudiantes';
+	if (hp.contactoCode) {
+		// Si viene desde el detalle de un contacto
+		backUrl = '#/contacto/' + encodeURIComponent(hp.contactoCode);
+
+	} else if (hp.contactoId) {
+		// Si viene desde la lista de estudiantes filtrada por contacto
+		backUrl = '#/estudiantes?contactoId=' + encodeURIComponent(hp.contactoId);
+
+	} else {
+
+	}
+	
 	container.innerHTML = `
 		<div class="card">
 			<div class="u-flex u-gap" style="justify-content:space-between;align-items:center;">
 				<div class="card-title">Estudiante <span class="badge">${id||''}</span></div>
 				<div class="u-flex u-gap">
-					<a id="u-back" class="btn btn-secondary" href="#/estudiantes${hp.contactoId?('?contactoId='+encodeURIComponent(hp.contactoId)) : ''}">Volver</a>
+					<a id="u-back" class="btn btn-secondary" href="${backUrl}">Volver</a>
 					<button id="u-guardar" class="btn btn-primary">Guardar cambios</button>
 				</div>
 			</div>

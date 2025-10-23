@@ -33,6 +33,13 @@ class PlgGenesis_ContactosController {
 			'permission_callback' => plg_genesis_can('plg_edit_contacts')
 		]);
 
+		// Academic history endpoint
+		register_rest_route('plg-genesis/v1', '/contactos/(?P<code>[a-zA-Z0-9\-_%]+)/academic-history', [
+			'methods'             => 'GET',
+			'callback'            => [ __CLASS__, 'get_academic_history' ],
+			'permission_callback' => plg_genesis_can('plg_view_contacts')
+		]);
+
 		// Endpoints por ID (deprecated - mantener temporalmente por compatibilidad)
 		register_rest_route('plg-genesis/v1', '/contactos/id/(?P<id>[0-9]+)', [
 			'methods'             => 'GET',
@@ -128,6 +135,20 @@ class PlgGenesis_ContactosController {
 		$result = $repo->updateByCode($code, is_array($payload) ? $payload : []);
 		if (is_wp_error($result)) { return self::error($result); }
 		return new WP_REST_Response([ 'success' => true, 'data' => [ 'updated' => true ] ], 200);
+	}
+
+	public static function get_academic_history($request) {
+		$code = $request->get_param('code');
+		$office = PlgGenesis_OfficeResolver::resolve_user_office(get_current_user_id());
+		if (is_wp_error($office)) { return self::error($office); }
+		$conn = PlgGenesis_ConnectionProvider::get_connection_for_office($office);
+		if (is_wp_error($conn)) { return self::error($conn); }
+		
+		$repo = new PlgGenesis_ContactosRepository($conn);
+		$result = $repo->getAcademicHistory($code);
+		if (is_wp_error($result)) { return self::error($result); }
+		
+		return new WP_REST_Response([ 'success' => true, 'data' => $result ], 200);
 	}
 
 	private static function error($wp_error) {
