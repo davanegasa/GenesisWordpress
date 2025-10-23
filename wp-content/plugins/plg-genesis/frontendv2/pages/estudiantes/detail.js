@@ -331,6 +331,9 @@ function renderAcademicHistory(container, data) {
 							<span class="collapse-icon">▶</span>
 							<span class="program-icon">📂</span>
 							<span class="program-name">${escapeHtml(program.nombre)}</span>
+							<span class="program-badge badge-info" style="background:#6366f1;color:white;">
+								v${program.version || 1}
+							</span>
 							<span class="program-badge ${program.tipo_asignacion === 'heredado' ? 'badge-secondary' : 'badge-primary'}">
 								${program.tipo_asignacion === 'heredado' ? '👥 Heredado' : '🎯 Directo'}
 							</span>

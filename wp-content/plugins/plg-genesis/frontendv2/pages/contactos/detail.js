@@ -224,6 +224,9 @@ function renderPrograms(container, data) {
                         <span class="collapse-icon">▶</span>
                         <span class="program-icon">📂</span>
                         <span class="program-name">${escapeHtml(program.programa_nombre)}</span>
+                        <span class="program-badge badge-info" style="background:#6366f1;color:white;">
+                            v${program.version || 1}
+                        </span>
                     </div>
                     <span class="level-summary">${totalCursos} curso${totalCursos !== 1 ? 's' : ''}</span>
                 </div>

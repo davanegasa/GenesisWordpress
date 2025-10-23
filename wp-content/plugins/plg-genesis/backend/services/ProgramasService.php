@@ -11,6 +11,10 @@ class PlgGenesis_ProgramasService {
     public function actualizar($id, $payload){ return $this->repo->update($id, $payload); }
     public function eliminar($id, $hard = false){ return $this->repo->delete($id, $hard); }
     public function asignar($idPrograma, $idEstudiante = null, $idContacto = null, $remove = false){ return $this->repo->assign($idPrograma, $idEstudiante, $idContacto, $remove); }
+
+    public function forzarAsignaciones($idPrograma, $toVersion, $scope='all'){
+        return $this->repo->upgradeAssignments($idPrograma, $toVersion, $scope);
+    }
 }
 
 
