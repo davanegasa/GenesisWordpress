@@ -36,42 +36,47 @@ class PlgGenesis_ProgramasRepository {
         return $out;
     }
 
-    public function get($id){
-        $sql = "SELECT id, nombre, descripcion FROM programas WHERE id=$1";
+    public function get($id, $version = null){
+        $sql = "SELECT id, nombre, descripcion, COALESCE(current_version,1) AS current_version FROM programas WHERE id=$1";
         $res = pg_query_params($this->conn, $sql, [ intval($id) ]);
         if (!$res){ $this->logPg('get', $sql); return new WP_Error('db_query_failed','Error obteniendo programa',[ 'status'=>500 ]); }
         $row = pg_fetch_assoc($res); pg_free_result($res);
         if (!$row) return new WP_Error('not_found','Programa no encontrado',[ 'status'=>404 ]);
         $programaId = intval($row['id']);
+        $ver = $version ? intval($version) : intval($row['current_version']);
         // niveles
-        $qN = pg_query_params($this->conn, "SELECT id, nombre FROM niveles_programas WHERE programa_id=$1 ORDER BY id", [ $programaId ]);
+        $nivSql = "SELECT id, nombre FROM niveles_programas WHERE programa_id=$1";
+        $nivParams = [ $programaId ];
+        if ($this->hasColumn('niveles_programas','version')){ $nivSql .= " AND version=$2"; $nivParams[] = $ver; }
+        $nivSql .= " ORDER BY id";
+        $qN = pg_query_params($this->conn, $nivSql, $nivParams);
         if (!$qN){ $this->logPg('get.niveles'); return new WP_Error('db_query_failed','Error obteniendo niveles',[ 'status'=>500 ]); }
         $niveles = [];
         while($n = pg_fetch_assoc($qN)){
             $nivelId = intval($n['id']);
-            $qC = pg_query_params(
-                $this->conn,
-                "SELECT pc.curso_id, c.nombre, c.descripcion, pc.consecutivo\n                 FROM programas_cursos pc\n                 JOIN cursos c ON pc.curso_id = c.id\n                 WHERE pc.programa_id=$1 AND pc.nivel_id=$2\n                 ORDER BY pc.consecutivo",
-                [ $programaId, $nivelId ]
-            );
+            $sqlC = "SELECT pc.curso_id, c.nombre, c.descripcion, pc.consecutivo FROM programas_cursos pc JOIN cursos c ON pc.curso_id=c.id WHERE pc.programa_id=$1 AND pc.nivel_id=$2";
+            $paramsC = [ $programaId, $nivelId ];
+            if ($this->hasColumn('programas_cursos','version')){ $sqlC .= " AND pc.version=$3"; $paramsC[] = $ver; }
+            $sqlC .= " ORDER BY pc.consecutivo";
+            $qC = pg_query_params($this->conn, $sqlC, $paramsC);
             if (!$qC){ $this->logPg('get.cursosNivel'); return new WP_Error('db_query_failed','Error obteniendo cursos de nivel',[ 'status'=>500 ]); }
             $cursos = []; while($c = pg_fetch_assoc($qC)){ $cursos[] = [ 'id'=>intval($c['curso_id']), 'nombre'=>$c['nombre'], 'descripcion'=>$c['descripcion'], 'consecutivo'=>intval($c['consecutivo']) ]; } pg_free_result($qC);
             $niveles[] = [ 'id'=>$nivelId, 'nombre'=>$n['nombre'], 'cursos'=>$cursos ];
         }
         pg_free_result($qN);
         // cursos sin nivel
-        $qS = pg_query_params(
-            $this->conn,
-            "SELECT pc.curso_id, c.nombre, c.descripcion, pc.consecutivo\n             FROM programas_cursos pc\n             JOIN cursos c ON pc.curso_id = c.id\n             WHERE pc.programa_id = $1 AND pc.nivel_id IS NULL\n             ORDER BY pc.consecutivo",
-            [ $programaId ]
-        );
+        $sqlS = "SELECT pc.curso_id, c.nombre, c.descripcion, pc.consecutivo FROM programas_cursos pc JOIN cursos c ON pc.curso_id=c.id WHERE pc.programa_id=$1 AND pc.nivel_id IS NULL";
+        $paramsS = [ $programaId ];
+        if ($this->hasColumn('programas_cursos','version')){ $sqlS .= " AND pc.version=$2"; $paramsS[] = $ver; }
+        $sqlS .= " ORDER BY pc.consecutivo";
+        $qS = pg_query_params($this->conn, $sqlS, $paramsS);
         if (!$qS){ $this->logPg('get.cursosSinNivel'); return new WP_Error('db_query_failed','Error obteniendo cursos sin nivel',[ 'status'=>500 ]); }
         $sinNivel = []; while($s = pg_fetch_assoc($qS)){ $sinNivel[] = [ 'id'=>intval($s['curso_id']), 'nombre'=>$s['nombre'], 'descripcion'=>$s['descripcion'], 'consecutivo'=>intval($s['consecutivo']) ]; } pg_free_result($qS);
         // prerequisitos
         $qP = pg_query_params($this->conn, "SELECT pp.prerequisito_id, p2.nombre FROM programas_prerequisitos pp JOIN programas p2 ON pp.prerequisito_id=p2.id WHERE pp.programa_id=$1 ORDER BY pp.prerequisito_id", [ $programaId ]);
         if (!$qP){ $this->logPg('get.prereq'); return new WP_Error('db_query_failed','Error obteniendo prerequisitos',[ 'status'=>500 ]); }
         $pre = []; while($p = pg_fetch_assoc($qP)){ $pre[] = [ 'id'=>intval($p['prerequisito_id']), 'nombre'=>$p['nombre'] ]; } pg_free_result($qP);
-        return [ 'id'=>$programaId, 'nombre'=>$row['nombre'], 'descripcion'=>$row['descripcion'], 'niveles'=>$niveles, 'cursosSinNivel'=>$sinNivel, 'prerequisitos'=>$pre ];
+        return [ 'id'=>$programaId, 'nombre'=>$row['nombre'], 'descripcion'=>$row['descripcion'], 'version'=>$ver, 'niveles'=>$niveles, 'cursosSinNivel'=>$sinNivel, 'prerequisitos'=>$pre ];
     }
 
     public function create($payload){
@@ -130,53 +135,64 @@ class PlgGenesis_ProgramasRepository {
         $nombre = isset($payload['nombre']) ? trim(strval($payload['nombre'])) : null;
         $descripcion = isset($payload['descripcion']) ? trim(strval($payload['descripcion'])) : null;
         pg_query($this->conn, 'BEGIN');
-        if ($nombre !== null || $descripcion !== null){
+        // Si solo se actualiza nombre/descripcion (sin estructura), update simple
+        if (($nombre !== null || $descripcion !== null) && !isset($payload['niveles']) && !isset($payload['cursosSinNivel']) && !isset($payload['cursos_sin_nivel'])){
             $q = pg_query_params($this->conn, "UPDATE programas SET nombre=COALESCE($1,nombre), descripcion=COALESCE($2,descripcion), updated_at=NOW() WHERE id=$3", [ $nombre, $descripcion, intval($id) ]);
             if (!$q){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.programa'); return new WP_Error('db_update_failed','Error actualizando programa',[ 'status'=>500 ]); }
             pg_free_result($q);
+            pg_query($this->conn,'COMMIT');
+            return [ 'updated'=>true ];
         }
-        // resync niveles/cursos si vienen
+        // resync niveles/cursos si vienen -> crear nueva versión
         if (isset($payload['niveles']) || isset($payload['cursosSinNivel']) || isset($payload['cursos_sin_nivel'])){
-            $qd = pg_query_params($this->conn, "DELETE FROM programas_cursos WHERE programa_id=$1", [ intval($id) ]);
-            if (!$qd){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.deleteCursos'); return new WP_Error('db_update_failed','Error limpiando cursos',[ 'status'=>500 ]); }
-            pg_free_result($qd);
-            // niveles: eliminar los que no estén presentes
-            $nivelesIds = [];
-            foreach (($payload['niveles'] ?? []) as $n){ if (isset($n['id'])) { $nivelesIds[] = intval($n['id']); } }
-            $inList = empty($nivelesIds) ? '0' : implode(',', $nivelesIds);
-            $qdelN = pg_query_params($this->conn, "DELETE FROM niveles_programas WHERE programa_id=$1 AND id NOT IN ($inList)", [ intval($id) ]);
-            if (!$qdelN){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.deleteNiveles'); return new WP_Error('db_update_failed','Error limpiando niveles',[ 'status'=>500 ]); }
-            pg_free_result($qdelN);
-            // upsert/insert niveles
-            foreach (($payload['niveles'] ?? []) as $nivel){
+            // Obtener versión actual y calcular siguiente
+            $qv = pg_query_params($this->conn, "SELECT COALESCE(current_version,1) FROM programas WHERE id=$1", [ intval($id) ]);
+            if (!$qv){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.getVersion'); return new WP_Error('db_query_failed','Error obteniendo versión actual',[ 'status'=>500 ]); }
+            $cv = intval(pg_fetch_result($qv, 0, 0)); pg_free_result($qv);
+            $next = $cv + 1;
+            // Insertar niveles de la nueva versión, manteniendo el orden del payload
+            $newNivelIds = [];
+            $nivelesPayload = ($payload['niveles'] ?? []);
+            foreach ($nivelesPayload as $idx => $nivel){
                 $nivelNombre = trim(strval($nivel['nombre'] ?? $nivel['nombre_nivel'] ?? ''));
-                if ($nivelNombre === '') continue;
-                $nivelId = isset($nivel['id']) ? intval($nivel['id']) : null;
-                if ($nivelId){
-                    $qn = pg_query_params($this->conn, "UPDATE niveles_programas SET nombre=$1 WHERE id=$2 AND programa_id=$3", [ $nivelNombre, $nivelId, intval($id) ]);
-                    if (!$qn){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.updNivel'); return new WP_Error('db_update_failed','Error actualizando nivel',[ 'status'=>500 ]); }
-                    pg_free_result($qn);
-                } else {
-                    $qn = pg_query_params($this->conn, "INSERT INTO niveles_programas (programa_id, nombre) VALUES ($1,$2) RETURNING id", [ intval($id), $nivelNombre ]);
-                    if (!$qn){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.insNivel'); return new WP_Error('db_update_failed','Error creando nivel',[ 'status'=>500 ]); }
-                    $nivelId = intval(pg_fetch_result($qn, 0, 0)); pg_free_result($qn);
-                }
+                if ($nivelNombre === '') { $newNivelIds[$idx] = null; continue; }
+                $qn = pg_query_params($this->conn, "INSERT INTO niveles_programas (programa_id, nombre, version) VALUES ($1,$2,$3) RETURNING id", [ intval($id), $nivelNombre, $next ]);
+                if (!$qn){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.insNivelV'); return new WP_Error('db_update_failed','Error creando nivel',[ 'status'=>500 ]); }
+                $newNivelIds[$idx] = intval(pg_fetch_result($qn, 0, 0)); pg_free_result($qn);
+            }
+            // Insertar cursos por nivel en la versión next
+            foreach ($nivelesPayload as $idx => $nivel){
+                $newNivelId = $newNivelIds[$idx];
+                if (!$newNivelId) continue;
                 foreach (($nivel['cursos'] ?? []) as $curso){
                     $cid = intval($curso['id'] ?? 0); $cons = intval($curso['consecutivo'] ?? 0);
-                    $qc = pg_query_params($this->conn, "INSERT INTO programas_cursos (programa_id, curso_id, nivel_id, consecutivo) VALUES ($1,$2,$3,$4)", [ intval($id), $cid, $nivelId, $cons ]);
-                    if (!$qc){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.cursoNivel'); return new WP_Error('db_update_failed','Error asociando curso',[ 'status'=>500 ]); }
+                    $qc = pg_query_params($this->conn, "INSERT INTO programas_cursos (programa_id, curso_id, nivel_id, consecutivo, version) VALUES ($1,$2,$3,$4,$5)", [ intval($id), $cid, $newNivelId, $cons, $next ]);
+                    if (!$qc){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.cursoNivelV'); return new WP_Error('db_update_failed','Error asociando curso',[ 'status'=>500 ]); }
                     pg_free_result($qc);
                 }
             }
+            // cursos sin nivel
             foreach (($payload['cursosSinNivel'] ?? $payload['cursos_sin_nivel'] ?? []) as $csn){
                 $cid = intval($csn['id'] ?? 0); $cons = intval($csn['consecutivo'] ?? 0);
-                $qs = pg_query_params($this->conn, "INSERT INTO programas_cursos (programa_id, curso_id, nivel_id, consecutivo) VALUES ($1,$2,NULL,$3)", [ intval($id), $cid, $cons ]);
-                if (!$qs){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.cursoSinNivel'); return new WP_Error('db_update_failed','Error asociando curso sin nivel',[ 'status'=>500 ]); }
+                $qs = pg_query_params($this->conn, "INSERT INTO programas_cursos (programa_id, curso_id, nivel_id, consecutivo, version) VALUES ($1,$2,NULL,$3,$4)", [ intval($id), $cid, $cons, $next ]);
+                if (!$qs){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.cursoSinNivelV'); return new WP_Error('db_update_failed','Error asociando curso sin nivel',[ 'status'=>500 ]); }
                 pg_free_result($qs);
             }
+            // Actualizar nombre/descripcion si vienen
+            if ($nombre !== null || $descripcion !== null){
+                $q = pg_query_params($this->conn, "UPDATE programas SET nombre=COALESCE($1,nombre), descripcion=COALESCE($2,descripcion), updated_at=NOW() WHERE id=$3", [ $nombre, $descripcion, intval($id) ]);
+                if (!$q){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.programaNombre'); return new WP_Error('db_update_failed','Error actualizando programa',[ 'status'=>500 ]); }
+                pg_free_result($q);
+            }
+            // Actualizar versión vigente
+            $qu = pg_query_params($this->conn, "UPDATE programas SET current_version=$1, updated_at=NOW() WHERE id=$2", [ $next, intval($id) ]);
+            if (!$qu){ pg_query($this->conn,'ROLLBACK'); $this->logPg('update.setCurrentVersion'); return new WP_Error('db_update_failed','Error actualizando versión',[ 'status'=>500 ]); }
+            pg_free_result($qu);
+            pg_query($this->conn,'COMMIT');
+            return [ 'updated'=>true, 'newVersion'=>$next ];
         }
         pg_query($this->conn,'COMMIT');
-        return true;
+        return [ 'updated'=>true ];
     }
 
     public function delete($id, $hard = false){
@@ -211,6 +227,17 @@ class PlgGenesis_ProgramasRepository {
         $res = pg_query_params($this->conn, $sql, [ intval($idPrograma), $idRef ]);
         if (!$res){ $this->logPg('assign'); return new WP_Error('db_update_failed','No fue posible actualizar la asignación',[ 'status'=>500 ]); }
         pg_free_result($res); return true;
+    }
+
+    public function upgradeAssignments($idPrograma, $toVersion, $scope='all'){
+        $where = '';
+        if ($scope === 'students') { $where = ' AND estudiante_id IS NOT NULL'; }
+        else if ($scope === 'contacts') { $where = ' AND contacto_id IS NOT NULL'; }
+        $sql = "UPDATE programas_asignaciones SET version=$1 WHERE programa_id=$2 AND (version IS NULL OR version<>$1)".$where;
+        $res = pg_query_params($this->conn, $sql, [ intval($toVersion), intval($idPrograma) ]);
+        if (!$res){ $this->logPg('upgradeAssignments'); return new WP_Error('db_update_failed','Error actualizando asignaciones',[ 'status'=>500 ]); }
+        $cnt = pg_affected_rows($res); pg_free_result($res);
+        return [ 'updated' => intval($cnt) ];
     }
 }
 

@@ -391,10 +391,10 @@ class PlgGenesis_EstudiantesRepository {
 		// 1. Obtener programas asignados (directo o por herencia)
 		$programs = $this->getStudentPrograms($idEstudiante);
 		
-		// 2. Obtener cursos por cada programa
+		// 2. Obtener cursos por cada programa (con su versión específica)
 		$coursesByProgram = [];
 		foreach ($programs as $prog) {
-			$coursesByProgram[$prog['id']] = $this->getCoursesByProgram($idEstudiante, $prog['id']);
+			$coursesByProgram[$prog['id']] = $this->getCoursesByProgram($idEstudiante, $prog['id'], $prog['version']);
 		}
 		
 		// 3. Obtener cursos sin programa
@@ -422,6 +422,7 @@ class PlgGenesis_EstudiantesRepository {
 				p.nombre,
 				p.descripcion,
 				pa.fecha_asignacion,
+				COALESCE(pa.version, p.current_version, 1) as version,
 				CASE 
 					WHEN pa.estudiante_id IS NOT NULL THEN 'directo'
 					ELSE 'heredado'
@@ -446,6 +447,7 @@ class PlgGenesis_EstudiantesRepository {
 				'nombre' => $row['nombre'],
 				'descripcion' => $row['descripcion'],
 				'fecha_asignacion' => $row['fecha_asignacion'],
+				'version' => intval($row['version']),
 				'tipo_asignacion' => $row['tipo_asignacion']
 			];
 		}
@@ -457,7 +459,16 @@ class PlgGenesis_EstudiantesRepository {
 	/**
 	 * Obtiene cursos de un estudiante organizados por niveles de un programa específico
 	 */
-	private function getCoursesByProgram($idEstudiante, $programaId) {
+	private function getCoursesByProgram($idEstudiante, $programaId, $version = null) {
+		// Si no se especifica versión, usar la versión actual del programa
+		$versionClause = '';
+		$params = [$idEstudiante, intval($programaId)];
+		
+		if ($version !== null) {
+			$versionClause = 'AND pc.version = $3 AND (np.id IS NULL OR np.version = $3)';
+			$params[] = intval($version);
+		}
+		
 		$sql = "
 			SELECT 
 				pc.id as programa_curso_id,
@@ -481,12 +492,13 @@ class PlgGenesis_EstudiantesRepository {
 			LEFT JOIN estudiantes_cursos ec ON ec.curso_id = c.id 
 				AND ec.estudiante_id = (SELECT id FROM estudiantes WHERE id_estudiante = $1)
 			WHERE pc.programa_id = $2
+			{$versionClause}
 			ORDER BY 
 				COALESCE(np.id, 999),
 				pc.consecutivo
 		";
 		
-		$result = pg_query_params($this->conn, $sql, [$idEstudiante, intval($programaId)]);
+		$result = pg_query_params($this->conn, $sql, $params);
 		if (!$result) {
 			return [];
 		}

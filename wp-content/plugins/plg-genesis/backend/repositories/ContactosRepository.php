@@ -145,10 +145,10 @@ class PlgGenesis_ContactosRepository {
 			return $programs;
 		}
 		
-		// Para cada programa, obtener los cursos
+		// Para cada programa, obtener los cursos (con su versión específica)
 		$programsWithCourses = [];
 		foreach ($programs as $program) {
-			$courses = $this->getCoursesByProgram($contactoId, $program['programa_id']);
+			$courses = $this->getCoursesByProgram($contactoId, $program['programa_id'], $program['version']);
 			if (!is_wp_error($courses)) {
 				$program['cursos'] = $courses;
 			} else {
@@ -189,6 +189,7 @@ class PlgGenesis_ContactosRepository {
 				pa.id as asignacion_id,
 				pa.programa_id,
 				pa.fecha_asignacion,
+				COALESCE(pa.version, p.current_version, 1) as version,
 				p.nombre as programa_nombre,
 				p.descripcion as programa_descripcion
 			FROM programas_asignaciones pa
@@ -209,7 +210,8 @@ class PlgGenesis_ContactosRepository {
 				'programa_id' => intval($row['programa_id']),
 				'programa_nombre' => $row['programa_nombre'],
 				'programa_descripcion' => $row['programa_descripcion'],
-				'fecha_asignacion' => $row['fecha_asignacion']
+				'fecha_asignacion' => $row['fecha_asignacion'],
+				'version' => intval($row['version'])
 			];
 		}
 		pg_free_result($result);
@@ -220,7 +222,15 @@ class PlgGenesis_ContactosRepository {
 	/**
 	 * Obtiene los cursos de un programa (estructura del programa, sin progreso individual)
 	 */
-	private function getCoursesByProgram($contactoId, $programaId) {
+	private function getCoursesByProgram($contactoId, $programaId, $version = null) {
+		$versionClause = '';
+		$params = [intval($programaId)];
+		
+		if ($version !== null) {
+			$versionClause = 'AND pc.version = $2 AND (np.id IS NULL OR np.version = $2)';
+			$params[] = intval($version);
+		}
+		
 		$sql = "
 			SELECT 
 				c.id as curso_id,
@@ -234,12 +244,13 @@ class PlgGenesis_ContactosRepository {
 			INNER JOIN cursos c ON pc.curso_id = c.id
 			LEFT JOIN niveles_programas np ON pc.nivel_id = np.id
 			WHERE pc.programa_id = $1
+			{$versionClause}
 			ORDER BY 
 				COALESCE(pc.nivel_id, 999),
 				pc.consecutivo
 		";
 		
-		$result = pg_query_params($this->conn, $sql, [intval($programaId)]);
+		$result = pg_query_params($this->conn, $sql, $params);
 		if (!$result) {
 			return [];
 		}

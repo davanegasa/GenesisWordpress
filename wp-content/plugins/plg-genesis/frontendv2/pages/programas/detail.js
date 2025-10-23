@@ -111,7 +111,7 @@ export async function mount(container, { id } = {}){
             const payload = buildStructurePayload();
             const msg = container.querySelector('#msg'); msg.textContent='Guardando estructura…';
             try{
-                await api.put('/programas/'+encodeURIComponent(id), payload);
+                const saveResp = await api.put('/programas/'+encodeURIComponent(id), payload);
                 showToast('Estructura guardada');
                 // refrescar d y vista
                 const fresh = await api.get('/programas/'+encodeURIComponent(id));
@@ -120,6 +120,11 @@ export async function mount(container, { id } = {}){
                 renderStructureView(d);
                 setStructMode(false);
                 msg.textContent='';
+                // Si se creó una nueva versión, preguntar si desea forzar actualización
+                if (saveResp && saveResp.data && saveResp.data.newVersion){
+                    const newVer = saveResp.data.newVersion;
+                    promptUpgradeAssignments(id, newVer);
+                }
             }catch(e){ msg.textContent=e.details?.message||e.message||'Error guardando estructura'; showToast('Error guardando', true); }
         });
 
@@ -350,7 +355,8 @@ export async function mount(container, { id } = {}){
         const cont = container.querySelector('#g-info'); cont.innerHTML='';
         const grid = createDetailGrid([
             createFieldView({ label:'Nombre', value:d.nombre||'-', span:1 }),
-            createFieldView({ label:'Descripción', value:d.descripcion||'-', span:1 })
+            createFieldView({ label:'Descripción', value:d.descripcion||'-', span:1 }),
+            createFieldView({ label:'Versión actual', value:`v${d.version||1}`, span:1 })
         ]);
         cont.appendChild(grid);
     }
@@ -421,6 +427,52 @@ export async function mount(container, { id } = {}){
         `;
         overlay.appendChild(modal); document.body.appendChild(overlay);
         const close = ()=> overlay.remove(); modal.querySelector('#x-close').addEventListener('click', close); modal.querySelector('#x-close2').addEventListener('click', close);
+    }
+
+    function promptUpgradeAssignments(programaId, newVersion){
+        const prev = document.querySelector('.modal-overlay'); if(prev) prev.remove();
+        const overlay = document.createElement('div'); overlay.className='modal-overlay';
+        const modal = document.createElement('div'); modal.className='modal';
+        modal.innerHTML = `
+            <div class="modal-header"><strong>Nueva versión creada (v${newVersion})</strong><button id="x-close" class="btn">Cerrar</button></div>
+            <div class="modal-body">
+                <p>Se ha creado una nueva versión de la estructura del programa (versión ${newVersion}).</p>
+                <p>Las asignaciones existentes seguirán usando su versión actual. ¿Deseas actualizar todas las asignaciones a la nueva versión?</p>
+                <div class="form-grid u-mt-16">
+                    <label>Alcance de la actualización:
+                        <select id="upgrade-scope" class="input">
+                            <option value="all">Todas (estudiantes y contactos)</option>
+                            <option value="students">Solo estudiantes</option>
+                            <option value="contacts">Solo contactos</option>
+                        </select>
+                    </label>
+                </div>
+                <div id="upgrade-msg" class="hint-text u-mt-8"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="x-close2" class="btn btn-secondary">Cancelar</button>
+                <button id="x-upgrade" class="btn btn-primary">Actualizar asignaciones</button>
+            </div>
+        `;
+        overlay.appendChild(modal); document.body.appendChild(overlay);
+        const close = ()=> overlay.remove();
+        modal.querySelector('#x-close').addEventListener('click', close);
+        modal.querySelector('#x-close2').addEventListener('click', close);
+        modal.querySelector('#x-upgrade').addEventListener('click', async ()=>{
+            const scope = modal.querySelector('#upgrade-scope').value;
+            const msgEl = modal.querySelector('#upgrade-msg');
+            msgEl.textContent = 'Actualizando asignaciones...';
+            try{
+                const resp = await api.post(`/programas/${encodeURIComponent(programaId)}/upgrade-assignments`, { toVersion: newVersion, scope });
+                const count = resp.data?.updated || 0;
+                msgEl.textContent = `✓ ${count} asignaciones actualizadas a la versión ${newVersion}.`;
+                showToast(`${count} asignaciones actualizadas`);
+                setTimeout(close, 2000);
+            }catch(e){
+                msgEl.textContent = `Error: ${e.details?.message || e.message || 'Error desconocido'}`;
+                showToast('Error actualizando asignaciones', true);
+            }
+        });
     }
 }
 
