@@ -9,6 +9,36 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Agregado
 
+- **Sistema de Diplomas para Programas (v1.10):**
+  - **Tabla `diplomas_entregados`**: Registro histórico simplificado de diplomas emitidos y entregados
+  - **Tipos de diplomas**: 
+    - `programa_completo`: Diploma por completar todos los cursos de un programa (≥70%)
+    - `nivel`: Diploma por completar todos los cursos de un nivel específico (≥70%)
+  - **Cálculo automático de elegibilidad**: Los diplomas se calculan dinámicamente según progreso real
+  - **Backend completo (`backend/repositories/DiplomasRepository.php`, `backend/services/DiplomasService.php`, `backend/api/controllers/DiplomasController.php`):**
+    - `GET /plg-genesis/v1/diplomas/elegibles` - Diplomas elegibles para un estudiante/contacto
+    - `GET /plg-genesis/v1/diplomas` - Lista diplomas emitidos (filtros: pendientes, entregados)
+    - `POST /plg-genesis/v1/diplomas/emitir` - Emite un diploma individual
+    - `POST /plg-genesis/v1/diplomas/emitir-todos` - Emite todos los diplomas elegibles
+    - `PUT /plg-genesis/v1/diplomas/{id}/entrega` - Registra entrega física de un diploma
+    - `GET /plg-genesis/v1/diplomas/acta-cierre` - Genera acta de cierre consolidada
+  - **Frontend (`frontendv2/components/diplomas.js`, `frontendv2/components/diplomas.css`):**
+    - Componente reutilizable para visualizar diplomas en detalle de estudiante/contacto
+    - Badges visuales por estado: elegibles (verde), pendientes (amarillo), entregados (gris)
+    - Acciones inline: emitir, registrar entrega
+    - Función "Emitir Todos" para cierre masivo
+  - **Vista de Acta de Cierre (`frontendv2/pages/contactos/acta-cierre.html`, `.js`):**
+    - Resumen ejecutivo de todos los diplomas de un contacto
+    - Secciones: elegibles, pendientes de entrega, entregados
+    - Tabla consolidada con acciones rápidas
+    - Función de impresión (estilos optimizados para papel)
+  - **Migración idempotente (`migration/v1_10.diplomas.sql`)**:
+    - Compatible con PostgreSQL 9.2+
+    - Constraints para evitar duplicados
+    - Índices para consultas eficientes
+    - Control de versión de programas para histórico preciso
+  - **Versionamiento**: Los diplomas registran la versión del programa bajo la cual se completó
+
 - **Sistema Multi-Base de Datos PostgreSQL por Oficina:**
   - **Configuración de desarrollo replica producción** con múltiples bases de datos PostgreSQL
   - **Base de datos BOG (Bogotá)**: `emmaus_estudiantes` - usando `dump20250805.sql`

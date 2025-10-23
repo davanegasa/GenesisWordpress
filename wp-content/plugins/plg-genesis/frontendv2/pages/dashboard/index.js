@@ -1,4 +1,5 @@
 import { api } from '../../api/client.js';
+import * as ProximosCompletar from '../../components/proximos-completar.js';
 
 export async function mount(container) {
 	container.innerHTML = `
@@ -16,6 +17,7 @@ export async function mount(container) {
 			<div class="card-title">Actividad reciente</div>
 			<ul id="activity" class="activity-list"></ul>
 		</div>
+		<div id="proximos-completar-widget" class="u-mt-16"></div>
 	`;
 	try {
 		const res = await api.get('/estadisticas');
@@ -41,5 +43,17 @@ export async function mount(container) {
 		const list = document.getElementById('activity');
 		list.innerHTML = '<li class="activity-item"><span class="activity-text">Error cargando KPIs</span></li>';
 	}
+
+	// Montar widget de próximos a completar
+	const widgetContainer = container.querySelector('#proximos-completar-widget');
+	if (widgetContainer) {
+		ProximosCompletar.mount(widgetContainer);
+	}
 }
-export function unmount() {}
+
+export function unmount() {
+	// Unmount widget
+	if (ProximosCompletar.unmount) {
+		ProximosCompletar.unmount();
+	}
+}

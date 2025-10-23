@@ -47,6 +47,18 @@ function resolveLoader(hash) {
 	}
     if (hash.startsWith('#/estudiantes')) return () => import('../pages/estudiantes/assign.js').then(m => m.mount(container));
     if (hash.startsWith('#/contactos/nuevo')) return () => import('../pages/contactos/create.js').then(m => m.mount(container));
+    if (hash.startsWith('#/contacto/') && hash.includes('/acta-cierre')) {
+        let code = hash.split('/')[2] || '';
+        if (code.includes('?')) code = code.split('?')[0];
+        code = decodeURIComponent(code);
+        return () => import('../pages/contactos/acta-cierre-v2.js').then(m => m.mount(container, { code }));
+    }
+    if (hash.startsWith('#/acta/')) {
+        let id = hash.split('/')[2] || '';
+        if (id.includes('?')) id = id.split('?')[0];
+        id = decodeURIComponent(id);
+        return () => import('../pages/actas/detail.js').then(m => m.mount(container, { id }));
+    }
     if (hash.startsWith('#/contacto/')) {
         let code = hash.split('/')[2] || '';
         if (code.includes('?')) code = code.split('?')[0];

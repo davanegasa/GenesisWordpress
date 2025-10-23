@@ -237,6 +237,10 @@ add_action('rest_api_init', function () {
 	if (class_exists('PlgGenesis_CoursesController')) {
 		PlgGenesis_CoursesController::register_routes();
 	}
+	require_once __DIR__ . '/api/controllers/DiplomasController.php';
+	if (class_exists('PlgGenesis_DiplomasController')) {
+		PlgGenesis_DiplomasController::register_routes();
+	}
     
     // CORS controlado (whitelist): permitir dashboard desde dominios específicos
     add_action('rest_api_init', function(){
