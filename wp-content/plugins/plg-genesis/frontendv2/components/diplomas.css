@@ -1,0 +1,350 @@
+/* Estilos para el componente de Diplomas */
+
+.diplomas-wrapper {
+	margin: 20px 0;
+	padding: 20px;
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.diplomas-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+	padding-bottom: 15px;
+	border-bottom: 2px solid #f0f0f0;
+}
+
+.diplomas-header h3 {
+	margin: 0;
+	font-size: 1.5rem;
+	color: #333;
+}
+
+.diplomas-elegibles,
+.diplomas-pendientes,
+.diplomas-entregados {
+	margin-bottom: 25px;
+}
+
+.diplomas-elegibles h4 {
+	color: #28a745;
+	margin-bottom: 15px;
+	font-size: 1.1rem;
+}
+
+.diplomas-pendientes h4 {
+	color: #ffc107;
+	margin-bottom: 15px;
+	font-size: 1.1rem;
+}
+
+.diplomas-entregados h4 {
+	color: #6c757d;
+	margin-bottom: 15px;
+	font-size: 1.1rem;
+}
+
+.diplomas-list {
+	display: grid;
+	gap: 12px;
+}
+
+.diploma-card {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	padding: 15px;
+	border-radius: 6px;
+	border: 2px solid #e0e0e0;
+	background: #fafafa;
+	transition: all 0.2s ease;
+}
+
+.diploma-card:hover {
+	box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+	transform: translateY(-2px);
+}
+
+.diploma-card.elegible {
+	border-color: #28a745;
+	background: #f8fff9;
+}
+
+.diploma-card.pendiente {
+	border-color: #ffc107;
+	background: #fffef8;
+}
+
+.diploma-card.entregado {
+	border-color: #6c757d;
+	background: #f8f9fa;
+	opacity: 0.8;
+}
+
+.diploma-icon {
+	font-size: 2rem;
+	flex-shrink: 0;
+}
+
+.diploma-info {
+	flex: 1;
+}
+
+.diploma-estudiante {
+	font-size: 0.9rem;
+	color: #007bff;
+	margin-bottom: 6px;
+	padding: 4px 8px;
+	background: #e7f3ff;
+	border-radius: 4px;
+	display: inline-block;
+}
+
+.diploma-estudiante strong {
+	font-weight: 700;
+}
+
+.diploma-nombre {
+	font-weight: 600;
+	font-size: 1rem;
+	color: #333;
+	margin-bottom: 4px;
+}
+
+.diploma-tipo {
+	font-size: 0.85rem;
+	color: #666;
+	margin-bottom: 2px;
+}
+
+.diploma-version {
+	font-size: 0.8rem;
+	color: #999;
+	font-style: italic;
+}
+
+.diploma-fecha {
+	font-size: 0.85rem;
+	color: #666;
+	margin-top: 4px;
+}
+
+.diploma-notas {
+	font-size: 0.85rem;
+	color: #555;
+	margin-top: 6px;
+	padding: 6px 10px;
+	background: #fff;
+	border-left: 3px solid #ddd;
+	border-radius: 3px;
+	font-style: italic;
+}
+
+.empty-state {
+	text-align: center;
+	padding: 40px 20px;
+	color: #999;
+}
+
+.empty-state p {
+	margin: 0;
+	font-size: 1rem;
+}
+
+/* Botones */
+.btn {
+	padding: 8px 16px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 0.9rem;
+	font-weight: 500;
+	transition: all 0.2s ease;
+	text-decoration: none;
+	display: inline-block;
+}
+
+.btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.btn-primary {
+	background: #007bff;
+	color: #fff;
+}
+
+.btn-primary:hover {
+	background: #0056b3;
+}
+
+.btn-success {
+	background: #28a745;
+	color: #fff;
+}
+
+.btn-success:hover {
+	background: #1e7e34;
+}
+
+.btn-sm {
+	padding: 6px 12px;
+	font-size: 0.85rem;
+}
+
+.loading,
+.error {
+	padding: 20px;
+	text-align: center;
+	color: #666;
+}
+
+.error {
+	color: #dc3545;
+}
+
+/* Acta de Cierre */
+.acta-cierre-container {
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 30px;
+}
+
+.acta-header {
+	text-align: center;
+	margin-bottom: 40px;
+	padding-bottom: 20px;
+	border-bottom: 3px solid #333;
+}
+
+.acta-header h1 {
+	margin: 0 0 10px 0;
+	font-size: 2rem;
+	color: #333;
+}
+
+.acta-header .contacto-info {
+	font-size: 1.1rem;
+	color: #666;
+}
+
+.acta-section {
+	margin-bottom: 30px;
+	padding: 20px;
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.acta-section h2 {
+	margin: 0 0 20px 0;
+	font-size: 1.3rem;
+	color: #333;
+	border-bottom: 2px solid #e0e0e0;
+	padding-bottom: 10px;
+}
+
+.acta-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 15px;
+}
+
+.acta-table th,
+.acta-table td {
+	padding: 12px;
+	text-align: left;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.acta-table th {
+	background: #f8f9fa;
+	font-weight: 600;
+	color: #555;
+}
+
+.acta-table tbody tr:hover {
+	background: #f9f9f9;
+}
+
+.acta-actions {
+	margin-top: 30px;
+	text-align: center;
+	padding-top: 20px;
+	border-top: 2px solid #e0e0e0;
+}
+
+.acta-actions .btn {
+	margin: 0 10px;
+}
+
+.badge {
+	display: inline-block;
+	padding: 4px 8px;
+	border-radius: 3px;
+	font-size: 0.8rem;
+	font-weight: 600;
+}
+
+.badge-success {
+	background: #d4edda;
+	color: #155724;
+}
+
+.badge-warning {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.badge-info {
+	background: #d1ecf1;
+	color: #0c5460;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+	.diplomas-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+	}
+
+	.diploma-card {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.acta-cierre-container {
+		padding: 15px;
+	}
+
+	.acta-table {
+		font-size: 0.9rem;
+	}
+
+	.acta-table th,
+	.acta-table td {
+		padding: 8px;
+	}
+}
+
+@media print {
+	.diplomas-header button,
+	.diploma-card button,
+	.acta-actions {
+		display: none;
+	}
+
+	.diploma-card:hover {
+		transform: none;
+		box-shadow: none;
+	}
+
+	.acta-cierre-container {
+		max-width: 100%;
+	}
+}
+

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Acta de Cierre - Sistema Genesis</title>
+	<link rel="stylesheet" href="../../components/diplomas.css">
+	<style>
+		body {
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			margin: 0;
+			padding: 20px;
+			background: #f5f5f5;
+		}
+
+		.fecha-generacion {
+			margin-top: 10px;
+			font-size: 0.9rem;
+			color: #999;
+		}
+
+		.btn-secondary {
+			background: #6c757d;
+			color: #fff;
+		}
+
+		.btn-secondary:hover {
+			background: #5a6268;
+		}
+
+		@media print {
+			body {
+				background: white;
+				padding: 0;
+			}
+			
+			.fecha-generacion {
+				display: none;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div id="app">
+		<div class="loading">Cargando acta de cierre...</div>
+	</div>
+
+	<script>
+		// Configuración global para nonce
+		window.plgGenesis = window.plgGenesis || {};
+		
+		// Obtener nonce si es necesario
+		if (!window.plgGenesis.nonce) {
+			fetch('/wp-json/plg-genesis/v1/auth/nonce')
+				.then(r => r.json())
+				.then(data => {
+					if (data.success) {
+						window.plgGenesis.nonce = data.data.nonce;
+					}
+				})
+				.catch(err => console.error('Error obteniendo nonce:', err));
+		}
+	</script>
+	<script src="acta-cierre.js"></script>
+</body>
+</html>
+

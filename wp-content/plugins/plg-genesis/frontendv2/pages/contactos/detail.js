@@ -1,4 +1,5 @@
 import { api } from '../../api/client.js';
+import * as ProximosCompletar from '../../components/proximos-completar.js';
 
 export async function mount(container, { code } = {}){
     container.innerHTML = `
@@ -33,6 +34,9 @@ export async function mount(container, { code } = {}){
                 <div class="tab active" data-tab="perfil">👤 Perfil</div>
                 <div class="tab" data-tab="programas">📂 Programas</div>
                 <div class="tab" data-tab="estudiantes">👥 Estudiantes</div>
+                <div class="tab" data-tab="diplomas">🎓 Diplomas</div>
+                <div class="tab" data-tab="actas">📋 Actas</div>
+                <div class="tab" data-tab="proximos">🔥 Por Completar</div>
             </div>
             
             <div class="tab-content" data-content="perfil">
@@ -67,10 +71,27 @@ export async function mount(container, { code } = {}){
             <div class="tab-content u-hidden" data-content="estudiantes">
                 <div id="c-students-section"></div>
             </div>
+            
+            <div class="tab-content u-hidden" data-content="diplomas">
+                <div style="margin-bottom: 15px;">
+                    <a href="#/contacto/${encodeURIComponent(code)}/acta-cierre" class="btn btn-primary">
+                        📜 Ver Acta de Cierre Completa
+                    </a>
+                </div>
+                <div id="c-diplomas-section">Cargando diplomas...</div>
+            </div>
+            
+            <div class="tab-content u-hidden" data-content="actas">
+                <div id="c-actas-section">Cargando actas...</div>
+            </div>
+            
+            <div class="tab-content u-hidden" data-content="proximos">
+                <div id="c-proximos-section"></div>
+            </div>
         `;
         
         // Configurar tabs
-        setupTabs(container);
+        setupTabs(container, d.id, code.trim());
         
         // Cargar historial académico
         loadAcademicHistory(container, code.trim(), d.nombre || 'Contacto');
@@ -129,9 +150,12 @@ export function unmount(){}
 
 // ============ TABS ============
 
-function setupTabs(container) {
+function setupTabs(container, contactoId, contactCode) {
     const tabs = container.querySelectorAll('.tab');
     const contents = container.querySelectorAll('.tab-content');
+    let diplomasLoaded = false;
+    let actasLoaded = false;
+    let proximosLoaded = false;
     
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -148,6 +172,24 @@ function setupTabs(container) {
             const targetContent = container.querySelector(`[data-content="${targetTab}"]`);
             if (targetContent) {
                 targetContent.classList.remove('u-hidden');
+            }
+            
+            // Cargar diplomas cuando se activa la tab (lazy loading)
+            if (targetTab === 'diplomas' && !diplomasLoaded && contactoId) {
+                diplomasLoaded = true;
+                loadDiplomas(container, contactoId, contactCode);
+            }
+            
+            // Cargar actas cuando se activa la tab (lazy loading)
+            if (targetTab === 'actas' && !actasLoaded && contactoId) {
+                actasLoaded = true;
+                loadActas(container, contactoId, contactCode);
+            }
+            
+            // Cargar próximos a completar cuando se activa la tab (lazy loading)
+            if (targetTab === 'proximos' && !proximosLoaded && contactoId) {
+                proximosLoaded = true;
+                loadProximosCompletar(container, contactoId);
             }
         });
     });
@@ -368,6 +410,544 @@ function renderInheritedStudents(container, data, contactCode) {
     container.innerHTML = html;
 }
 
+// ============ DIPLOMAS ============
+
+async function loadDiplomas(container, contactoId, contactCode) {
+    const diplomasSection = container.querySelector('#c-diplomas-section');
+    if (!diplomasSection) return;
+
+    try {
+        // Cargar elegibles y emitidos en paralelo
+        const [elegiblesRes, emitidosRes] = await Promise.all([
+            api.get(`/diplomas/elegibles?contactoId=${contactoId}`),
+            api.get(`/diplomas?contactoId=${contactoId}`)
+        ]);
+
+        const elegibles = elegiblesRes?.data || [];
+        const emitidos = emitidosRes?.data || [];
+        const pendientesEntrega = emitidos.filter(d => !d.entregado);
+        const entregados = emitidos.filter(d => d.entregado);
+
+        let html = '<div class="diplomas-wrapper">';
+
+        // Elegibles - Agrupados por programa y nivel
+        if (elegibles.length > 0) {
+            // Agrupar por programa y nivel
+            const elegiblesPorDiploma = elegibles.reduce((acc, d) => {
+                const key = d.tipo === 'nivel' 
+                    ? `${d.programa_id}_${d.nivel_id}_${d.tipo}_${d.version_programa}`
+                    : `${d.programa_id}_${d.tipo}_${d.version_programa}`;
+                if (!acc[key]) {
+                    acc[key] = {
+                        tipo: d.tipo,
+                        programa_id: d.programa_id,
+                        programa_nombre: d.programa_nombre,
+                        nivel_id: d.nivel_id,
+                        nivel_nombre: d.nivel_nombre,
+                        version_programa: d.version_programa,
+                        estudiantes: []
+                    };
+                }
+                acc[key].estudiantes.push({
+                    estudiante_id: d.estudiante_id,
+                    estudiante_codigo: d.estudiante_codigo,
+                    estudiante_nombre: d.estudiante_nombre
+                });
+                return acc;
+            }, {});
+
+            html += `
+                <div class="section u-mb-16">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div class="section-title" style="color: #28a745; margin: 0;">✨ Elegibles para Emisión (${elegibles.length})</div>
+                        <div>
+                            <button class="btn btn-sm btn-secondary" onclick="toggleSeleccionTodos()" style="margin-right: 10px;">
+                                ☑️ <span id="toggle-sel-text">Seleccionar Todos</span>
+                            </button>
+                            <button class="btn btn-success" onclick="emitirDiplomasSeleccionados()" id="btn-emitir-sel">
+                                ✅ Emitir Seleccionados (<span id="count-sel">0</span>)
+                            </button>
+                        </div>
+                    </div>
+                    <div class="u-flex u-gap" style="flex-direction: column;">
+                        ${Object.values(elegiblesPorDiploma).map((grupo, idx) => {
+                            const nombreCompleto = grupo.tipo === 'nivel' 
+                                ? `${escapeHtml(grupo.programa_nombre)} - ${escapeHtml(grupo.nivel_nombre)}`
+                                : `${escapeHtml(grupo.programa_nombre)} (Completo)`;
+                            const collapseId = `elegible-${idx}`;
+                            return `
+                                <div class="card" style="background: #f8fff9; border: 2px solid #28a745;">
+                                    <div 
+                                        style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid #d4edda; cursor: pointer;" 
+                                        onclick="toggleCollapse('${collapseId}')">
+                                        <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                                            <div style="font-size: 1.5rem;">🎓</div>
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: 700; font-size: 1rem; color: #28a745;">
+                                                    ${nombreCompleto}
+                                                </div>
+                                                <div style="font-size: 0.85rem; color: #666;">
+                                                    ${grupo.tipo === 'nivel' ? 'Nivel' : 'Programa Completo'} • Versión ${grupo.version_programa} • ${grupo.estudiantes.length} estudiante${grupo.estudiantes.length > 1 ? 's' : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="${collapseId}-icon" style="font-size: 1.2rem; color: #28a745; transition: transform 0.2s; transform: rotate(-90deg);">▼</div>
+                                    </div>
+                                    <div id="${collapseId}" class="u-flex u-gap" style="flex-direction: column; gap: 8px; display: none;">
+                                        ${grupo.estudiantes.map((est, estIdx) => `
+                                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px; border-left: 3px solid #28a745;">
+                                                <div style="display: flex; align-items: center; gap: 12px;">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        class="dip-checkbox" 
+                                                        data-tipo="${grupo.tipo}"
+                                                        data-programa-id="${grupo.programa_id}"
+                                                        data-version="${grupo.version_programa}"
+                                                        data-estudiante-id="${est.estudiante_id}"
+                                                        data-nivel-id="${grupo.nivel_id || ''}"
+                                                        onchange="updateContadorSel()"
+                                                        style="width: 18px; height: 18px; cursor: pointer;"
+                                                    />
+                                                    <div style="font-size: 1.2rem;">👤</div>
+                                                    <div>
+                                                        <div style="font-weight: 600; color: #007bff;">
+                                                            ${escapeHtml(est.estudiante_codigo)}
+                                                        </div>
+                                                        <div style="font-size: 0.9rem; color: #666;">
+                                                            ${escapeHtml(est.estudiante_nombre)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button 
+                                                    class="btn btn-success btn-sm" 
+                                                    onclick="emitirDiplomaContacto(${grupo.programa_id}, ${grupo.version_programa}, '${grupo.tipo}', ${est.estudiante_id}, ${grupo.nivel_id || 'null'})">
+                                                    Emitir
+                                                </button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Pendientes de entrega - Agrupados por programa y nivel
+        if (pendientesEntrega.length > 0) {
+            // Agrupar por programa y nivel
+            const pendientesPorDiploma = pendientesEntrega.reduce((acc, d) => {
+                const key = d.tipo === 'nivel' 
+                    ? `${d.programa_id}_${d.nivel_id}_${d.tipo}_${d.version_programa}`
+                    : `${d.programa_id}_${d.tipo}_${d.version_programa}`;
+                if (!acc[key]) {
+                    acc[key] = {
+                        tipo: d.tipo,
+                        programa_id: d.programa_id,
+                        programa_nombre: d.programa_nombre,
+                        nivel_id: d.nivel_id,
+                        nivel_nombre: d.nivel_nombre,
+                        version_programa: d.version_programa,
+                        diplomas: []
+                    };
+                }
+                acc[key].diplomas.push(d);
+                return acc;
+            }, {});
+
+            html += `
+                <div class="section u-mb-16">
+                    <div class="section-title" style="color: #ffc107;">📋 Pendientes de Entrega (${pendientesEntrega.length})</div>
+                    <div class="u-flex u-gap" style="flex-direction: column;">
+                        ${Object.values(pendientesPorDiploma).map((grupo, idx) => {
+                            const nombreCompleto = grupo.tipo === 'nivel' 
+                                ? `${escapeHtml(grupo.programa_nombre)} - ${escapeHtml(grupo.nivel_nombre)}`
+                                : `${escapeHtml(grupo.programa_nombre)} (Completo)`;
+                            const collapseId = `pendiente-${idx}`;
+                            return `
+                                <div class="card" style="background: #fffef8; border: 2px solid #ffc107;">
+                                    <div 
+                                        style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid #fff3cd; cursor: pointer;"
+                                        onclick="toggleCollapse('${collapseId}')">
+                                        <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                                            <div style="font-size: 1.5rem;">📜</div>
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: 700; font-size: 1rem; color: #ffc107;">
+                                                    ${nombreCompleto}
+                                                </div>
+                                                <div style="font-size: 0.85rem; color: #666;">
+                                                    ${grupo.tipo === 'nivel' ? 'Nivel' : 'Programa Completo'} • Versión ${grupo.version_programa} • ${grupo.diplomas.length} diploma${grupo.diplomas.length > 1 ? 's' : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="${collapseId}-icon" style="font-size: 1.2rem; color: #ffc107; transition: transform 0.2s; transform: rotate(-90deg);">▼</div>
+                                    </div>
+                                    <div id="${collapseId}" class="u-flex u-gap" style="flex-direction: column; gap: 8px; display: none;">
+                                        ${grupo.diplomas.map(d => `
+                                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px; border-left: 3px solid #ffc107;">
+                                                <div style="flex: 1;">
+                                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                                        <div style="font-size: 1rem;">👤</div>
+                                                        <div>
+                                                            <span style="font-weight: 600; color: #007bff;">${escapeHtml(d.estudiante_codigo)}</span>
+                                                            <span style="color: #666;"> - ${escapeHtml(d.estudiante_nombre)}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div style="font-size: 0.85rem; color: #666; padding-left: 28px;">
+                                                        Emitido: ${formatDate(d.fecha_emision)}
+                                                    </div>
+                                                    ${d.notas ? `<div style="font-size: 0.85rem; color: #999; margin-top: 4px; padding-left: 28px;">${escapeHtml(d.notas)}</div>` : ''}
+                                                </div>
+                                                <button 
+                                                    class="btn btn-primary btn-sm" 
+                                                    onclick="registrarEntregaContacto(${d.id})">
+                                                    Registrar Entrega
+                                                </button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Entregados - Agrupados por programa y nivel
+        if (entregados.length > 0) {
+            // Agrupar por programa y nivel
+            const entregadosPorDiploma = entregados.reduce((acc, d) => {
+                const key = d.tipo === 'nivel' 
+                    ? `${d.programa_id}_${d.nivel_id}_${d.tipo}_${d.version_programa}`
+                    : `${d.programa_id}_${d.tipo}_${d.version_programa}`;
+                if (!acc[key]) {
+                    acc[key] = {
+                        tipo: d.tipo,
+                        programa_id: d.programa_id,
+                        programa_nombre: d.programa_nombre,
+                        nivel_id: d.nivel_id,
+                        nivel_nombre: d.nivel_nombre,
+                        version_programa: d.version_programa,
+                        diplomas: []
+                    };
+                }
+                acc[key].diplomas.push(d);
+                return acc;
+            }, {});
+
+            html += `
+                <div class="section u-mb-16">
+                    <div class="section-title" style="color: #6c757d;">✅ Entregados (${entregados.length})</div>
+                    <div class="u-flex u-gap" style="flex-direction: column;">
+                        ${Object.values(entregadosPorDiploma).map((grupo, idx) => {
+                            const nombreCompleto = grupo.tipo === 'nivel' 
+                                ? `${escapeHtml(grupo.programa_nombre)} - ${escapeHtml(grupo.nivel_nombre)}`
+                                : `${escapeHtml(grupo.programa_nombre)} (Completo)`;
+                            const collapseId = `entregado-${idx}`;
+                            return `
+                                <div class="card" style="background: #f8f9fa; border: 2px solid #6c757d; opacity: 0.9;">
+                                    <div 
+                                        style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid #dee2e6; cursor: pointer;"
+                                        onclick="toggleCollapse('${collapseId}')">
+                                        <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                                            <div style="font-size: 1.5rem;">✅</div>
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: 700; font-size: 1rem; color: #6c757d;">
+                                                    ${nombreCompleto}
+                                                </div>
+                                                <div style="font-size: 0.85rem; color: #666;">
+                                                    ${grupo.tipo === 'nivel' ? 'Nivel' : 'Programa Completo'} • Versión ${grupo.version_programa} • ${grupo.diplomas.length} diploma${grupo.diplomas.length > 1 ? 's' : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="${collapseId}-icon" style="font-size: 1.2rem; color: #6c757d; transition: transform 0.2s;">▼</div>
+                                    </div>
+                                    <div id="${collapseId}" class="u-flex u-gap" style="flex-direction: column; gap: 8px; display: none;">
+                                        ${grupo.diplomas.map(d => `
+                                            <div style="padding: 10px; background: white; border-radius: 4px; border-left: 3px solid #6c757d;">
+                                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                                    <div style="font-size: 1rem;">👤</div>
+                                                    <div>
+                                                        <span style="font-weight: 600; color: #007bff;">${escapeHtml(d.estudiante_codigo)}</span>
+                                                        <span style="color: #666;"> - ${escapeHtml(d.estudiante_nombre)}</span>
+                                                    </div>
+                                                </div>
+                                                <div style="font-size: 0.85rem; color: #666; padding-left: 28px;">
+                                                    Emitido: ${formatDate(d.fecha_emision)} • Entregado: ${formatDate(d.fecha_entrega)}
+                                                </div>
+                                                ${d.notas ? `<div style="font-size: 0.85rem; color: #999; margin-top: 4px; padding-left: 28px;">${escapeHtml(d.notas)}</div>` : ''}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Estado vacío
+        if (elegibles.length === 0 && emitidos.length === 0) {
+            html += '<div class="card" style="text-align: center; padding: 40px; color: #999;">No hay diplomas disponibles para este contacto.</div>';
+        }
+
+        html += '</div>';
+        diplomasSection.innerHTML = html;
+
+        // Agregar funciones globales para las acciones
+        setupDiplomasActions(contactoId, contactCode);
+
+    } catch (error) {
+        console.error('Error cargando diplomas:', error);
+        diplomasSection.innerHTML = '<div class="card" style="color: #dc3545;">Error cargando diplomas</div>';
+    }
+}
+
+function setupDiplomasActions(contactoId, contactCode) {
+    // Actualizar contador de seleccionados
+    window.updateContadorSel = function() {
+        const checked = document.querySelectorAll('.dip-checkbox:checked');
+        const contador = document.getElementById('count-sel');
+        const btn = document.getElementById('btn-emitir-sel');
+        
+        if (contador) contador.textContent = checked.length;
+        if (btn) btn.disabled = checked.length === 0;
+    };
+
+    // Seleccionar/deseleccionar todos
+    window.toggleSeleccionTodos = function() {
+        const checkboxes = document.querySelectorAll('.dip-checkbox');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        const toggleText = document.getElementById('toggle-sel-text');
+        
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+        
+        if (toggleText) {
+            toggleText.textContent = !allChecked ? 'Deseleccionar Todos' : 'Seleccionar Todos';
+        }
+        
+        updateContadorSel();
+    };
+
+    // Emitir diplomas seleccionados
+    window.emitirDiplomasSeleccionados = async function() {
+        const checkboxes = document.querySelectorAll('.dip-checkbox:checked');
+        
+        if (checkboxes.length === 0) {
+            alert('Por favor selecciona al menos un diploma');
+            return;
+        }
+
+        if (!confirm(`¿Emitir ${checkboxes.length} diploma(s) seleccionado(s)?`)) {
+            return;
+        }
+
+        const diplomas = Array.from(checkboxes).map(cb => ({
+            tipo: cb.dataset.tipo,
+            programaId: parseInt(cb.dataset.programaId),
+            version: parseInt(cb.dataset.version),
+            estudianteId: parseInt(cb.dataset.estudianteId),
+            nivelId: cb.dataset.nivelId ? parseInt(cb.dataset.nivelId) : null
+        }));
+
+        // Emitir todos en una sola request (batch) con acta
+        try {
+            const response = await api.post('/diplomas/emitir-batch', { 
+                diplomas,
+                contactoId: parseInt(contactoId)
+            });
+            
+            if (response && response.success) {
+                const { numero_acta, total_exitosos, total_errores, errores } = response.data;
+                
+                if (total_exitosos > 0) {
+                    let mensaje = `✅ Acta ${numero_acta} generada\n\n${total_exitosos} diploma(s) emitido(s)`;
+                    if (total_errores > 0) {
+                        mensaje += `\n⚠️ ${total_errores} error(es)`;
+                        console.error('Errores:', errores);
+                    }
+                    alert(mensaje);
+                    location.reload();
+                } else {
+                    alert('❌ No se pudo emitir ningún diploma');
+                    console.error('Errores:', errores);
+                }
+            } else {
+                alert('Error: ' + (response?.error?.message || 'No se pudo emitir diplomas'));
+            }
+        } catch (error) {
+            console.error('Error emitiendo batch:', error);
+            alert('❌ Error al emitir diplomas');
+        }
+    };
+
+    // Emitir diploma individual
+    window.emitirDiplomaContacto = async function(programaId, version, tipo, estudianteId, nivelId) {
+        if (!confirm('¿Desea emitir este diploma?')) return;
+
+        try {
+            const response = await api.post('/diplomas/emitir', {
+                tipo,
+                programaId,
+                version,
+                estudianteId,
+                nivelId: nivelId !== 'null' ? nivelId : null
+            });
+
+            if (response && response.success) {
+                alert('Diploma emitido exitosamente');
+                location.hash = `#/contacto/${encodeURIComponent(contactCode)}`;
+                location.reload();
+            } else {
+                alert('Error: ' + (response?.error?.message || 'No se pudo emitir el diploma'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error emitiendo diploma');
+        }
+    };
+
+    window.registrarEntregaContacto = async function(diplomaId) {
+        const fechaEntrega = prompt('Fecha de entrega (YYYY-MM-DD) o dejar vacío para hoy:');
+        const notas = prompt('Notas sobre la entrega (opcional):');
+
+        try {
+            const response = await api.put(`/diplomas/${diplomaId}/entrega`, {
+                fechaEntrega: fechaEntrega || null,
+                notas: notas || null
+            });
+
+            if (response && response.success) {
+                alert('Entrega registrada exitosamente');
+                location.reload();
+            } else {
+                alert('Error: ' + (response?.error?.message || 'No se pudo registrar la entrega'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error registrando entrega');
+        }
+    };
+}
+
+// ============ PRÓXIMOS A COMPLETAR ============
+
+async function loadProximosCompletar(container, contactoId) {
+    const proximosSection = container.querySelector('#c-proximos-section');
+    if (!proximosSection) return;
+
+    try {
+        await ProximosCompletar.mount(proximosSection, { 
+            contactoId: contactoId,
+            titulo: 'Estudiantes Próximos a Graduarse'
+        });
+    } catch (error) {
+        console.error('Error cargando próximos a completar:', error);
+        proximosSection.innerHTML = '<div class="card" style="color: #dc3545;">Error cargando próximos a completar</div>';
+    }
+}
+
+// ============ ACTAS ============
+
+async function loadActas(container, contactoId, contactCode) {
+    const actasSection = container.querySelector('#c-actas-section');
+    if (!actasSection) return;
+
+    try {
+        // Cargar actas del contacto
+        const response = await api.get(`/actas?contactoId=${contactoId}&estado=activa`);
+        
+        if (!response || !response.success) {
+            throw new Error('Error cargando actas');
+        }
+
+        const actas = response.data || [];
+
+        if (actas.length === 0) {
+            actasSection.innerHTML = `
+                <div class="card" style="text-align: center; padding: 40px; color: #999;">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">📋</div>
+                    <p>No hay actas generadas para este contacto.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="u-flex u-gap" style="flex-direction: column;">';
+
+        actas.forEach(acta => {
+            const fecha = new Date(acta.fecha_acta).toLocaleDateString('es-ES', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            html += `
+                <div class="card" style="border-left: 4px solid #007bff;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <div style="font-size: 2rem;">📜</div>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 1.2rem; color: #007bff;">
+                                        Acta ${escapeHtml(acta.numero_acta)}
+                                    </div>
+                                    <div style="font-size: 0.9rem; color: #666;">
+                                        ${fecha}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 20px; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                                <div>
+                                    <span style="font-weight: 600; color: #666;">Total diplomas:</span>
+                                    <span style="font-weight: 700; color: #28a745; font-size: 1.1rem;">${acta.total_diplomas}</span>
+                                </div>
+                                <div>
+                                    <span style="font-weight: 600; color: #666;">Tipo:</span>
+                                    <span style="color: #333;">${acta.tipo_acta === 'cierre' ? 'Acta de Cierre' : acta.tipo_acta}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-direction: column;">
+                            <button class="btn btn-primary btn-sm" onclick="verActa(${acta.id})">
+                                👁️ Ver Detalle
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="imprimirActa(${acta.id})">
+                                🖨️ Reimprimir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        actasSection.innerHTML = html;
+
+        // Setup acciones
+        setupActasActions(contactCode);
+
+    } catch (error) {
+        console.error('Error cargando actas:', error);
+        actasSection.innerHTML = '<div class="card" style="color: #dc3545;">Error cargando actas</div>';
+    }
+}
+
+function setupActasActions(contactCode) {
+    window.verActa = function(actaId) {
+        // Navegar a la página de detalle del acta
+        location.hash = `#/acta/${actaId}`;
+    };
+
+    window.imprimirActa = async function(actaId) {
+        // Abrir el detalle del acta en modo impresión
+        location.hash = `#/acta/${actaId}?print=true`;
+    };
+}
+
 // ============ HELPER FUNCTIONS ============
 
 function getLevelIcon(level) {
@@ -384,6 +964,24 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+function toggleCollapse(collapseId) {
+    const content = document.getElementById(collapseId);
+    const icon = document.getElementById(`${collapseId}-icon`);
+    
+    if (!content || !icon) return;
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'flex';
+        icon.style.transform = 'rotate(0deg)';
+    } else {
+        content.style.display = 'none';
+        icon.style.transform = 'rotate(-90deg)';
+    }
+}
+
+// Hacer toggleCollapse disponible globalmente
+window.toggleCollapse = toggleCollapse;
 
 function formatDate(dateStr) {
     if (!dateStr) return '-';
