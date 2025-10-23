@@ -22,7 +22,7 @@ async function render(root) {
 		return;
 	}
 
-	console.log('Renderizando página de usuarios...');
+
 	
 	root.innerHTML = `
 		<div class="card">
@@ -76,9 +76,9 @@ async function loadUsers() {
 	tableContainer.innerHTML = '<p>Cargando...</p>';
 
 	try {
-		console.log('Cargando usuarios...', { search, currentPage, limit });
+
 		const response = await apiClient.get(`/user-management?q=${encodeURIComponent(search)}&page=${currentPage}&limit=${limit}`);
-		console.log('Respuesta recibida:', response);
+
 		
 		if (!response.success) {
 			throw new Error(response.error?.message || 'Error al cargar usuarios');
@@ -86,7 +86,7 @@ async function loadUsers() {
 
 		const { users, pagination } = response.data;
 
-		console.log('Usuarios extraídos:', users, 'Cantidad:', users?.length);
+
 
 		if (!users || users.length === 0) {
 			tableContainer.innerHTML = '<p style="text-align:center; color:#666;">No se encontraron usuarios</p>';

@@ -677,6 +677,146 @@ label{display:flex;flex-direction:column;gap:6px;color:var(--plg-mutedText);font
   }
 }
 
+/* Students Grid - Contactos */
+.students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.student-card {
+  border: 1px solid var(--plg-border);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--plg-cardBg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.student-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+  border-color: var(--plg-accent);
+}
+
+.student-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.student-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--plg-accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.student-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.student-name {
+  font-weight: 600;
+  color: var(--plg-text);
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-code {
+  font-size: 12px;
+  color: var(--plg-mutedText);
+}
+
+.student-stats {
+  display: flex;
+  gap: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--plg-border);
+}
+
+.student-stats .stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.student-stats .stat-label {
+  font-size: 11px;
+  color: var(--plg-mutedText);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.student-stats .stat-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--plg-text);
+}
+
+/* Stats Grid - General */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.stat-card {
+  padding: 16px;
+  background: color-mix(in srgb, var(--plg-accent) 5%, var(--plg-cardBg));
+  border: 1px solid var(--plg-border);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.stat-card .stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--plg-accent);
+  line-height: 1;
+}
+
+.stat-card .stat-label {
+  font-size: 12px;
+  color: var(--plg-mutedText);
+  margin-top: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Course Structure (sin progreso) */
+.course-item.structure {
+  opacity: 0.85;
+}
+
+.course-item.structure .course-status-icon {
+  color: var(--plg-mutedText);
+}
+
+/* Responsive - Students Grid */
+@media (max-width: 768px) {
+  .students-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .student-stats {
+    gap: 8px;
+  }
+}
+
 @media (max-width: 480px) {
   .stats-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
