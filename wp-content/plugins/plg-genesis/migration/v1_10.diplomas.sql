@@ -41,19 +41,43 @@ CREATE TABLE IF NOT EXISTS diplomas_entregados (
 );
 
 -- Índices para diplomas_entregados
-CREATE INDEX IF NOT EXISTS idx_diplomas_tipo ON diplomas_entregados(tipo);
-CREATE INDEX IF NOT EXISTS idx_diplomas_programa ON diplomas_entregados(programa_id);
-CREATE INDEX IF NOT EXISTS idx_diplomas_nivel ON diplomas_entregados(nivel_id);
-CREATE INDEX IF NOT EXISTS idx_diplomas_estudiante ON diplomas_entregados(estudiante_id);
-CREATE INDEX IF NOT EXISTS idx_diplomas_contacto ON diplomas_entregados(contacto_id);
-CREATE INDEX IF NOT EXISTS idx_diplomas_emision ON diplomas_entregados(fecha_emision);
-CREATE INDEX IF NOT EXISTS idx_diplomas_entrega ON diplomas_entregados(fecha_entrega);
-CREATE INDEX IF NOT EXISTS idx_diplomas_pendientes ON diplomas_entregados(fecha_entrega) WHERE fecha_entrega IS NULL;
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_diplomas_tipo') THEN
+        CREATE INDEX idx_diplomas_tipo ON diplomas_entregados(tipo);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_diplomas_programa') THEN
+        CREATE INDEX idx_diplomas_programa ON diplomas_entregados(programa_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_diplomas_nivel') THEN
+        CREATE INDEX idx_diplomas_nivel ON diplomas_entregados(nivel_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_diplomas_estudiante') THEN
+        CREATE INDEX idx_diplomas_estudiante ON diplomas_entregados(estudiante_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_diplomas_contacto') THEN
+        CREATE INDEX idx_diplomas_contacto ON diplomas_entregados(contacto_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_diplomas_emision') THEN
+        CREATE INDEX idx_diplomas_emision ON diplomas_entregados(fecha_emision);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_diplomas_entrega') THEN
+        CREATE INDEX idx_diplomas_entrega ON diplomas_entregados(fecha_entrega);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_diplomas_pendientes') THEN
+        CREATE INDEX idx_diplomas_pendientes ON diplomas_entregados(fecha_entrega) WHERE fecha_entrega IS NULL;
+    END IF;
+END $$;
 
 -- Índices únicos para evitar duplicados
-CREATE UNIQUE INDEX IF NOT EXISTS uq_diploma_programa_estudiante 
-ON diplomas_entregados(tipo, programa_id, COALESCE(nivel_id, 0), estudiante_id) 
-WHERE estudiante_id IS NOT NULL;
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'uq_diploma_programa_estudiante') THEN
+        CREATE UNIQUE INDEX uq_diploma_programa_estudiante 
+        ON diplomas_entregados(tipo, programa_id, COALESCE(nivel_id, 0), estudiante_id) 
+        WHERE estudiante_id IS NOT NULL;
+    END IF;
+END $$;
 
 -- Comentarios descriptivos para diplomas_entregados
 COMMENT ON TABLE diplomas_entregados IS 'Registro histórico de diplomas emitidos y entregados a estudiantes';
@@ -87,9 +111,18 @@ CREATE TABLE IF NOT EXISTS actas_diplomas (
 );
 
 -- Índices para actas_diplomas
-CREATE INDEX IF NOT EXISTS idx_actas_fecha ON actas_diplomas(fecha_acta DESC);
-CREATE INDEX IF NOT EXISTS idx_actas_contacto ON actas_diplomas(contacto_id);
-CREATE INDEX IF NOT EXISTS idx_actas_numero ON actas_diplomas(numero_acta);
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_actas_fecha') THEN
+        CREATE INDEX idx_actas_fecha ON actas_diplomas(fecha_acta DESC);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_actas_contacto') THEN
+        CREATE INDEX idx_actas_contacto ON actas_diplomas(contacto_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_actas_numero') THEN
+        CREATE INDEX idx_actas_numero ON actas_diplomas(numero_acta);
+    END IF;
+END $$;
 
 -- Comentarios descriptivos para actas_diplomas
 COMMENT ON TABLE actas_diplomas IS 'Registro formal de actas que agrupan diplomas emitidos';
@@ -100,12 +133,18 @@ COMMENT ON COLUMN actas_diplomas.estado IS 'Estado del acta: activa o anulada';
 -- =============================================
 -- Agregar FK de diplomas_entregados a actas_diplomas
 -- =============================================
-ALTER TABLE diplomas_entregados 
-ADD COLUMN IF NOT EXISTS acta_id INTEGER;
-
--- Agregar constraint solo si no existe
 DO $$ 
 BEGIN
+    -- Agregar columna acta_id si no existe
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'diplomas_entregados' 
+        AND column_name = 'acta_id'
+    ) THEN
+        ALTER TABLE diplomas_entregados ADD COLUMN acta_id INTEGER;
+    END IF;
+    
+    -- Agregar constraint solo si no existe
     IF NOT EXISTS (
         SELECT 1 FROM pg_constraint 
         WHERE conname = 'fk_diplomas_acta'
@@ -117,7 +156,12 @@ BEGIN
 END $$;
 
 -- Índice para joins rápidos
-CREATE INDEX IF NOT EXISTS idx_diplomas_acta ON diplomas_entregados(acta_id);
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_diplomas_acta') THEN
+        CREATE INDEX idx_diplomas_acta ON diplomas_entregados(acta_id);
+    END IF;
+END $$;
 
 -- =============================================
 -- Función: generar_numero_acta
@@ -148,20 +192,3 @@ BEGIN
     RETURN nuevo_numero;
 END;
 $$ LANGUAGE plpgsql;
-
--- =============================================
--- Trigger: actualizar updated_at en actas
--- =============================================
-CREATE OR REPLACE FUNCTION update_actas_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS trg_actas_updated_at ON actas_diplomas;
-CREATE TRIGGER trg_actas_updated_at
-    BEFORE UPDATE ON actas_diplomas
-    FOR EACH ROW
-    EXECUTE FUNCTION update_actas_updated_at();

@@ -513,7 +513,7 @@ class PlgGenesis_DiplomasRepository {
 
 		// Actualizar contador de diplomas en el acta
 		$totalExitosos = count($exitosos);
-		$sqlUpdate = "UPDATE actas_diplomas SET total_diplomas = $1 WHERE id = $2";
+		$sqlUpdate = "UPDATE actas_diplomas SET total_diplomas = $1, updated_at = NOW() WHERE id = $2";
 		pg_query_params($this->conn, $sqlUpdate, [ $totalExitosos, $actaId ]);
 
 		pg_query($this->conn, 'COMMIT');
