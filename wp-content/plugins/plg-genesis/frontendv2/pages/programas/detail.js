@@ -1,5 +1,5 @@
 import { api } from '../../api/client.js';
-import { createTable, showToast, createDetailGrid, createFieldView } from '../../components/ui/index.js';
+import { createTable, showToast, createDetailGrid, createFieldView, createModal } from '../../components/ui/index.js';
 
 export async function mount(container, { id } = {}){
     container.innerHTML = `
@@ -42,22 +42,13 @@ export async function mount(container, { id } = {}){
             </div>
             <div id="struct-view"></div>
             <div id="struct-edit" class="u-hidden"></div>
-            <div class="section">
-                <div class="section-title">Niveles</div>
-                <div id="niveles"></div>
-            </div>
-            <div class="section">
-                <div class="section-title">Cursos sin nivel</div>
-                <div id="sinNivel"></div>
-            </div>
+            <!-- Secciones antiguas de "Niveles" y "Cursos sin nivel" se reemplazan por la vista de Estructura -->
             <div class="section">
                 <div class="section-title">Prerequisitos</div>
                 <div id="pre"></div>
             </div>
         `;
         try { renderInfo(d); } catch(e){ console.error('renderInfo error', e); const c=container.querySelector('#g-info'); if(c) c.textContent=(d.nombre||'-')+' — '+(d.descripcion||'-'); }
-        renderNiveles(d);
-        renderSinNivel(d);
         renderPre(d);
         // View/Edit toggle
         const saveBtn = container.querySelector('#save');
@@ -83,7 +74,7 @@ export async function mount(container, { id } = {}){
             try{ await api.put('/programas/'+encodeURIComponent(id), payload); msg.textContent='Guardado'; showToast('Programa actualizado'); }
             catch(e){ msg.textContent=e.details?.message||e.message||'Error'; showToast('Error guardando', true); }
             // Sync view
-            try{ const fresh = await api.get('/programas/'+encodeURIComponent(id)); renderInfo(fresh && fresh.data || d); } catch{}
+        try{ const fresh = await api.get('/programas/'+encodeURIComponent(id)); renderInfo(fresh && fresh.data || d); } catch(_){}
             setMode(false);
         });
         // ====== Estructura: estado y edición ======
@@ -125,7 +116,8 @@ export async function mount(container, { id } = {}){
                 // refrescar d y vista
                 const fresh = await api.get('/programas/'+encodeURIComponent(id));
                 d = (fresh && fresh.data) || d;
-                renderNiveles(d); renderSinNivel(d); renderStructureView(d);
+                // Solo re-render de la vista de estructura (secciones antiguas ya no existen)
+                renderStructureView(d);
                 setStructMode(false);
                 msg.textContent='';
             }catch(e){ msg.textContent=e.details?.message||e.message||'Error guardando estructura'; showToast('Error guardando', true); }
@@ -169,10 +161,12 @@ export async function mount(container, { id } = {}){
                 const wrap = document.createElement('div'); wrap.className='card u-mb-8';
                 const row = document.createElement('div'); row.className='u-flex u-gap'; row.style.alignItems='center';
                 const inp = document.createElement('input'); inp.className='input'; inp.value=n.nombre||''; inp.style.flex='1';
+                const addC = document.createElement('button'); addC.className='btn'; addC.textContent='Agregar curso';
                 const del = document.createElement('button'); del.className='btn'; del.textContent='Eliminar';
                 del.onclick = ()=>{ if (confirm('¿Eliminar nivel? Los cursos pasarán a "Sin nivel".')){ state.sinNivel.push(...n.cursos); state.levels.splice(idx,1); renderStructureEdit(); } };
-                row.appendChild(inp); row.appendChild(del); wrap.appendChild(row);
+                row.appendChild(inp); row.appendChild(addC); row.appendChild(del); wrap.appendChild(row);
                 inp.oninput = ()=>{ n.nombre = inp.value; };
+                addC.onclick = ()=> openCoursePicker({ to:'level', levelIndex: idx });
                 const list = document.createElement('div'); list.className='drop-zone'; list.style.minHeight='40px'; list.dataset.levelIndex=String(idx);
                 // cursos
                 (n.cursos||[]).forEach((c, cidx)=>{ list.appendChild(renderDraggableCourse(c, { from:'level', levelIndex:idx, courseIndex:cidx })); });
@@ -186,11 +180,12 @@ export async function mount(container, { id } = {}){
             // Columna sin nivel editable
             const colSn = document.createElement('div');
             const cardSn = document.createElement('div'); cardSn.className='card';
-            cardSn.innerHTML='<div class="section-title">Cursos sin nivel</div>';
+            cardSn.innerHTML='<div class="u-flex u-gap" style="justify-content:space-between;align-items:center;"><div class="section-title" style="margin:0;">Cursos sin nivel</div><div><button id="btn-add-sin" class="btn">Agregar curso</button></div></div>';
             const listSn = document.createElement('div'); listSn.className='drop-zone'; listSn.style.minHeight='40px';
             (state.sinNivel||[]).forEach((c, cidx)=>{ listSn.appendChild(renderDraggableCourse(c, { from:'sin', courseIndex:cidx })); });
             enableDrop(listSn, (info, toIndex)=>{ moveCourse(info, { to:'sin', toIndex }); });
             cardSn.appendChild(listSn); colSn.appendChild(cardSn);
+            const btnAddSin = cardSn.querySelector('#btn-add-sin'); if (btnAddSin) btnAddSin.onclick = ()=> openCoursePicker({ to:'sin' });
 
             grid.appendChild(colLv); grid.appendChild(colSn); cont.appendChild(grid);
         }
@@ -240,6 +235,44 @@ export async function mount(container, { id } = {}){
                 state.sinNivel.splice(origin.courseIndex,1);
             }
             renderStructureEdit();
+        }
+
+        async function openCoursePicker(target){
+            const m = createModal({ title: 'Agregar curso', bodyHtml: `
+                <div class="u-flex u-gap"><input id="find-course" class="input" placeholder="Escribe para buscar cursos..." style="flex:1"></div>
+                <div id="course-results" class="listbox u-mt-8"></div>
+                <div id="course-msg" class="hint-text u-mt-8"></div>
+            `, primaryLabel: 'Agregar', secondaryLabel: 'Cancelar', onPrimary: (close)=>{
+                const sel = selected; if (!sel){ document.querySelector('#course-msg').textContent='Selecciona un curso'; return; }
+                if (existsInStructure(sel.id)){ document.querySelector('#course-msg').textContent='El curso ya existe en la estructura'; return; }
+                const item = { id: sel.id, nombre: sel.nombre, descripcion: sel.descripcion };
+                if (target.to==='level'){ state.levels[target.levelIndex].cursos.push(item); }
+                else { state.sinNivel.push(item); }
+                renderStructureEdit(); close();
+            }});
+            document.body.appendChild(m.overlay);
+            const $q = document.querySelector('#find-course'); const $list = document.querySelector('#course-results');
+            let selected = null; let items = [];
+            async function searchCourses(text){
+                try{ const r = await api.get('/cursos?q='+encodeURIComponent(text||'')); items = (r&&r.data&&r.data.items)||[]; renderList(); }
+                catch(_){ $list.innerHTML='<div class="listbox-item">Error buscando</div>'; }
+            }
+            function renderList(){
+                $list.innerHTML='';
+                items.forEach(c=>{
+                    const el = document.createElement('div'); el.className='listbox-item'; el.textContent = c.nombre; el.onclick = ()=>{ selected = c; Array.from($list.children).forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); };
+                    $list.appendChild(el);
+                });
+                if (!$list.children.length){ $list.innerHTML='<div class="listbox-item">Sin resultados</div>'; }
+            }
+            function existsInStructure(courseId){
+                const idn = Number(courseId);
+                const inLevels = (state.levels||[]).some(n=> (n.cursos||[]).some(c=> Number(c.id)===idn));
+                const inSin = (state.sinNivel||[]).some(c=> Number(c.id)===idn);
+                return inLevels || inSin;
+            }
+            $q.addEventListener('input', ()=> searchCourses($q.value||''));
+            searchCourses(''); $q.focus();
         }
 
         function enableDrop(zone, onDrop){
