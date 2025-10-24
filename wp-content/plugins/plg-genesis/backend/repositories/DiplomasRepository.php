@@ -715,7 +715,7 @@ class PlgGenesis_DiplomasRepository {
 		}
 
 		// QUERY 2: Cursos requeridos por programa/nivel (estructura del programa)
-		$programaIds = array_unique(array_column($estudiantesPrograms, 'programa_id'));
+		$programaIds = array_values(array_unique(array_column($estudiantesPrograms, 'programa_id')));
 		$placeholders = implode(',', array_map(function($i) { return '$' . ($i + 1); }, array_keys($programaIds)));
 		
 		$sqlCursosRequeridos = "
@@ -769,7 +769,7 @@ class PlgGenesis_DiplomasRepository {
 		pg_free_result($resCursos);
 
 		// QUERY 3: Progreso de estudiantes (qué cursos han completado)
-		$estudianteIds = array_unique(array_column($estudiantesPrograms, 'estudiante_id'));
+		$estudianteIds = array_values(array_unique(array_column($estudiantesPrograms, 'estudiante_id')));
 		$placeholders = implode(',', array_map(function($i) { return '$' . ($i + 1); }, array_keys($estudianteIds)));
 
 		$sqlProgreso = "
@@ -996,7 +996,7 @@ class PlgGenesis_DiplomasRepository {
 		}
 
 		// QUERY 2: Cursos requeridos por programa/nivel
-		$programaIds = array_unique(array_column($estudiantesPrograms, 'programa_id'));
+		$programaIds = array_values(array_unique(array_column($estudiantesPrograms, 'programa_id')));
 		$placeholders = implode(',', array_map(function($i) { return '$' . ($i + 1); }, array_keys($programaIds)));
 		
 		$sqlCursosRequeridos = "
@@ -1056,7 +1056,7 @@ class PlgGenesis_DiplomasRepository {
 		pg_free_result($resCursos);
 
 		// QUERY 3: Progreso de estudiantes
-		$estudianteIds = array_unique(array_column($estudiantesPrograms, 'estudiante_id'));
+		$estudianteIds = array_values(array_unique(array_column($estudiantesPrograms, 'estudiante_id')));
 		$placeholders = implode(',', array_map(function($i) { return '$' . ($i + 1); }, array_keys($estudianteIds)));
 
 		$sqlProgreso = "
