@@ -8,25 +8,117 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
---
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
-
 SET search_path = public, pg_catalog;
+
+--
+-- Name: generar_numero_acta(); Type: FUNCTION; Schema: public; Owner: emmaus
+--
+
+CREATE FUNCTION generar_numero_acta() RETURNS text
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+    anio TEXT;
+    consecutivo INTEGER;
+    nuevo_numero TEXT;
+BEGIN
+    anio := EXTRACT(YEAR FROM CURRENT_DATE)::TEXT;
+    
+    -- Obtener el último consecutivo del año actual
+    SELECT COALESCE(MAX(
+        CAST(SUBSTRING(numero_acta FROM '\d+$') AS INTEGER)
+    ), 0) INTO consecutivo
+    FROM actas_diplomas
+    WHERE numero_acta LIKE anio || '-%';
+    
+    -- Incrementar
+    consecutivo := consecutivo + 1;
+    
+    -- Formato: YYYY-NNN (ej: 2025-001)
+    nuevo_numero := anio || '-' || LPAD(consecutivo::TEXT, 3, '0');
+    
+    RETURN nuevo_numero;
+END;
+$_$;
+
+
+ALTER FUNCTION public.generar_numero_acta() OWNER TO emmaus;
 
 SET default_tablespace = '';
 
 SET default_with_oids = false;
+
+--
+-- Name: actas_diplomas; Type: TABLE; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE TABLE actas_diplomas (
+    id integer NOT NULL,
+    numero_acta character varying(50) NOT NULL,
+    fecha_acta date DEFAULT ('now'::text)::date NOT NULL,
+    contacto_id integer,
+    tipo_acta character varying(50) DEFAULT 'cierre'::character varying NOT NULL,
+    total_diplomas integer DEFAULT 0 NOT NULL,
+    observaciones text,
+    estado character varying(20) DEFAULT 'activa'::character varying NOT NULL,
+    created_by integer,
+    created_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT now(),
+    CONSTRAINT chk_estado_acta CHECK (((estado)::text = ANY ((ARRAY['activa'::character varying, 'anulada'::character varying])::text[]))),
+    CONSTRAINT chk_tipo_acta CHECK (((tipo_acta)::text = ANY ((ARRAY['cierre'::character varying, 'graduacion'::character varying, 'regular'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.actas_diplomas OWNER TO emmaus;
+
+--
+-- Name: TABLE actas_diplomas; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON TABLE actas_diplomas IS 'Registro formal de actas que agrupan diplomas emitidos';
+
+
+--
+-- Name: COLUMN actas_diplomas.numero_acta; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON COLUMN actas_diplomas.numero_acta IS 'Número único de acta, formato YYYY-NNN';
+
+
+--
+-- Name: COLUMN actas_diplomas.tipo_acta; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON COLUMN actas_diplomas.tipo_acta IS 'Tipo de acta: cierre, graduacion, regular';
+
+
+--
+-- Name: COLUMN actas_diplomas.estado; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON COLUMN actas_diplomas.estado IS 'Estado del acta: activa o anulada';
+
+
+--
+-- Name: actas_diplomas_id_seq; Type: SEQUENCE; Schema: public; Owner: emmaus
+--
+
+CREATE SEQUENCE actas_diplomas_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.actas_diplomas_id_seq OWNER TO emmaus;
+
+--
+-- Name: actas_diplomas_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: emmaus
+--
+
+ALTER SEQUENCE actas_diplomas_id_seq OWNED BY actas_diplomas.id;
+
 
 --
 -- Name: asistencias_congresos; Type: TABLE; Schema: public; Owner: emmaus; Tablespace: 
@@ -280,6 +372,110 @@ ALTER SEQUENCE cursos_id_seq OWNED BY cursos.id;
 
 
 --
+-- Name: diplomas_entregados; Type: TABLE; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE TABLE diplomas_entregados (
+    id integer NOT NULL,
+    tipo character varying(50) NOT NULL,
+    programa_id integer NOT NULL,
+    nivel_id integer,
+    version_programa integer DEFAULT 1 NOT NULL,
+    estudiante_id integer,
+    contacto_id integer,
+    acta_id integer,
+    fecha_emision date DEFAULT ('now'::text)::date NOT NULL,
+    fecha_entrega date,
+    entregado_por integer,
+    notas text,
+    created_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT now(),
+    CONSTRAINT chk_diploma_estudiante_required CHECK ((estudiante_id IS NOT NULL)),
+    CONSTRAINT chk_nivel_requerido CHECK (((((tipo)::text = 'nivel'::text) AND (nivel_id IS NOT NULL)) OR (((tipo)::text = 'programa_completo'::text) AND (nivel_id IS NULL)))),
+    CONSTRAINT chk_tipo_diploma CHECK (((tipo)::text = ANY ((ARRAY['programa_completo'::character varying, 'nivel'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.diplomas_entregados OWNER TO emmaus;
+
+--
+-- Name: TABLE diplomas_entregados; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON TABLE diplomas_entregados IS 'Registro histórico de diplomas emitidos y entregados a estudiantes';
+
+
+--
+-- Name: COLUMN diplomas_entregados.tipo; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON COLUMN diplomas_entregados.tipo IS 'Tipo de diploma: programa_completo o nivel';
+
+
+--
+-- Name: COLUMN diplomas_entregados.programa_id; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON COLUMN diplomas_entregados.programa_id IS 'Programa al que pertenece el diploma';
+
+
+--
+-- Name: COLUMN diplomas_entregados.nivel_id; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON COLUMN diplomas_entregados.nivel_id IS 'Nivel específico (solo si tipo=nivel)';
+
+
+--
+-- Name: COLUMN diplomas_entregados.version_programa; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON COLUMN diplomas_entregados.version_programa IS 'Versión del programa bajo la cual se completó';
+
+
+--
+-- Name: COLUMN diplomas_entregados.fecha_emision; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON COLUMN diplomas_entregados.fecha_emision IS 'Fecha en que se emitió el diploma';
+
+
+--
+-- Name: COLUMN diplomas_entregados.fecha_entrega; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON COLUMN diplomas_entregados.fecha_entrega IS 'Fecha de entrega física (NULL = pendiente)';
+
+
+--
+-- Name: COLUMN diplomas_entregados.entregado_por; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON COLUMN diplomas_entregados.entregado_por IS 'ID del usuario WordPress que registró la entrega';
+
+
+--
+-- Name: diplomas_entregados_id_seq; Type: SEQUENCE; Schema: public; Owner: emmaus
+--
+
+CREATE SEQUENCE diplomas_entregados_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.diplomas_entregados_id_seq OWNER TO emmaus;
+
+--
+-- Name: diplomas_entregados_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: emmaus
+--
+
+ALTER SEQUENCE diplomas_entregados_id_seq OWNED BY diplomas_entregados.id;
+
+
+--
 -- Name: estudiantes; Type: TABLE; Schema: public; Owner: emmaus; Tablespace: 
 --
 
@@ -513,7 +709,9 @@ CREATE TABLE programas (
     id integer NOT NULL,
     nombre character varying(100) NOT NULL,
     descripcion text,
-    current_version integer
+    current_version integer,
+    created_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT now()
 );
 
 
@@ -750,6 +948,13 @@ ALTER SEQUENCE users_id_seq OWNED BY users.id;
 -- Name: id; Type: DEFAULT; Schema: public; Owner: emmaus
 --
 
+ALTER TABLE ONLY actas_diplomas ALTER COLUMN id SET DEFAULT nextval('actas_diplomas_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: emmaus
+--
+
 ALTER TABLE ONLY asistencias_congresos ALTER COLUMN id SET DEFAULT nextval('asistencias_congresos_id_asistencia_seq'::regclass);
 
 
@@ -786,6 +991,13 @@ ALTER TABLE ONLY contactos ALTER COLUMN id SET DEFAULT nextval('contactos_id_seq
 --
 
 ALTER TABLE ONLY cursos ALTER COLUMN id SET DEFAULT nextval('cursos_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: emmaus
+--
+
+ALTER TABLE ONLY diplomas_entregados ALTER COLUMN id SET DEFAULT nextval('diplomas_entregados_id_seq'::regclass);
 
 
 --
@@ -870,6 +1082,21 @@ ALTER TABLE ONLY user_permissions ALTER COLUMN id SET DEFAULT nextval('user_perm
 --
 
 ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
+
+
+--
+-- Data for Name: actas_diplomas; Type: TABLE DATA; Schema: public; Owner: emmaus
+--
+
+COPY actas_diplomas (id, numero_acta, fecha_acta, contacto_id, tipo_acta, total_diplomas, observaciones, estado, created_by, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Name: actas_diplomas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: emmaus
+--
+
+SELECT pg_catalog.setval('actas_diplomas_id_seq', 1, false);
 
 
 --
@@ -4804,6 +5031,21 @@ SELECT pg_catalog.setval('cursos_id_seq', 250, true);
 
 
 --
+-- Data for Name: diplomas_entregados; Type: TABLE DATA; Schema: public; Owner: emmaus
+--
+
+COPY diplomas_entregados (id, tipo, programa_id, nivel_id, version_programa, estudiante_id, contacto_id, acta_id, fecha_emision, fecha_entrega, entregado_por, notas, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Name: diplomas_entregados_id_seq; Type: SEQUENCE SET; Schema: public; Owner: emmaus
+--
+
+SELECT pg_catalog.setval('diplomas_entregados_id_seq', 1, false);
+
+
+--
 -- Data for Name: estudiantes; Type: TABLE DATA; Schema: public; Owner: emmaus
 --
 
@@ -7014,8 +7256,8 @@ COPY estudiantes (id, id_contacto, doc_identidad, id_estudiante, nombre1, nombre
 16694	42	41383733	360833	MARIANA		CABRERA		3112546247	marianacabrera1947@gmail.com		Aposento Alto Orquideas	2024-06-13 11:12:57.238686	\N	\N	\N
 16695	42	52999802	360755	MARCELA	PATRICIA	GUERRA	VILLALOBO	3214886421	marcelaguerrasa@hotmail.com, marcelaguerra50@hotmail.com	BOGOTA	Aposento Alto Calle 140	2024-06-13 11:12:57.238686	\N	\N	\N
 16696	42	52753285	360747	MARIANA		CASTIBLANCO	ESPINOSA	3126818441	mariana.castiblanco3@hotmail.com	BOGOTA	APOSENTO ALTO ORQUIDEAS	2024-06-13 11:12:57.238686	\N	\N	\N
-16697	42	52410193	360746	YENNY	PAOLA	RODRIGUEZ	DIAZ	8033406	stelladiazrodriguez@hotmail.com	Bogot 	Aposento Alto Orquideas	2024-06-13 11:12:57.238686	\N	\N	\N
-16698	42	1020720442	360699	LENY	SUSANA	RODRIGUEZ	ZAMBRANO	0	susi370@gmail.com	Bogot 	Aposento Alto Calle 140	2024-06-13 11:12:57.238686	\N	\N	\N
+16697	42	52410193	360746	YENNY	PAOLA	RODRIGUEZ	DIAZ	8033406	stelladiazrodriguez@hotmail.com	Bogot 	Aposento Alto Orquideas	2024-06-13 11:12:57.238686	\N	\N	\N
+16698	42	1020720442	360699	LENY	SUSANA	RODRIGUEZ	ZAMBRANO	0	susi370@gmail.com	Bogot 	Aposento Alto Calle 140	2024-06-13 11:12:57.238686	\N	\N	\N
 16699	42	339767	360673	DAVID	ERICK	EASTER			david.easter@gmail.com	BOGOTA	Aposento Alto Cerro Norte	2024-06-13 11:12:57.238686	\N	\N	\N
 16700	42	0	360663	CARLOS	HERNANDO	PARADA	RIAÑO	0			Aposento Alto Calle 140	2024-06-13 11:12:57.238686	\N	\N	\N
 16701	42	53106045	360606	SANDRA	MILENA	GUERRA	VILLALOBOS	3118563060	milefabio@hotmail.com		Aposento Alto Cerro Norte	2024-06-13 11:12:57.238686	\N	\N	\N
@@ -44159,6 +44401,28 @@ COPY estudiantes_cursos (id, estudiante_id, curso_id, fecha, porcentaje, enviado
 256429	19732	209	2025-10-08	84	f
 256430	16362	209	2025-10-09	93	f
 256431	19444	127	2025-10-16	56	f
+256432	14785	178	2025-10-23	97	f
+256433	14785	160	2025-10-23	92	f
+256434	14785	180	2025-10-23	93	f
+256435	14785	182	2025-10-23	88	f
+256436	14785	207	2025-10-23	92	f
+256437	14785	197	2025-10-23	92	f
+256438	14785	148	2025-10-23	90	f
+256439	14785	202	2025-10-23	93	f
+256440	14785	208	2025-10-23	92	f
+256441	14785	221	2025-10-23	98	f
+256442	14785	213	2025-10-23	88	f
+256443	14785	210	2025-10-23	94	f
+256444	14785	181	2025-10-23	83	f
+256445	17407	131	2025-10-23	100	f
+256446	17407	132	2025-10-23	98	f
+256447	17407	130	2025-10-23	100	f
+256448	17407	129	2025-10-23	100	f
+256449	19604	128	2025-10-23	95	f
+256450	17384	155	2025-10-23	83	f
+256451	19616	137	2025-10-23	95	f
+256452	19624	225	2025-10-23	87	f
+256453	19645	209	2025-10-23	90	f
 \.
 
 
@@ -44166,7 +44430,7 @@ COPY estudiantes_cursos (id, estudiante_id, curso_id, fecha, porcentaje, enviado
 -- Name: estudiantes_cursos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: emmaus
 --
 
-SELECT pg_catalog.setval('estudiantes_cursos_id_seq', 256431, true);
+SELECT pg_catalog.setval('estudiantes_cursos_id_seq', 256453, true);
 
 
 --
@@ -44273,19 +44537,19 @@ SELECT pg_catalog.setval('observaciones_estudiantes_id_seq', 16, true);
 -- Data for Name: programas; Type: TABLE DATA; Schema: public; Owner: emmaus
 --
 
-COPY programas (id, nombre, descripcion, current_version) FROM stdin;
-12	DIPLOMADO: Liderazgo	Ofrece las herramientas necesarias para las diferentes áreas de servicio ministerial y para el desarrollo del carácter de un líder.	1
-10	DIPLOMADO: Profecía Bíblica	El estudiante adquirirá las bases suficientes para la interpretación y aplicación de todos los aspectos proféticos. Una herramienta escatológica muy necesaria en estos tiempos.	1
-9	DIPLOMADO: Apologética	Un programa que le permitirá al estudiante capacitarse para defender racionalmente la fe cristiana ante un mundo lleno de inquietudes.	1
-1	Teologia Basica	Programa teológico sistemático con énfasis doctrinal y práctico, que lleva al estudiante en un recorrido libro por libro de la Biblia y lo capacita en las áreas de estudio e interpretación, vida cristiana, familia, Evangelismo, discipulado y consejería, y formación ministerial.	1
-2	Biblia 1	Este programa está diseñado para que el estudiante haga un análisis de cada libro de la Biblia, conozca su panorama y desarrolle la habilidad para manejar mejor la Palabra de Dios, del Antiguo Testamento	1
-3	Biblia 2	Este programa está diseñado para que el estudiante haga un análisis de cada libro de la Biblia, conozca su panorama y desarrolle la habilidad para manejar mejor la Palabra de Dios, del Nuevo Testamento	1
-4	Doctrinas	Un programa orientado a contribuir en la formación de creyentes con bases doctrinales sólidas y con la capacidad de establecer en todas las esferas de la vida \ndesde profundos principios bíblicos.	1
-5	DIPLOMADO: Evangelismo	El estudiante recibirá capacitación para la labor de predicar el evangelio, recursos para la evangelización y las bases doctrinales necesarias para enfrentar esta tarea.	1
-6	DIPLOMADO: Discipulado	Capacítese para la más grande tarea universal: Hacer discípulos de Cristo. Provee las bases necesarias para que el nuevo creyente pueda afirmarse en la fe, recursos para desarrollar el discipulado, y todos los temas prácticos necesarios para el nuevo discípulo.	1
-7	DIPLOMADO: Consejería Familiar	Adquiera el conocimiento básico sobre el hogar, los conyugues, la administración de recursos, y los desafíos que enfrentan las mujeres y jóvenes en esta sociedad. El estudiante podrá capacitarse para ayudar a otros también.	1
-11	DIPLOMADO: Hermenéutica y Homilética	Encontrará herramientas necesarias para la correcta interpretación de la Biblia y su debida aplicación y adquirirá los conocimientos básicos para la preparación de la exposición bíblica	1
-8	DIPLOMADO: Vida Cristiana Práctica	El material que todo creyente requiere para crecer y madurar en la fe, tocando todas las áreas de la vida personal. Un verdadero entrenamiento en la carrera de la vida cristiana, para sí mismo, y para ayudar a otros en este desafío.	1
+COPY programas (id, nombre, descripcion, current_version, created_at, updated_at) FROM stdin;
+12	DIPLOMADO: Liderazgo	Ofrece las herramientas necesarias para las diferentes áreas de servicio ministerial y para el desarrollo del carácter de un líder.	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
+10	DIPLOMADO: Profecía Bíblica	El estudiante adquirirá las bases suficientes para la interpretación y aplicación de todos los aspectos proféticos. Una herramienta escatológica muy necesaria en estos tiempos.	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
+9	DIPLOMADO: Apologética	Un programa que le permitirá al estudiante capacitarse para defender racionalmente la fe cristiana ante un mundo lleno de inquietudes.	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
+1	Teologia Basica	Programa teológico sistemático con énfasis doctrinal y práctico, que lleva al estudiante en un recorrido libro por libro de la Biblia y lo capacita en las áreas de estudio e interpretación, vida cristiana, familia, Evangelismo, discipulado y consejería, y formación ministerial.	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
+2	Biblia 1	Este programa está diseñado para que el estudiante haga un análisis de cada libro de la Biblia, conozca su panorama y desarrolle la habilidad para manejar mejor la Palabra de Dios, del Antiguo Testamento	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
+3	Biblia 2	Este programa está diseñado para que el estudiante haga un análisis de cada libro de la Biblia, conozca su panorama y desarrolle la habilidad para manejar mejor la Palabra de Dios, del Nuevo Testamento	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
+4	Doctrinas	Un programa orientado a contribuir en la formación de creyentes con bases doctrinales sólidas y con la capacidad de establecer en todas las esferas de la vida \ndesde profundos principios bíblicos.	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
+5	DIPLOMADO: Evangelismo	El estudiante recibirá capacitación para la labor de predicar el evangelio, recursos para la evangelización y las bases doctrinales necesarias para enfrentar esta tarea.	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
+6	DIPLOMADO: Discipulado	Capacítese para la más grande tarea universal: Hacer discípulos de Cristo. Provee las bases necesarias para que el nuevo creyente pueda afirmarse en la fe, recursos para desarrollar el discipulado, y todos los temas prácticos necesarios para el nuevo discípulo.	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
+7	DIPLOMADO: Consejería Familiar	Adquiera el conocimiento básico sobre el hogar, los conyugues, la administración de recursos, y los desafíos que enfrentan las mujeres y jóvenes en esta sociedad. El estudiante podrá capacitarse para ayudar a otros también.	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
+11	DIPLOMADO: Hermenéutica y Homilética	Encontrará herramientas necesarias para la correcta interpretación de la Biblia y su debida aplicación y adquirirá los conocimientos básicos para la preparación de la exposición bíblica	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
+8	DIPLOMADO: Vida Cristiana Práctica	El material que todo creyente requiere para crecer y madurar en la fe, tocando todas las áreas de la vida personal. Un verdadero entrenamiento en la carrera de la vida cristiana, para sí mismo, y para ayudar a otros en este desafío.	1	2025-10-22 21:19:35.17517	2025-10-22 21:19:35.17517
 \.
 
 
@@ -44608,6 +44872,22 @@ SELECT pg_catalog.setval('users_id_seq', 10, true);
 
 
 --
+-- Name: actas_diplomas_numero_acta_key; Type: CONSTRAINT; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+ALTER TABLE ONLY actas_diplomas
+    ADD CONSTRAINT actas_diplomas_numero_acta_key UNIQUE (numero_acta);
+
+
+--
+-- Name: actas_diplomas_pkey; Type: CONSTRAINT; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+ALTER TABLE ONLY actas_diplomas
+    ADD CONSTRAINT actas_diplomas_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: asistencias_congresos_pkey; Type: CONSTRAINT; Schema: public; Owner: emmaus; Tablespace: 
 --
 
@@ -44669,6 +44949,14 @@ ALTER TABLE ONLY contactos
 
 ALTER TABLE ONLY cursos
     ADD CONSTRAINT cursos_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: diplomas_entregados_pkey; Type: CONSTRAINT; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+ALTER TABLE ONLY diplomas_entregados
+    ADD CONSTRAINT diplomas_entregados_pkey PRIMARY KEY (id);
 
 
 --
@@ -44736,14 +45024,6 @@ ALTER TABLE ONLY programas_cursos
 
 
 --
--- Name: programas_cursos_programa_id_consecutivo_key; Type: CONSTRAINT; Schema: public; Owner: emmaus; Tablespace: 
---
-
-ALTER TABLE ONLY programas_cursos
-    ADD CONSTRAINT programas_cursos_programa_id_consecutivo_key UNIQUE (programa_id, consecutivo);
-
-
---
 -- Name: programas_pkey; Type: CONSTRAINT; Schema: public; Owner: emmaus; Tablespace: 
 --
 
@@ -44807,6 +45087,27 @@ CREATE INDEX cursos_deleted_active_idx ON cursos USING btree (id) WHERE (deleted
 
 
 --
+-- Name: idx_actas_contacto; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_actas_contacto ON actas_diplomas USING btree (contacto_id);
+
+
+--
+-- Name: idx_actas_fecha; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_actas_fecha ON actas_diplomas USING btree (fecha_acta DESC);
+
+
+--
+-- Name: idx_actas_numero; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_actas_numero ON actas_diplomas USING btree (numero_acta);
+
+
+--
 -- Name: idx_congresos_estado; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
 --
 
@@ -44818,6 +45119,69 @@ CREATE INDEX idx_congresos_estado ON congresos USING btree (estado);
 --
 
 CREATE INDEX idx_contacto_id ON programas_asignaciones USING btree (contacto_id);
+
+
+--
+-- Name: idx_diplomas_acta; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_diplomas_acta ON diplomas_entregados USING btree (acta_id);
+
+
+--
+-- Name: idx_diplomas_contacto; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_diplomas_contacto ON diplomas_entregados USING btree (contacto_id);
+
+
+--
+-- Name: idx_diplomas_emision; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_diplomas_emision ON diplomas_entregados USING btree (fecha_emision);
+
+
+--
+-- Name: idx_diplomas_entrega; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_diplomas_entrega ON diplomas_entregados USING btree (fecha_entrega);
+
+
+--
+-- Name: idx_diplomas_estudiante; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_diplomas_estudiante ON diplomas_entregados USING btree (estudiante_id);
+
+
+--
+-- Name: idx_diplomas_nivel; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_diplomas_nivel ON diplomas_entregados USING btree (nivel_id);
+
+
+--
+-- Name: idx_diplomas_pendientes; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_diplomas_pendientes ON diplomas_entregados USING btree (fecha_entrega) WHERE (fecha_entrega IS NULL);
+
+
+--
+-- Name: idx_diplomas_programa; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_diplomas_programa ON diplomas_entregados USING btree (programa_id);
+
+
+--
+-- Name: idx_diplomas_tipo; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_diplomas_tipo ON diplomas_entregados USING btree (tipo);
 
 
 --
@@ -44884,6 +45248,21 @@ CREATE INDEX programas_cursos_programa_version_idx ON programas_cursos USING btr
 
 
 --
+-- Name: uq_diploma_programa_estudiante; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE UNIQUE INDEX uq_diploma_programa_estudiante ON diplomas_entregados USING btree (tipo, programa_id, (COALESCE(nivel_id, 0)), estudiante_id) WHERE (estudiante_id IS NOT NULL);
+
+
+--
+-- Name: actas_diplomas_contacto_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: emmaus
+--
+
+ALTER TABLE ONLY actas_diplomas
+    ADD CONSTRAINT actas_diplomas_contacto_id_fkey FOREIGN KEY (contacto_id) REFERENCES contactos(id) ON DELETE SET NULL;
+
+
+--
 -- Name: asistencias_congresos_id_asistente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: emmaus
 --
 
@@ -44940,6 +45319,38 @@ ALTER TABLE ONLY cursos
 
 
 --
+-- Name: diplomas_entregados_contacto_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: emmaus
+--
+
+ALTER TABLE ONLY diplomas_entregados
+    ADD CONSTRAINT diplomas_entregados_contacto_id_fkey FOREIGN KEY (contacto_id) REFERENCES contactos(id) ON DELETE CASCADE;
+
+
+--
+-- Name: diplomas_entregados_estudiante_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: emmaus
+--
+
+ALTER TABLE ONLY diplomas_entregados
+    ADD CONSTRAINT diplomas_entregados_estudiante_id_fkey FOREIGN KEY (estudiante_id) REFERENCES estudiantes(id) ON DELETE CASCADE;
+
+
+--
+-- Name: diplomas_entregados_nivel_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: emmaus
+--
+
+ALTER TABLE ONLY diplomas_entregados
+    ADD CONSTRAINT diplomas_entregados_nivel_id_fkey FOREIGN KEY (nivel_id) REFERENCES niveles_programas(id) ON DELETE SET NULL;
+
+
+--
+-- Name: diplomas_entregados_programa_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: emmaus
+--
+
+ALTER TABLE ONLY diplomas_entregados
+    ADD CONSTRAINT diplomas_entregados_programa_id_fkey FOREIGN KEY (programa_id) REFERENCES programas(id) ON DELETE CASCADE;
+
+
+--
 -- Name: estudiantes_cursos_curso_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: emmaus
 --
 
@@ -44969,6 +45380,14 @@ ALTER TABLE ONLY estudiantes
 
 ALTER TABLE ONLY programas_asignaciones
     ADD CONSTRAINT fk_contacto FOREIGN KEY (contacto_id) REFERENCES contactos(id) ON DELETE CASCADE;
+
+
+--
+-- Name: fk_diplomas_acta; Type: FK CONSTRAINT; Schema: public; Owner: emmaus
+--
+
+ALTER TABLE ONLY diplomas_entregados
+    ADD CONSTRAINT fk_diplomas_acta FOREIGN KEY (acta_id) REFERENCES actas_diplomas(id) ON DELETE SET NULL;
 
 
 --
@@ -45457,4 +45876,3 @@ GRANT ALL ON SEQUENCE users_id_seq TO emmaus_admin;
 --
 -- PostgreSQL database dump complete
 --
-
