@@ -67,6 +67,12 @@ class PlgGenesis_DiplomasController {
 			'permission_callback' => plg_genesis_can('plg_view_students')
 		]);
 
+		register_rest_route('plg-genesis/v1', '/diplomas/proximos-completar/programas', [
+			'methods' => 'GET',
+			'callback' => [ __CLASS__, 'programas_con_proximos' ],
+			'permission_callback' => plg_genesis_can('plg_view_students')
+		]);
+
 		register_rest_route('plg-genesis/v1', '/diplomas/proximos-completar', [
 			'methods' => 'GET',
 			'callback' => [ __CLASS__, 'proximos_completar' ],
@@ -436,7 +442,37 @@ class PlgGenesis_DiplomasController {
 	}
 
 	/**
-	 * GET /plg-genesis/v1/diplomas/proximos-completar?limite=50&umbral=80&contactoId=123
+	 * GET /plg-genesis/v1/diplomas/proximos-completar/programas?contactoId=123&umbral=80
+	 * Retorna solo la lista de programas con contador de estudiantes (ligero y rápido)
+	 */
+	public static function programas_con_proximos(WP_REST_Request $request) {
+		$service = self::get_service();
+		if (is_wp_error($service)) {
+			return new WP_REST_Response([
+				'success' => false,
+				'error' => [ 'code' => 'db_connection_failed', 'message' => $service->get_error_message() ]
+			], 500);
+		}
+
+		$contactoId = $request->get_param('contactoId') ? intval($request->get_param('contactoId')) : null;
+		$umbral = intval($request->get_param('umbral') ?? 80);
+
+		$result = $service->getProgramasConProximos($contactoId, $umbral);
+		if (is_wp_error($result)) {
+			return new WP_REST_Response([
+				'success' => false,
+				'error' => [ 'code' => $result->get_error_code(), 'message' => $result->get_error_message() ]
+			], $result->get_error_data()['status'] ?? 500);
+		}
+
+		return new WP_REST_Response([
+			'success' => true,
+			'data' => $result
+		], 200);
+	}
+
+	/**
+	 * GET /plg-genesis/v1/diplomas/proximos-completar?limite=50&umbral=80&contactoId=123&programaId=1
 	 */
 	public static function proximos_completar(WP_REST_Request $request) {
 		$service = self::get_service();
@@ -450,8 +486,9 @@ class PlgGenesis_DiplomasController {
 		$limite = intval($request->get_param('limite') ?? 50);
 		$umbral = intval($request->get_param('umbral') ?? 80);
 		$contactoId = $request->get_param('contactoId') ? intval($request->get_param('contactoId')) : null;
+		$programaId = $request->get_param('programaId') ? intval($request->get_param('programaId')) : null;
 
-		$result = $service->getProximosACompletar($limite, $umbral, $contactoId);
+		$result = $service->getProximosACompletar($limite, $umbral, $contactoId, $programaId);
 		if (is_wp_error($result)) {
 			return new WP_REST_Response([
 				'success' => false,
