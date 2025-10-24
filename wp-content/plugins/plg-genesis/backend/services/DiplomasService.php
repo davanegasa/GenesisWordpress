@@ -72,8 +72,8 @@ class PlgGenesis_DiplomasService {
 	/**
 	 * Obtiene estudiantes próximos a completar (>= 80% de progreso)
 	 */
-	public function getProximosACompletar($limite = 50, $umbral = 80) {
-		return $this->repository->getProximosACompletar($limite, $umbral);
+	public function getProximosACompletar($limite = 50, $umbral = 80, $contactoId = null) {
+		return $this->repository->getProximosACompletar($limite, $umbral, $contactoId);
 	}
 
 	/**

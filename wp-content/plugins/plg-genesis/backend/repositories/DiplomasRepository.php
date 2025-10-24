@@ -659,8 +659,9 @@ class PlgGenesis_DiplomasRepository {
 	 * Obtiene estudiantes próximos a completar (progreso >= 80%)
 	 * Retorna información de niveles y programas que están por completar
 	 */
-	public function getProximosACompletar($limite = 50, $umbral = 80) {
+	public function getProximosACompletar($limite = 50, $umbral = 80, $contactoId = null) {
 		// Obtener todos los programas activos con sus niveles y cursos
+		$whereClause = $contactoId ? "WHERE pa.contacto_id = $1" : "";
 		$sqlProgramas = "
 			SELECT DISTINCT
 				pa.contacto_id,
@@ -678,10 +679,14 @@ class PlgGenesis_DiplomasRepository {
 			JOIN estudiantes e ON e.id_contacto = pa.contacto_id
 			JOIN contactos c ON c.id = pa.contacto_id
 			LEFT JOIN niveles_programas np ON np.programa_id = p.id AND np.version = pa.version
+			$whereClause
 			ORDER BY pa.programa_id, np.id, e.id
 		";
 		
-		$res = pg_query($this->conn, $sqlProgramas);
+		$res = $contactoId 
+			? pg_query_params($this->conn, $sqlProgramas, [ intval($contactoId) ])
+			: pg_query($this->conn, $sqlProgramas);
+		
 		if (!$res) {
 			$this->logPg('getProximosACompletar.programas', $sqlProgramas);
 			return new WP_Error('db_error', 'Error consultando programas', [ 'status' => 500 ]);

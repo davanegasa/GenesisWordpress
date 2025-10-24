@@ -60,12 +60,10 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # Script de inicialización de esquema
-      - ./wp-content/plugins/plg-genesis/migration/init.sql:/docker-entrypoint-initdb.d/01-init-schema.sql
-      # Script para crear múltiples bases de datos (se ejecuta primero por orden alfabético)
+      # Script para crear múltiples bases de datos
       - ./migration/init-postgres-multidb.sh:/docker-entrypoint-initdb.d/02-create-databases.sh
-      # Dumps SQL de datos por oficina
-      - ./wp-content/plugins/plg-genesis/migration/dump20250805.sql:/docker-entrypoint-initdb.d/data/dump20250805.sql
+      # Dumps SQL completos (ambos incluyen tablas de diplomas)
+      - ./wp-content/plugins/plg-genesis/migration/examples/emmausBog.sql:/docker-entrypoint-initdb.d/data/emmausBog.sql
       - ./wp-content/plugins/plg-genesis/migration/examples/fuentedeLuz.sql:/docker-entrypoint-initdb.d/data/fuentedeLuz.sql
       # Scripts de carga de datos por base de datos
       - ./migration/load-bog-data.sh:/docker-entrypoint-initdb.d/03-load-bog-data.sh

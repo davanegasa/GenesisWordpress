@@ -3,19 +3,13 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost:3306
--- Tiempo de generación: 26-04-2025 a las 22:39:03
+-- Tiempo de generación: 24-10-2025 a las 15:49:38
 -- Versión del servidor: 10.3.39-MariaDB-cll-lve
 -- Versión de PHP: 8.1.31
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Base de datos: `emmaus_wpgenesis`
@@ -105,7 +99,7 @@ CREATE TABLE `edgen_options` (
 --
 
 INSERT INTO `edgen_options` (`option_id`, `option_name`, `option_value`, `autoload`) VALUES
-(1, 'cron', 'a:10:{i:1745720227;a:1:{s:34:\"wp_privacy_delete_old_export_files\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:6:\"hourly\";s:4:\"args\";a:0:{}s:8:\"interval\";i:3600;}}}i:1745741808;a:1:{s:16:\"wp_update_themes\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:10:\"twicedaily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:43200;}}}i:1745741827;a:2:{s:16:\"wp_version_check\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:10:\"twicedaily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:43200;}}s:17:\"wp_update_plugins\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:10:\"twicedaily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:43200;}}}i:1745742635;a:1:{s:21:\"wp_update_user_counts\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:10:\"twicedaily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:43200;}}}i:1745785008;a:1:{s:32:\"recovery_mode_clean_expired_keys\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:5:\"daily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:86400;}}}i:1745785835;a:3:{s:19:\"wp_scheduled_delete\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:5:\"daily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:86400;}}s:25:\"delete_expired_transients\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:5:\"daily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:86400;}}s:30:\"wp_scheduled_auto_draft_delete\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:5:\"daily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:86400;}}}i:1745794433;a:1:{s:24:\"wpb_data_sync_loginpress\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:5:\"daily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:86400;}}}i:1745958687;a:1:{s:30:\"wp_delete_temp_updater_backups\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:6:\"weekly\";s:4:\"args\";a:0:{}s:8:\"interval\";i:604800;}}}i:1746044208;a:1:{s:30:\"wp_site_health_scheduled_check\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:6:\"weekly\";s:4:\"args\";a:0:{}s:8:\"interval\";i:604800;}}}s:7:\"version\";i:2;}', 'on'),
+(1, 'cron', 'a:9:{i:1761337835;a:4:{s:19:\"wp_scheduled_delete\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:5:\"daily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:86400;}}s:25:\"delete_expired_transients\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:5:\"daily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:86400;}}s:30:\"wp_scheduled_auto_draft_delete\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:5:\"daily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:86400;}}s:21:\"wp_update_user_counts\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:10:\"twicedaily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:43200;}}}i:1761340627;a:1:{s:34:\"wp_privacy_delete_old_export_files\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:6:\"hourly\";s:4:\"args\";a:0:{}s:8:\"interval\";i:3600;}}}i:1761346433;a:1:{s:24:\"wpb_data_sync_loginpress\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:5:\"daily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:86400;}}}i:1761380208;a:1:{s:16:\"wp_update_themes\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:10:\"twicedaily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:43200;}}}i:1761380227;a:2:{s:16:\"wp_version_check\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:10:\"twicedaily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:43200;}}s:17:\"wp_update_plugins\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:10:\"twicedaily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:43200;}}}i:1761423408;a:1:{s:32:\"recovery_mode_clean_expired_keys\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:5:\"daily\";s:4:\"args\";a:0:{}s:8:\"interval\";i:86400;}}}i:1761683487;a:1:{s:30:\"wp_delete_temp_updater_backups\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:6:\"weekly\";s:4:\"args\";a:0:{}s:8:\"interval\";i:604800;}}}i:1761769008;a:1:{s:30:\"wp_site_health_scheduled_check\";a:1:{s:32:\"40cd750bba9870f18aada2478b24840a\";a:3:{s:8:\"schedule\";s:6:\"weekly\";s:4:\"args\";a:0:{}s:8:\"interval\";i:604800;}}}s:7:\"version\";i:2;}', 'on'),
 (2, 'siteurl', 'https://emmausdigital.com/genesis', 'on'),
 (3, 'home', 'https://emmausdigital.com/genesis', 'on'),
 (4, 'blogname', 'Genesis', 'on'),
@@ -140,7 +134,7 @@ INSERT INTO `edgen_options` (`option_id`, `option_name`, `option_value`, `autolo
 (33, 'moderation_keys', '', 'off'),
 (34, 'active_plugins', 'a:1:{i:0;s:36:\"plg-genesis/registro-estudiantes.php\";}', 'on'),
 (35, 'category_base', '', 'on'),
-(36, 'ping_sites', 'http://rpc.pingomatic.com/', 'on'),
+(36, 'ping_sites', 'https://rpc.pingomatic.com/', 'on'),
 (37, 'comment_max_links', '2', 'on'),
 (38, 'gmt_offset', '0', 'on'),
 (39, 'default_email_category', '1', 'on'),
@@ -151,7 +145,7 @@ INSERT INTO `edgen_options` (`option_id`, `option_name`, `option_value`, `autolo
 (44, 'html_type', 'text/html', 'on'),
 (45, 'use_trackback', '0', 'on'),
 (46, 'default_role', 'subscriber', 'on'),
-(47, 'db_version', '58975', 'on'),
+(47, 'db_version', '60421', 'on'),
 (48, 'uploads_use_yearmonth_folders', '1', 'on'),
 (49, 'upload_path', '', 'on'),
 (50, 'blog_public', '1', 'on'),
@@ -196,7 +190,7 @@ INSERT INTO `edgen_options` (`option_id`, `option_name`, `option_value`, `autolo
 (89, 'medium_large_size_h', '0', 'on'),
 (90, 'wp_page_for_privacy_policy', '3', 'on'),
 (91, 'show_comments_cookies_opt_in', '1', 'on'),
-(92, 'admin_email_lifespan', '1758467942', 'on'),
+(92, 'admin_email_lifespan', '1774979364', 'on'),
 (93, 'disallowed_keys', '', 'off'),
 (94, 'comment_previously_approved', '1', 'on'),
 (95, 'auto_plugin_theme_update_emails', 'a:0:{}', 'off'),
@@ -206,9 +200,9 @@ INSERT INTO `edgen_options` (`option_id`, `option_name`, `option_value`, `autolo
 (99, 'wp_force_deactivated_plugins', 'a:0:{}', 'off'),
 (100, 'wp_attachment_pages_enabled', '0', 'on'),
 (101, 'initial_db_version', '57155', 'on'),
-(102, 'edgen_user_roles', 'a:5:{s:13:\"administrator\";a:2:{s:4:\"name\";s:13:\"Administrator\";s:12:\"capabilities\";a:61:{s:13:\"switch_themes\";b:1;s:11:\"edit_themes\";b:1;s:16:\"activate_plugins\";b:1;s:12:\"edit_plugins\";b:1;s:10:\"edit_users\";b:1;s:10:\"edit_files\";b:1;s:14:\"manage_options\";b:1;s:17:\"moderate_comments\";b:1;s:17:\"manage_categories\";b:1;s:12:\"manage_links\";b:1;s:12:\"upload_files\";b:1;s:6:\"import\";b:1;s:15:\"unfiltered_html\";b:1;s:10:\"edit_posts\";b:1;s:17:\"edit_others_posts\";b:1;s:20:\"edit_published_posts\";b:1;s:13:\"publish_posts\";b:1;s:10:\"edit_pages\";b:1;s:4:\"read\";b:1;s:8:\"level_10\";b:1;s:7:\"level_9\";b:1;s:7:\"level_8\";b:1;s:7:\"level_7\";b:1;s:7:\"level_6\";b:1;s:7:\"level_5\";b:1;s:7:\"level_4\";b:1;s:7:\"level_3\";b:1;s:7:\"level_2\";b:1;s:7:\"level_1\";b:1;s:7:\"level_0\";b:1;s:17:\"edit_others_pages\";b:1;s:20:\"edit_published_pages\";b:1;s:13:\"publish_pages\";b:1;s:12:\"delete_pages\";b:1;s:19:\"delete_others_pages\";b:1;s:22:\"delete_published_pages\";b:1;s:12:\"delete_posts\";b:1;s:19:\"delete_others_posts\";b:1;s:22:\"delete_published_posts\";b:1;s:20:\"delete_private_posts\";b:1;s:18:\"edit_private_posts\";b:1;s:18:\"read_private_posts\";b:1;s:20:\"delete_private_pages\";b:1;s:18:\"edit_private_pages\";b:1;s:18:\"read_private_pages\";b:1;s:12:\"delete_users\";b:1;s:12:\"create_users\";b:1;s:17:\"unfiltered_upload\";b:1;s:14:\"edit_dashboard\";b:1;s:14:\"update_plugins\";b:1;s:14:\"delete_plugins\";b:1;s:15:\"install_plugins\";b:1;s:13:\"update_themes\";b:1;s:14:\"install_themes\";b:1;s:11:\"update_core\";b:1;s:10:\"list_users\";b:1;s:12:\"remove_users\";b:1;s:13:\"promote_users\";b:1;s:18:\"edit_theme_options\";b:1;s:13:\"delete_themes\";b:1;s:6:\"export\";b:1;}}s:6:\"editor\";a:2:{s:4:\"name\";s:6:\"Editor\";s:12:\"capabilities\";a:34:{s:17:\"moderate_comments\";b:1;s:17:\"manage_categories\";b:1;s:12:\"manage_links\";b:1;s:12:\"upload_files\";b:1;s:15:\"unfiltered_html\";b:1;s:10:\"edit_posts\";b:1;s:17:\"edit_others_posts\";b:1;s:20:\"edit_published_posts\";b:1;s:13:\"publish_posts\";b:1;s:10:\"edit_pages\";b:1;s:4:\"read\";b:1;s:7:\"level_7\";b:1;s:7:\"level_6\";b:1;s:7:\"level_5\";b:1;s:7:\"level_4\";b:1;s:7:\"level_3\";b:1;s:7:\"level_2\";b:1;s:7:\"level_1\";b:1;s:7:\"level_0\";b:1;s:17:\"edit_others_pages\";b:1;s:20:\"edit_published_pages\";b:1;s:13:\"publish_pages\";b:1;s:12:\"delete_pages\";b:1;s:19:\"delete_others_pages\";b:1;s:22:\"delete_published_pages\";b:1;s:12:\"delete_posts\";b:1;s:19:\"delete_others_posts\";b:1;s:22:\"delete_published_posts\";b:1;s:20:\"delete_private_posts\";b:1;s:18:\"edit_private_posts\";b:1;s:18:\"read_private_posts\";b:1;s:20:\"delete_private_pages\";b:1;s:18:\"edit_private_pages\";b:1;s:18:\"read_private_pages\";b:1;}}s:6:\"author\";a:2:{s:4:\"name\";s:6:\"Author\";s:12:\"capabilities\";a:10:{s:12:\"upload_files\";b:1;s:10:\"edit_posts\";b:1;s:20:\"edit_published_posts\";b:1;s:13:\"publish_posts\";b:1;s:4:\"read\";b:1;s:7:\"level_2\";b:1;s:7:\"level_1\";b:1;s:7:\"level_0\";b:1;s:12:\"delete_posts\";b:1;s:22:\"delete_published_posts\";b:1;}}s:11:\"contributor\";a:2:{s:4:\"name\";s:11:\"Contributor\";s:12:\"capabilities\";a:5:{s:10:\"edit_posts\";b:1;s:4:\"read\";b:1;s:7:\"level_1\";b:1;s:7:\"level_0\";b:1;s:12:\"delete_posts\";b:1;}}s:10:\"subscriber\";a:2:{s:4:\"name\";s:10:\"Subscriber\";s:12:\"capabilities\";a:2:{s:4:\"read\";b:1;s:7:\"level_0\";b:1;}}}', 'auto'),
+(102, 'edgen_user_roles', 'a:9:{s:13:\"administrator\";a:2:{s:4:\"name\";s:13:\"Administrator\";s:12:\"capabilities\";a:92:{s:13:\"switch_themes\";b:1;s:11:\"edit_themes\";b:1;s:16:\"activate_plugins\";b:1;s:12:\"edit_plugins\";b:1;s:10:\"edit_users\";b:1;s:10:\"edit_files\";b:1;s:14:\"manage_options\";b:1;s:17:\"moderate_comments\";b:1;s:17:\"manage_categories\";b:1;s:12:\"manage_links\";b:1;s:12:\"upload_files\";b:1;s:6:\"import\";b:1;s:15:\"unfiltered_html\";b:1;s:10:\"edit_posts\";b:1;s:17:\"edit_others_posts\";b:1;s:20:\"edit_published_posts\";b:1;s:13:\"publish_posts\";b:1;s:10:\"edit_pages\";b:1;s:4:\"read\";b:1;s:8:\"level_10\";b:1;s:7:\"level_9\";b:1;s:7:\"level_8\";b:1;s:7:\"level_7\";b:1;s:7:\"level_6\";b:1;s:7:\"level_5\";b:1;s:7:\"level_4\";b:1;s:7:\"level_3\";b:1;s:7:\"level_2\";b:1;s:7:\"level_1\";b:1;s:7:\"level_0\";b:1;s:17:\"edit_others_pages\";b:1;s:20:\"edit_published_pages\";b:1;s:13:\"publish_pages\";b:1;s:12:\"delete_pages\";b:1;s:19:\"delete_others_pages\";b:1;s:22:\"delete_published_pages\";b:1;s:12:\"delete_posts\";b:1;s:19:\"delete_others_posts\";b:1;s:22:\"delete_published_posts\";b:1;s:20:\"delete_private_posts\";b:1;s:18:\"edit_private_posts\";b:1;s:18:\"read_private_posts\";b:1;s:20:\"delete_private_pages\";b:1;s:18:\"edit_private_pages\";b:1;s:18:\"read_private_pages\";b:1;s:12:\"delete_users\";b:1;s:12:\"create_users\";b:1;s:17:\"unfiltered_upload\";b:1;s:14:\"edit_dashboard\";b:1;s:14:\"update_plugins\";b:1;s:14:\"delete_plugins\";b:1;s:15:\"install_plugins\";b:1;s:13:\"update_themes\";b:1;s:14:\"install_themes\";b:1;s:11:\"update_core\";b:1;s:10:\"list_users\";b:1;s:12:\"remove_users\";b:1;s:13:\"promote_users\";b:1;s:18:\"edit_theme_options\";b:1;s:13:\"delete_themes\";b:1;s:6:\"export\";b:1;s:17:\"plg_view_students\";b:1;s:19:\"plg_create_students\";b:1;s:17:\"plg_edit_students\";b:1;s:19:\"plg_delete_students\";b:1;s:16:\"plg_view_courses\";b:1;s:18:\"plg_assign_courses\";b:1;s:18:\"plg_create_courses\";b:1;s:16:\"plg_edit_courses\";b:1;s:18:\"plg_delete_courses\";b:1;s:17:\"plg_view_programs\";b:1;s:19:\"plg_create_programs\";b:1;s:17:\"plg_edit_programs\";b:1;s:19:\"plg_delete_programs\";b:1;s:17:\"plg_view_contacts\";b:1;s:19:\"plg_create_contacts\";b:1;s:17:\"plg_edit_contacts\";b:1;s:19:\"plg_delete_contacts\";b:1;s:15:\"plg_view_events\";b:1;s:17:\"plg_create_events\";b:1;s:15:\"plg_edit_events\";b:1;s:17:\"plg_delete_events\";b:1;s:14:\"plg_view_stats\";b:1;s:16:\"plg_export_stats\";b:1;s:14:\"plg_view_theme\";b:1;s:16:\"plg_change_theme\";b:1;s:14:\"plg_view_users\";b:1;s:16:\"plg_create_users\";b:1;s:14:\"plg_edit_users\";b:1;s:16:\"plg_delete_users\";b:1;s:17:\"plg_switch_office\";b:1;s:16:\"plg_view_swagger\";b:1;}}s:6:\"editor\";a:2:{s:4:\"name\";s:6:\"Editor\";s:12:\"capabilities\";a:34:{s:17:\"moderate_comments\";b:1;s:17:\"manage_categories\";b:1;s:12:\"manage_links\";b:1;s:12:\"upload_files\";b:1;s:15:\"unfiltered_html\";b:1;s:10:\"edit_posts\";b:1;s:17:\"edit_others_posts\";b:1;s:20:\"edit_published_posts\";b:1;s:13:\"publish_posts\";b:1;s:10:\"edit_pages\";b:1;s:4:\"read\";b:1;s:7:\"level_7\";b:1;s:7:\"level_6\";b:1;s:7:\"level_5\";b:1;s:7:\"level_4\";b:1;s:7:\"level_3\";b:1;s:7:\"level_2\";b:1;s:7:\"level_1\";b:1;s:7:\"level_0\";b:1;s:17:\"edit_others_pages\";b:1;s:20:\"edit_published_pages\";b:1;s:13:\"publish_pages\";b:1;s:12:\"delete_pages\";b:1;s:19:\"delete_others_pages\";b:1;s:22:\"delete_published_pages\";b:1;s:12:\"delete_posts\";b:1;s:19:\"delete_others_posts\";b:1;s:22:\"delete_published_posts\";b:1;s:20:\"delete_private_posts\";b:1;s:18:\"edit_private_posts\";b:1;s:18:\"read_private_posts\";b:1;s:20:\"delete_private_pages\";b:1;s:18:\"edit_private_pages\";b:1;s:18:\"read_private_pages\";b:1;}}s:6:\"author\";a:2:{s:4:\"name\";s:6:\"Author\";s:12:\"capabilities\";a:10:{s:12:\"upload_files\";b:1;s:10:\"edit_posts\";b:1;s:20:\"edit_published_posts\";b:1;s:13:\"publish_posts\";b:1;s:4:\"read\";b:1;s:7:\"level_2\";b:1;s:7:\"level_1\";b:1;s:7:\"level_0\";b:1;s:12:\"delete_posts\";b:1;s:22:\"delete_published_posts\";b:1;}}s:11:\"contributor\";a:2:{s:4:\"name\";s:11:\"Contributor\";s:12:\"capabilities\";a:5:{s:10:\"edit_posts\";b:1;s:4:\"read\";b:1;s:7:\"level_1\";b:1;s:7:\"level_0\";b:1;s:12:\"delete_posts\";b:1;}}s:10:\"subscriber\";a:2:{s:4:\"name\";s:10:\"Subscriber\";s:12:\"capabilities\";a:2:{s:4:\"read\";b:1;s:7:\"level_0\";b:1;}}s:17:\"plg_office_viewer\";a:2:{s:4:\"name\";s:23:\"Visualizador de Oficina\";s:12:\"capabilities\";a:8:{s:4:\"read\";b:1;s:17:\"plg_view_students\";b:1;s:16:\"plg_view_courses\";b:1;s:17:\"plg_view_programs\";b:1;s:17:\"plg_view_contacts\";b:1;s:15:\"plg_view_events\";b:1;s:14:\"plg_view_stats\";b:1;s:14:\"plg_view_theme\";b:1;}}s:16:\"plg_office_staff\";a:2:{s:4:\"name\";s:19:\"Personal de Oficina\";s:12:\"capabilities\";a:16:{s:4:\"read\";b:1;s:17:\"plg_view_students\";b:1;s:19:\"plg_create_students\";b:1;s:17:\"plg_edit_students\";b:1;s:16:\"plg_view_courses\";b:1;s:18:\"plg_assign_courses\";b:1;s:17:\"plg_view_programs\";b:1;s:17:\"plg_view_contacts\";b:1;s:19:\"plg_create_contacts\";b:1;s:17:\"plg_edit_contacts\";b:1;s:15:\"plg_view_events\";b:1;s:17:\"plg_create_events\";b:1;s:15:\"plg_edit_events\";b:1;s:14:\"plg_view_stats\";b:1;s:14:\"plg_view_theme\";b:1;s:16:\"plg_view_swagger\";b:1;}}s:18:\"plg_office_manager\";a:2:{s:4:\"name\";s:24:\"Administrador de Oficina\";s:12:\"capabilities\";a:31:{s:4:\"read\";b:1;s:17:\"plg_view_students\";b:1;s:19:\"plg_create_students\";b:1;s:17:\"plg_edit_students\";b:1;s:19:\"plg_delete_students\";b:1;s:16:\"plg_view_courses\";b:1;s:18:\"plg_assign_courses\";b:1;s:18:\"plg_create_courses\";b:1;s:16:\"plg_edit_courses\";b:1;s:18:\"plg_delete_courses\";b:1;s:17:\"plg_view_programs\";b:1;s:19:\"plg_create_programs\";b:1;s:17:\"plg_edit_programs\";b:1;s:19:\"plg_delete_programs\";b:1;s:17:\"plg_view_contacts\";b:1;s:19:\"plg_create_contacts\";b:1;s:17:\"plg_edit_contacts\";b:1;s:19:\"plg_delete_contacts\";b:1;s:15:\"plg_view_events\";b:1;s:17:\"plg_create_events\";b:1;s:15:\"plg_edit_events\";b:1;s:17:\"plg_delete_events\";b:1;s:14:\"plg_view_stats\";b:1;s:16:\"plg_export_stats\";b:1;s:14:\"plg_view_theme\";b:1;s:16:\"plg_change_theme\";b:1;s:14:\"plg_view_users\";b:1;s:16:\"plg_create_users\";b:1;s:14:\"plg_edit_users\";b:1;s:16:\"plg_delete_users\";b:1;s:16:\"plg_view_swagger\";b:1;}}s:15:\"plg_super_admin\";a:2:{s:4:\"name\";s:19:\"Super Administrador\";s:12:\"capabilities\";a:32:{s:4:\"read\";b:1;s:17:\"plg_view_students\";b:1;s:19:\"plg_create_students\";b:1;s:17:\"plg_edit_students\";b:1;s:19:\"plg_delete_students\";b:1;s:16:\"plg_view_courses\";b:1;s:18:\"plg_assign_courses\";b:1;s:18:\"plg_create_courses\";b:1;s:16:\"plg_edit_courses\";b:1;s:18:\"plg_delete_courses\";b:1;s:17:\"plg_view_programs\";b:1;s:19:\"plg_create_programs\";b:1;s:17:\"plg_edit_programs\";b:1;s:19:\"plg_delete_programs\";b:1;s:17:\"plg_view_contacts\";b:1;s:19:\"plg_create_contacts\";b:1;s:17:\"plg_edit_contacts\";b:1;s:19:\"plg_delete_contacts\";b:1;s:15:\"plg_view_events\";b:1;s:17:\"plg_create_events\";b:1;s:15:\"plg_edit_events\";b:1;s:17:\"plg_delete_events\";b:1;s:14:\"plg_view_stats\";b:1;s:16:\"plg_export_stats\";b:1;s:14:\"plg_view_theme\";b:1;s:16:\"plg_change_theme\";b:1;s:14:\"plg_view_users\";b:1;s:16:\"plg_create_users\";b:1;s:14:\"plg_edit_users\";b:1;s:16:\"plg_delete_users\";b:1;s:17:\"plg_switch_office\";b:1;s:16:\"plg_view_swagger\";b:1;}}}', 'on'),
 (103, 'fresh_site', '0', 'off'),
-(104, 'user_count', '12', 'off'),
+(104, 'user_count', '15', 'off'),
 (105, 'widget_block', 'a:6:{i:2;a:1:{s:7:\"content\";s:19:\"<!-- wp:search /-->\";}i:3;a:1:{s:7:\"content\";s:154:\"<!-- wp:group --><div class=\"wp-block-group\"><!-- wp:heading --><h2>Recent Posts</h2><!-- /wp:heading --><!-- wp:latest-posts /--></div><!-- /wp:group -->\";}i:4;a:1:{s:7:\"content\";s:227:\"<!-- wp:group --><div class=\"wp-block-group\"><!-- wp:heading --><h2>Recent Comments</h2><!-- /wp:heading --><!-- wp:latest-comments {\"displayAvatar\":false,\"displayDate\":false,\"displayExcerpt\":false} /--></div><!-- /wp:group -->\";}i:5;a:1:{s:7:\"content\";s:146:\"<!-- wp:group --><div class=\"wp-block-group\"><!-- wp:heading --><h2>Archives</h2><!-- /wp:heading --><!-- wp:archives /--></div><!-- /wp:group -->\";}i:6;a:1:{s:7:\"content\";s:150:\"<!-- wp:group --><div class=\"wp-block-group\"><!-- wp:heading --><h2>Categories</h2><!-- /wp:heading --><!-- wp:categories /--></div><!-- /wp:group -->\";}s:12:\"_multiwidget\";i:1;}', 'auto'),
 (106, 'sidebars_widgets', 'a:2:{s:19:\"wp_inactive_widgets\";a:5:{i:0;s:7:\"block-2\";i:1;s:7:\"block-3\";i:2;s:7:\"block-4\";i:3;s:7:\"block-5\";i:4;s:7:\"block-6\";}s:13:\"array_version\";i:3;}', 'auto'),
 (107, 'widget_pages', 'a:1:{s:12:\"_multiwidget\";i:1;}', 'auto'),
@@ -232,7 +226,7 @@ INSERT INTO `edgen_options` (`option_id`, `option_name`, `option_value`, `autolo
 (501, 'current_theme', 'Tema Personalizado', 'auto'),
 (502, 'theme_mods_MiTema', 'a:3:{i:0;b:0;s:18:\"nav_menu_locations\";a:0:{}s:18:\"custom_css_post_id\";i:-1;}', 'on'),
 (503, 'theme_switched', '', 'auto'),
-(667, 'auto_core_update_notified', 'a:4:{s:4:\"type\";s:7:\"success\";s:5:\"email\";s:23:\"admin@emmausdigital.com\";s:7:\"version\";s:3:\"6.8\";s:9:\"timestamp\";i:1744754396;}', 'off'),
+(667, 'auto_core_update_notified', 'a:4:{s:4:\"type\";s:7:\"success\";s:5:\"email\";s:23:\"admin@emmausdigital.com\";s:7:\"version\";s:5:\"6.8.3\";s:9:\"timestamp\";i:1761252497;}', 'off'),
 (274, 'wpb_sdk_module_id', '6', 'auto'),
 (275, 'wpb_sdk_module_slug', 'loginpress', 'auto'),
 (276, 'loginpress_customization', 'a:0:{}', 'auto'),
@@ -248,22 +242,40 @@ INSERT INTO `edgen_options` (`option_id`, `option_name`, `option_value`, `autolo
 (286, 'rdn_fetch_12516765', 'fetch', 'auto'),
 (287, '_loginpress_optin', 'yes', 'auto'),
 (288, 'wpb_sdk_loginpress', '{\"communication\":\"1\",\"diagnostic_info\":\"1\",\"extensions\":\"1\",\"user_skip\":\"0\"}', 'auto'),
-(674, 'can_compress_scripts', '0', 'on'),
-(239, '_transient_health-check-site-status-result', '{\"good\":19,\"recommended\":4,\"critical\":0}', 'on'),
-(2224, '_transient_timeout_feed_d117b5738fbd35bd8c0391cda1f2b5d9', '1740870722', 'off'),
+(239, '_transient_health-check-site-status-result', '{\"good\":17,\"recommended\":5,\"critical\":1}', 'on'),
+(7068, '_transient_timeout_feed_d117b5738fbd35bd8c0391cda1f2b5d9', '1761379861', 'off'),
 (152, '_site_transient_wp_plugin_dependencies_plugin_data', 'a:0:{}', 'off'),
 (153, 'recently_activated', 'a:0:{}', 'off'),
 (158, 'finished_updating_comment_type', '1', 'auto'),
 (465, 'category_children', 'a:0:{}', 'auto'),
 (662, 'db_upgraded', '', 'on'),
 (450, 'recovery_mode_email_last_sent', '1732026601', 'auto'),
-(791, '_site_transient_update_themes', 'O:8:\"stdClass\":5:{s:12:\"last_checked\";i:1745705719;s:7:\"checked\";a:1:{s:6:\"MiTema\";s:3:\"1.0\";}s:8:\"response\";a:0:{}s:9:\"no_update\";a:0:{}s:12:\"translations\";a:0:{}}', 'off'),
-(3433, '_site_transient_timeout_wp_theme_files_patterns-41b33adeff96d6ae17cdc464af3998ca', '1745720483', 'off'),
-(3434, '_site_transient_wp_theme_files_patterns-41b33adeff96d6ae17cdc464af3998ca', 'a:2:{s:7:\"version\";s:3:\"1.0\";s:8:\"patterns\";a:0:{}}', 'off'),
-(273, '_site_transient_update_plugins', 'O:8:\"stdClass\":5:{s:12:\"last_checked\";i:1745705720;s:8:\"response\";a:0:{}s:12:\"translations\";a:0:{}s:9:\"no_update\";a:0:{}s:7:\"checked\";a:1:{s:36:\"plg-genesis/registro-estudiantes.php\";s:3:\"1.0\";}}', 'off'),
-(3146, '_site_transient_update_core', 'O:8:\"stdClass\":4:{s:7:\"updates\";a:1:{i:0;O:8:\"stdClass\":10:{s:8:\"response\";s:6:\"latest\";s:8:\"download\";s:57:\"https://downloads.wordpress.org/release/wordpress-6.8.zip\";s:6:\"locale\";s:5:\"en_US\";s:8:\"packages\";O:8:\"stdClass\":5:{s:4:\"full\";s:57:\"https://downloads.wordpress.org/release/wordpress-6.8.zip\";s:10:\"no_content\";s:68:\"https://downloads.wordpress.org/release/wordpress-6.8-no-content.zip\";s:11:\"new_bundled\";s:69:\"https://downloads.wordpress.org/release/wordpress-6.8-new-bundled.zip\";s:7:\"partial\";s:0:\"\";s:8:\"rollback\";s:0:\"\";}s:7:\"current\";s:3:\"6.8\";s:7:\"version\";s:3:\"6.8\";s:11:\"php_version\";s:6:\"7.2.24\";s:13:\"mysql_version\";s:5:\"5.5.5\";s:11:\"new_bundled\";s:3:\"6.7\";s:15:\"partial_version\";s:0:\"\";}}s:12:\"last_checked\";i:1745705719;s:15:\"version_checked\";s:3:\"6.8\";s:12:\"translations\";a:0:{}}', 'off'),
-(3423, '_site_transient_timeout_theme_roots', '1745707519', 'off'),
-(3424, '_site_transient_theme_roots', 'a:1:{s:6:\"MiTema\";s:7:\"/themes\";}', 'off');
+(6642, 'WPLANG', '', 'auto'),
+(6643, 'new_admin_email', 'admin@emmausdigital.com', 'auto'),
+(6666, 'plg_genesis_theme_BOG', '{\"bg\":\"#F5F7FB\",\"text\":\"#0F172A\",\"accent\":\"#0C497A\",\"sidebarBg\":\"#0C1018\",\"sidebarText\":\"#E5E7EB\",\"cardBg\":\"#FFFFFF\",\"border\":\"#D7DFEB\",\"mutedText\":\"#6B7280\",\"success\":\"#3FAB49\",\"warning\":\"#FFF100\",\"danger\":\"#E11D48\",\"info\":\"#154289\"}', 'off'),
+(7056, '_site_transient_timeout_theme_roots', '1761338443', 'off'),
+(7057, '_site_transient_theme_roots', 'a:4:{s:6:\"MiTema\";s:7:\"/themes\";s:16:\"twentytwentyfive\";s:7:\"/themes\";s:16:\"twentytwentyfour\";s:7:\"/themes\";s:17:\"twentytwentythree\";s:7:\"/themes\";}', 'off'),
+(6981, '_site_transient_timeout_php_check_38979a08dcd71638878b7b4419751271', '1761770685', 'off'),
+(6982, '_site_transient_php_check_38979a08dcd71638878b7b4419751271', 'a:5:{s:19:\"recommended_version\";s:3:\"8.3\";s:15:\"minimum_version\";s:6:\"7.2.24\";s:12:\"is_supported\";b:0;s:9:\"is_secure\";b:0;s:13:\"is_acceptable\";b:0;}', 'off'),
+(6933, 'plg_genesis_theme_FDL', '{\"bg\":\"#FFFFFF\",\"text\":\"#0F172A\",\"accent\":\"#0C497A\",\"sidebarBg\":\"#0A1224\",\"sidebarText\":\"#F1F5F9\",\"cardBg\":\"#FFFFFF\",\"border\":\"#E5E7EB\",\"mutedText\":\"#6B7280\",\"success\":\"#3FAB49\",\"warning\":\"#EAB308\",\"danger\":\"#EF4444\",\"info\":\"#3B82F6\"}', 'off');
+INSERT INTO `edgen_options` (`option_id`, `option_name`, `option_value`, `autoload`) VALUES
+(7039, '_site_transient_update_core', 'O:8:\"stdClass\":4:{s:7:\"updates\";a:1:{i:0;O:8:\"stdClass\":10:{s:8:\"response\";s:6:\"latest\";s:8:\"download\";s:59:\"https://downloads.wordpress.org/release/wordpress-6.8.3.zip\";s:6:\"locale\";s:5:\"en_US\";s:8:\"packages\";O:8:\"stdClass\":5:{s:4:\"full\";s:59:\"https://downloads.wordpress.org/release/wordpress-6.8.3.zip\";s:10:\"no_content\";s:70:\"https://downloads.wordpress.org/release/wordpress-6.8.3-no-content.zip\";s:11:\"new_bundled\";s:71:\"https://downloads.wordpress.org/release/wordpress-6.8.3-new-bundled.zip\";s:7:\"partial\";s:0:\"\";s:8:\"rollback\";s:0:\"\";}s:7:\"current\";s:5:\"6.8.3\";s:7:\"version\";s:5:\"6.8.3\";s:11:\"php_version\";s:6:\"7.2.24\";s:13:\"mysql_version\";s:5:\"5.5.5\";s:11:\"new_bundled\";s:3:\"6.7\";s:15:\"partial_version\";s:0:\"\";}}s:12:\"last_checked\";i:1761337115;s:15:\"version_checked\";s:5:\"6.8.3\";s:12:\"translations\";a:0:{}}', 'off'),
+(7075, '_site_transient_update_themes', 'O:8:\"stdClass\":5:{s:12:\"last_checked\";i:1761337115;s:7:\"checked\";a:4:{s:6:\"MiTema\";s:3:\"1.0\";s:16:\"twentytwentyfive\";s:3:\"1.2\";s:16:\"twentytwentyfour\";s:3:\"1.3\";s:17:\"twentytwentythree\";s:3:\"1.6\";}s:8:\"response\";a:1:{s:16:\"twentytwentyfive\";a:6:{s:5:\"theme\";s:16:\"twentytwentyfive\";s:11:\"new_version\";s:3:\"1.3\";s:3:\"url\";s:46:\"https://wordpress.org/themes/twentytwentyfive/\";s:7:\"package\";s:62:\"https://downloads.wordpress.org/theme/twentytwentyfive.1.3.zip\";s:8:\"requires\";s:3:\"6.7\";s:12:\"requires_php\";s:3:\"7.2\";}}s:9:\"no_update\";a:2:{s:16:\"twentytwentyfour\";a:6:{s:5:\"theme\";s:16:\"twentytwentyfour\";s:11:\"new_version\";s:3:\"1.3\";s:3:\"url\";s:46:\"https://wordpress.org/themes/twentytwentyfour/\";s:7:\"package\";s:62:\"https://downloads.wordpress.org/theme/twentytwentyfour.1.3.zip\";s:8:\"requires\";s:3:\"6.4\";s:12:\"requires_php\";s:3:\"7.0\";}s:17:\"twentytwentythree\";a:6:{s:5:\"theme\";s:17:\"twentytwentythree\";s:11:\"new_version\";s:3:\"1.6\";s:3:\"url\";s:47:\"https://wordpress.org/themes/twentytwentythree/\";s:7:\"package\";s:63:\"https://downloads.wordpress.org/theme/twentytwentythree.1.6.zip\";s:8:\"requires\";s:3:\"6.1\";s:12:\"requires_php\";s:3:\"5.6\";}}s:12:\"translations\";a:0:{}}', 'off'),
+(7076, '_site_transient_update_plugins', 'O:8:\"stdClass\":5:{s:12:\"last_checked\";i:1761337115;s:8:\"response\";a:1:{s:19:\"akismet/akismet.php\";O:8:\"stdClass\":13:{s:2:\"id\";s:21:\"w.org/plugins/akismet\";s:4:\"slug\";s:7:\"akismet\";s:6:\"plugin\";s:19:\"akismet/akismet.php\";s:11:\"new_version\";s:3:\"5.5\";s:3:\"url\";s:38:\"https://wordpress.org/plugins/akismet/\";s:7:\"package\";s:54:\"https://downloads.wordpress.org/plugin/akismet.5.5.zip\";s:5:\"icons\";a:2:{s:2:\"2x\";s:60:\"https://ps.w.org/akismet/assets/icon-256x256.png?rev=2818463\";s:2:\"1x\";s:60:\"https://ps.w.org/akismet/assets/icon-128x128.png?rev=2818463\";}s:7:\"banners\";a:2:{s:2:\"2x\";s:63:\"https://ps.w.org/akismet/assets/banner-1544x500.png?rev=2900731\";s:2:\"1x\";s:62:\"https://ps.w.org/akismet/assets/banner-772x250.png?rev=2900731\";}s:11:\"banners_rtl\";a:0:{}s:8:\"requires\";s:3:\"5.8\";s:6:\"tested\";s:5:\"6.8.3\";s:12:\"requires_php\";s:3:\"7.2\";s:16:\"requires_plugins\";a:0:{}}}s:12:\"translations\";a:0:{}s:9:\"no_update\";a:1:{s:9:\"hello.php\";O:8:\"stdClass\":10:{s:2:\"id\";s:25:\"w.org/plugins/hello-dolly\";s:4:\"slug\";s:11:\"hello-dolly\";s:6:\"plugin\";s:9:\"hello.php\";s:11:\"new_version\";s:5:\"1.7.2\";s:3:\"url\";s:42:\"https://wordpress.org/plugins/hello-dolly/\";s:7:\"package\";s:60:\"https://downloads.wordpress.org/plugin/hello-dolly.1.7.2.zip\";s:5:\"icons\";a:2:{s:2:\"2x\";s:64:\"https://ps.w.org/hello-dolly/assets/icon-256x256.jpg?rev=2052855\";s:2:\"1x\";s:64:\"https://ps.w.org/hello-dolly/assets/icon-128x128.jpg?rev=2052855\";}s:7:\"banners\";a:2:{s:2:\"2x\";s:67:\"https://ps.w.org/hello-dolly/assets/banner-1544x500.jpg?rev=2645582\";s:2:\"1x\";s:66:\"https://ps.w.org/hello-dolly/assets/banner-772x250.jpg?rev=2052855\";}s:11:\"banners_rtl\";a:0:{}s:8:\"requires\";s:3:\"4.6\";}}s:7:\"checked\";a:3:{s:19:\"akismet/akismet.php\";s:5:\"5.3.7\";s:9:\"hello.php\";s:5:\"1.7.2\";s:36:\"plg-genesis/registro-estudiantes.php\";s:3:\"1.0\";}}', 'off'),
+(5156, '_site_transient_timeout_community-events-270d391a97c88df429e71f9e9e3c8dee', '1753791860', 'off'),
+(7065, '_transient_timeout_feed_9bbd59226dc36b9b26cd43f15694c5c3', '1761379861', 'off'),
+(7066, '_transient_timeout_feed_mod_9bbd59226dc36b9b26cd43f15694c5c3', '1761379861', 'off'),
+(7067, '_transient_feed_mod_9bbd59226dc36b9b26cd43f15694c5c3', '1761336661', 'off'),
+(7069, '_transient_timeout_feed_mod_d117b5738fbd35bd8c0391cda1f2b5d9', '1761379861', 'off'),
+(7070, '_transient_feed_mod_d117b5738fbd35bd8c0391cda1f2b5d9', '1761336661', 'off'),
+(6761, 'plg_genesis_roles_version', '1.0.0', 'auto'),
+(7063, '_site_transient_timeout_browser_3268fe57febc0d1640e7d7359e3c065d', '1761941458', 'off'),
+(7064, '_site_transient_browser_3268fe57febc0d1640e7d7359e3c065d', 'a:10:{s:4:\"name\";s:6:\"Chrome\";s:7:\"version\";s:9:\"141.0.0.0\";s:8:\"platform\";s:9:\"Macintosh\";s:10:\"update_url\";s:29:\"https://www.google.com/chrome\";s:7:\"img_src\";s:43:\"http://s.w.org/images/browsers/chrome.png?1\";s:11:\"img_src_ssl\";s:44:\"https://s.w.org/images/browsers/chrome.png?1\";s:15:\"current_version\";s:2:\"18\";s:7:\"upgrade\";b:0;s:8:\"insecure\";b:0;s:6:\"mobile\";b:0;}', 'off'),
+(7071, '_transient_timeout_dash_v2_88ae138922fe95674369b1cb3d215a2b', '1761379861', 'off'),
+(7072, '_transient_dash_v2_88ae138922fe95674369b1cb3d215a2b', '<div class=\"rss-widget\"><ul><li><a class=\'rsswidget\' href=\'https://wordpress.org/news/2025/09/wordpress-6-8-3-release/\'>WordPress 6.8.3 Release</a></li><li><a class=\'rsswidget\' href=\'https://wordpress.org/news/2025/08/portland-welcomes-wcus-2025/\'>Portland Welcomes WordCamp US 2025: A Community Gathering</a></li></ul></div><div class=\"rss-widget\"><ul><li><a class=\'rsswidget\' href=\'https://central.wordcamp.org/news/2025/10/bhopal-hosts-wp-build-tour-2025-empowering-1700-students-across-central-india/\'>WordCamp Central: Bhopal Hosts WP Build Tour 2025: Empowering 1700+ Students Across Central India</a></li><li><a class=\'rsswidget\' href=\'https://ma.tt/2025/10/under-the-weather/\'>Matt: Under the Weather</a></li><li><a class=\'rsswidget\' href=\'https://ma.tt/2025/10/new-woo/\'>Matt: New Woo</a></li></ul></div>', 'off'),
+(7077, '_site_transient_timeout_wp_theme_files_patterns-41b33adeff96d6ae17cdc464af3998ca', '1761338915', 'off'),
+(7078, '_site_transient_wp_theme_files_patterns-41b33adeff96d6ae17cdc464af3998ca', 'a:2:{s:7:\"version\";s:3:\"1.0\";s:8:\"patterns\";a:0:{}}', 'off'),
+(6614, 'plg_genesis_use_api', '0', 'auto');
 
 -- --------------------------------------------------------
 
@@ -301,9 +313,10 @@ INSERT INTO `edgen_postmeta` (`meta_id`, `post_id`, `meta_key`, `meta_value`) VA
 (72, 99, 'origin', 'theme'),
 (94, 133, '_wp_attached_file', '2024/11/logo-2.webp'),
 (95, 133, '_wp_attachment_metadata', 'a:6:{s:5:\"width\";i:1024;s:6:\"height\";i:1024;s:4:\"file\";s:19:\"2024/11/logo-2.webp\";s:8:\"filesize\";i:104938;s:5:\"sizes\";a:3:{s:6:\"medium\";a:5:{s:4:\"file\";s:19:\"logo-2-300x300.webp\";s:5:\"width\";i:300;s:6:\"height\";i:300;s:9:\"mime-type\";s:10:\"image/webp\";s:8:\"filesize\";i:7410;}s:9:\"thumbnail\";a:5:{s:4:\"file\";s:19:\"logo-2-150x150.webp\";s:5:\"width\";i:150;s:6:\"height\";i:150;s:9:\"mime-type\";s:10:\"image/webp\";s:8:\"filesize\";i:2880;}s:12:\"medium_large\";a:5:{s:4:\"file\";s:19:\"logo-2-768x768.webp\";s:5:\"width\";i:768;s:6:\"height\";i:768;s:9:\"mime-type\";s:10:\"image/webp\";s:8:\"filesize\";i:23104;}}s:10:\"image_meta\";a:12:{s:8:\"aperture\";s:1:\"0\";s:6:\"credit\";s:0:\"\";s:6:\"camera\";s:0:\"\";s:7:\"caption\";s:0:\"\";s:17:\"created_timestamp\";s:1:\"0\";s:9:\"copyright\";s:0:\"\";s:12:\"focal_length\";s:1:\"0\";s:3:\"iso\";s:1:\"0\";s:13:\"shutter_speed\";s:1:\"0\";s:5:\"title\";s:0:\"\";s:11:\"orientation\";s:1:\"0\";s:8:\"keywords\";a:0:{}}}'),
-(91, 125, '_edit_lock', '1731938845:2'),
+(91, 125, '_edit_lock', '1760034058:2'),
 (86, 119, 'footnotes', ''),
-(85, 112, '_edit_lock', '1741285087:13');
+(85, 112, '_edit_lock', '1741285087:13'),
+(106, 150, '_edit_lock', '1760031495:2');
 
 -- --------------------------------------------------------
 
@@ -384,7 +397,9 @@ INSERT INTO `edgen_posts` (`ID`, `post_author`, `post_date`, `post_date_gmt`, `p
 (116, 2, '2024-10-02 05:01:13', '2024-10-02 05:01:13', '<!-- wp:shortcode -->\n[shortcode_mostrar_dashboard]\n<!-- /wp:shortcode -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->', 'dashboard', '', 'inherit', 'closed', 'closed', '', '112-revision-v1', '', '', '2024-10-02 05:01:13', '2024-10-02 05:01:13', '', 112, 'https://emmausdigital.com/genesis/?p=116', 0, 'revision', '', 0),
 (134, 2, '2024-11-18 14:07:27', '2024-11-18 14:07:27', '<!-- wp:html /-->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->', 'Custom Login', '', 'inherit', 'closed', 'closed', '', '125-revision-v1', '', '', '2024-11-18 14:07:27', '2024-11-18 14:07:27', '', 125, 'https://emmausdigital.com/genesis/?p=134', 0, 'revision', '', 0),
 (132, 2, '2024-11-15 01:50:49', '2024-11-15 01:50:49', '<!-- wp:html -->\n<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Login</title>\n  <style>\n      body {\n          font-family: Arial, sans-serif;\n          background-color: #f8f9fa;\n          margin: 0;\n          padding: 0;\n          display: flex;\n          justify-content: center;\n          align-items: center;\n          height: 100vh;\n      }\n\n      .card {\n          background-color: #fff;\n          border-radius: 8px;\n          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\n          width: 400px;\n      }\n\n      .card-header {\n          background-color: #0D457E;\n          border-top-left-radius: 8px;\n          border-top-right-radius: 8px;\n          color: #fff;\n          font-size: 1.5rem;\n          padding: 20px;\n          text-align: center;\n      }\n\n      .card-body {\n          padding: 40px;\n      }\n\n      .form-group {\n          margin-bottom: 20px;\n      }\n\n      .form-label {\n          display: block;\n          font-size: 1rem;\n          margin-bottom: 8px;\n      }\n\n      .form-control {\n          border: 1px solid #0D457E;\n          border-radius: 5px;\n          font-size: 1rem;\n          height: 40px;\n          padding: 8px;\n          width: calc(100% - 16px);\n      }\n\n      .btn-primary {\n          background-color: #0D457E;\n          border: none;\n          border-radius: 5px;\n          color: #fff;\n          cursor: pointer;\n          font-size: 1rem;\n          height: 40px;\n          text-transform: uppercase;\n          width: 100%;\n      }\n\n      .btn-primary:hover {\n          background-color: #07365A;\n      }\n\n      .text-center {\n          text-align: center;\n      }\n\n      .text-muted {\n          color: #6c757d;\n          font-size: 0.9rem;\n      }\n\n      .responsive-banner img {\n          max-width: 100%;\n          height: auto;\n      }\n\n      .responsive-banner {\n          background-color: #102B4F;\n          width: 100%;\n          display: flex;\n          justify-content: center;\n          align-items: center;\n          overflow: hidden;\n          border-top-left-radius: 8px;\n          border-top-right-radius: 8px;\n          margin-bottom: 20px;\n      }\n\n      .error-message {\n          position: fixed;\n          bottom: 20px;\n          left: 50%;\n          transform: translateX(-50%);\n          background-color: #f44336;\n          color: white;\n          padding: 15px 20px;\n          border-radius: 5px;\n          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\n          opacity: 0;\n          transition: opacity 0.5s ease;\n      }\n\n      .error-message.show {\n          opacity: 1;\n      }\n  </style>\n</head>\n<body>\n<?php\nif(isset($_GET[\'error\'])) {\n    echo \'<div id=\"error-message\" class=\"error-message show\">\' . htmlspecialchars($_GET[\'error\']) . \'</div>\';\n}\n?>\n<script>\n    setTimeout(function() {\n        var errorMessage = document.getElementById(\'error-message\');\n        if (errorMessage) {\n            errorMessage.classList.remove(\'show\');\n        }\n    }, 4000);\n</script>\n  <div class=\"card\">\n    <div class=\"card-header\">\n      <div class=\"responsive-banner\">\n        <img src=\"<?php echo get_template_directory_uri(); ?>/images/emmaus/header.png\" alt=\"Logo Emmaus\">\n      </div>      \n    </div>\n    <div class=\"card-body\">\n        <form action=\"<?php echo esc_url(site_url(\'wp-login.php\')); ?>\" method=\"post\">\n          <div class=\"responsive-banner\">\n            <img src=\"<?php echo get_template_directory_uri(); ?>/images/genesis/logo.png\" alt=\"Logo Genesis\">\n          </div>\n          <div class=\"form-group\">\n            <label for=\"username\" class=\"form-label\">Usuario</label>\n            <input type=\"text\" id=\"username\" name=\"log\" class=\"form-control\" placeholder=\"Usuario\" required>\n          </div>\n          <div class=\"form-group\">\n            <label for=\"password\" class=\"form-label\">Contraseña</label>\n            <input type=\"password\" id=\"password\" name=\"pwd\" class=\"form-control\" placeholder=\"Contraseña\" required>\n          </div>\n          <button type=\"submit\" class=\"btn-primary\">Iniciar sesión</button>\n        </form>\n        <div class=\"text-center mt-3\">\n            <a href=\"<?php echo esc_url(wp_lostpassword_url()); ?>\" class=\"text-muted\">¿Olvidaste tu contraseña?</a>\n        </div>\n    </div>\n  </div>\n</body>\n</html>\n<!-- /wp:html -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->', 'login', '', 'inherit', 'closed', 'closed', '', '125-revision-v1', '', '', '2024-11-15 01:50:49', '2024-11-15 01:50:49', '', 125, 'https://emmausdigital.com/genesis/?p=132', 0, 'revision', '', 0),
-(133, 2, '2024-11-18 12:58:30', '2024-11-18 12:58:30', '', 'logoGenesis', '', 'inherit', 'open', 'closed', '', 'logo-2', '', '', '2024-11-18 12:58:52', '2024-11-18 12:58:52', '', 0, 'https://emmausdigital.com/genesis/wp-content/uploads/2024/11/logo-2.webp', 0, 'attachment', 'image/webp', 0);
+(133, 2, '2024-11-18 12:58:30', '2024-11-18 12:58:30', '', 'logoGenesis', '', 'inherit', 'open', 'closed', '', 'logo-2', '', '', '2024-11-18 12:58:52', '2024-11-18 12:58:52', '', 0, 'https://emmausdigital.com/genesis/wp-content/uploads/2024/11/logo-2.webp', 0, 'attachment', 'image/webp', 0),
+(150, 2, '2025-10-09 16:46:11', '2025-10-09 16:46:11', '<!-- wp:shortcode -->\nmostrar_dashboard_v2\n<!-- /wp:shortcode -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->', 'DashBoard v2', '', 'publish', 'closed', 'closed', '', 'dashboard-v2', '', '', '2025-10-09 16:46:11', '2025-10-09 16:46:11', '', 0, 'https://emmausdigital.com/genesis/?page_id=150', 0, 'page', '', 0),
+(151, 2, '2025-10-09 16:46:11', '2025-10-09 16:46:11', '<!-- wp:shortcode -->\nmostrar_dashboard_v2\n<!-- /wp:shortcode -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->', 'DashBoard v2', '', 'inherit', 'closed', 'closed', '', '150-revision-v1', '', '', '2025-10-09 16:46:11', '2025-10-09 16:46:11', '', 150, 'https://emmausdigital.com/genesis/?p=151', 0, 'revision', '', 0);
 
 -- --------------------------------------------------------
 
@@ -505,6 +520,10 @@ INSERT INTO `edgen_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) V
 (69, 4, 'description', ''),
 (70, 4, 'rich_editing', 'true'),
 (71, 4, 'syntax_highlighting', 'true'),
+(349, 15, 'edgen_capabilities', 'a:1:{s:16:\"plg_office_staff\";b:1;}'),
+(313, 13, 'edgen_dashboard_quick_press_last_post_id', '139'),
+(401, 2, 'session_tokens', 'a:3:{s:64:\"a3de3cb24a3abdfd0743e412148c95a3c80e3d71a652c91d2b7615f051174b46\";a:4:{s:10:\"expiration\";i:1761241147;s:2:\"ip\";s:15:\"190.121.155.164\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\";s:5:\"login\";i:1760031547;}s:64:\"e9356a51b364fcaab8dbe416251ed85fbad01ff38510fb1a75f65e80a5f6ceb4\";a:4:{s:10:\"expiration\";i:1761367847;s:2:\"ip\";s:12:\"179.32.76.52\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36\";s:5:\"login\";i:1761195047;}s:64:\"ec7d8d179ae49f17ae973f977a4202111382a8ee7e0d7cd385076b19d9f24535\";a:4:{s:10:\"expiration\";i:1761398878;s:2:\"ip\";s:12:\"179.32.76.52\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36\";s:5:\"login\";i:1761226078;}}'),
+(312, 13, 'session_tokens', 'a:1:{s:64:\"1833be1a58f48fa903f4548001e177db1bbb4e6a740327e0c62b824b9fd731af\";a:4:{s:10:\"expiration\";i:1751052303;s:2:\"ip\";s:14:\"190.146.40.106\";s:2:\"ua\";s:111:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36\";s:5:\"login\";i:1750879503;}}'),
 (21, 2, 'nickname', 'daniel.vanegas'),
 (22, 2, 'first_name', 'Daniel'),
 (23, 2, 'last_name', 'Vanegas'),
@@ -516,11 +535,11 @@ INSERT INTO `edgen_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) V
 (29, 2, 'use_ssl', '0'),
 (30, 2, 'show_admin_bar_front', 'true'),
 (31, 2, 'locale', ''),
-(32, 2, 'edgen_capabilities', 'a:1:{s:13:\"administrator\";b:1;}'),
-(33, 2, 'edgen_user_level', '10'),
+(32, 2, 'edgen_capabilities', 'a:1:{s:15:\"plg_super_admin\";b:1;}'),
+(33, 2, 'edgen_user_level', '0'),
 (34, 2, 'dismissed_wp_pointers', ''),
-(36, 2, 'edgen_dashboard_quick_press_last_post_id', '138'),
-(37, 2, 'community-events-location', 'a:1:{s:2:\"ip\";s:13:\"186.170.222.0\";}'),
+(36, 2, 'edgen_dashboard_quick_press_last_post_id', '141'),
+(37, 2, 'community-events-location', 'a:1:{s:2:\"ip\";s:11:\"179.32.76.0\";}'),
 (41, 2, 'oficina', 'BOG'),
 (43, 2, 'edgen_persisted_preferences', 'a:4:{s:4:\"core\";a:2:{s:26:\"isComplementaryAreaVisible\";b:0;s:10:\"editorMode\";s:6:\"visual\";}s:14:\"core/edit-site\";a:2:{s:12:\"welcomeGuide\";b:0;s:16:\"welcomeGuidePage\";b:0;}s:9:\"_modified\";s:24:\"2024-10-02T03:44:32.261Z\";s:14:\"core/edit-post\";a:3:{s:12:\"welcomeGuide\";b:0;s:20:\"welcomeGuideTemplate\";b:0;s:14:\"fullscreenMode\";b:0;}}'),
 (139, 7, 'rich_editing', 'true'),
@@ -532,8 +551,8 @@ INSERT INTO `edgen_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) V
 (145, 7, 'locale', ''),
 (47, 2, 'edgen_user-settings', 'libraryContent=browse'),
 (48, 2, 'edgen_user-settings-time', '1731934715'),
-(77, 4, 'edgen_capabilities', 'a:1:{s:6:\"editor\";b:1;}'),
-(78, 4, 'edgen_user_level', '7'),
+(77, 4, 'edgen_capabilities', 'a:1:{s:16:\"plg_office_staff\";b:1;}'),
+(78, 4, 'edgen_user_level', '0'),
 (79, 4, 'dismissed_wp_pointers', ''),
 (80, 4, 'oficina', 'BOG'),
 (49, 3, 'nickname', 'laura.vanegas'),
@@ -547,8 +566,8 @@ INSERT INTO `edgen_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) V
 (57, 3, 'use_ssl', '0'),
 (58, 3, 'show_admin_bar_front', 'true'),
 (59, 3, 'locale', ''),
-(60, 3, 'edgen_capabilities', 'a:1:{s:6:\"editor\";b:1;}'),
-(61, 3, 'edgen_user_level', '7'),
+(60, 3, 'edgen_capabilities', 'a:1:{s:18:\"plg_office_manager\";b:1;}'),
+(61, 3, 'edgen_user_level', '0'),
 (62, 3, 'dismissed_wp_pointers', ''),
 (63, 3, 'oficina', 'BOG'),
 (166, 3, 'edgen_dashboard_quick_press_last_post_id', '120'),
@@ -557,26 +576,40 @@ INSERT INTO `edgen_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) V
 (208, 10, 'last_name', 'Bastidas'),
 (209, 10, 'description', ''),
 (210, 10, 'rich_editing', 'true'),
-(183, 9, 'use_ssl', '0'),
-(184, 9, 'show_admin_bar_front', 'true'),
-(185, 9, 'locale', ''),
-(186, 9, 'edgen_capabilities', 'a:1:{s:6:\"editor\";b:1;}'),
-(187, 9, 'edgen_user_level', '7'),
-(188, 9, 'dismissed_wp_pointers', ''),
+(388, 15, 'session_tokens', 'a:2:{s:64:\"aaad2a09a8f35e05dc1bd7ff55b6d0d29d01c406d0035bc20acc099f81ca51f9\";a:4:{s:10:\"expiration\";i:1755989426;s:2:\"ip\";s:15:\"152.203.255.239\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36\";s:5:\"login\";i:1755816626;}s:64:\"cba656e0e848c92b2b7a4a1285b81fa80353da01034652b53bea6fccfea7182d\";a:4:{s:10:\"expiration\";i:1757028549;s:2:\"ip\";s:15:\"152.203.255.239\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36\";s:5:\"login\";i:1755818949;}}'),
+(407, 14, 'session_tokens', 'a:3:{s:64:\"be7e8da6a729275f0854320d4cdad87cfba1b4aa92277a2b64ac74ae47ba70dc\";a:4:{s:10:\"expiration\";i:1761240984;s:2:\"ip\";s:15:\"152.203.249.114\";s:2:\"ua\";s:125:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0\";s:5:\"login\";i:1761068184;}s:64:\"234d0968c813f479f3c88a84f91a7425d76de7d49dceaa85587b463bcf2a4282\";a:4:{s:10:\"expiration\";i:1761241879;s:2:\"ip\";s:15:\"152.203.249.114\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36\";s:5:\"login\";i:1761069079;}s:64:\"6806717166f7a90291540aab93394ab286f34eb921866f129329568462fd34ad\";a:4:{s:10:\"expiration\";i:1761241880;s:2:\"ip\";s:15:\"152.203.249.114\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36\";s:5:\"login\";i:1761069080;}}'),
+(364, 16, 'locale', ''),
+(363, 16, 'show_admin_bar_front', 'true'),
+(362, 16, 'use_ssl', '0'),
+(361, 16, 'admin_color', 'fresh'),
 (82, 4, 'edgen_dashboard_quick_press_last_post_id', '58'),
-(83, 4, 'community-events-location', 'a:1:{s:2:\"ip\";s:10:\"181.63.4.0\";}'),
-(263, 4, 'session_tokens', 'a:1:{s:64:\"a98fd4a15ca17d1673c6b594dbb85603637f3519f4cb129643c8e39f5578b213\";a:4:{s:10:\"expiration\";i:1740088827;s:2:\"ip\";s:15:\"152.203.159.149\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36\";s:5:\"login\";i:1739916027;}}'),
+(83, 4, 'community-events-location', 'a:1:{s:2:\"ip\";s:11:\"186.171.3.0\";}'),
+(307, 6, 'session_tokens', 'a:1:{s:64:\"9327b62b33b87619b0bfef3e2d156d0bbd9147728d78a7f412c2dafcc7d4404b\";a:4:{s:10:\"expiration\";i:1756777083;s:2:\"ip\";s:15:\"181.137.147.156\";s:2:\"ua\";s:111:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\";s:5:\"login\";i:1756604283;}}'),
+(322, 14, 'nickname', 'FL.Laura.vanegas'),
+(333, 14, 'edgen_capabilities', 'a:1:{s:18:\"plg_office_manager\";b:1;}'),
+(334, 14, 'edgen_user_level', '0'),
+(335, 14, 'dismissed_wp_pointers', ''),
 (265, 13, 'nickname', 'admin.bolivia'),
 (266, 13, 'first_name', ''),
 (267, 13, 'last_name', ''),
 (268, 13, 'description', ''),
 (269, 13, 'rich_editing', 'true'),
 (270, 13, 'syntax_highlighting', 'true'),
-(236, 10, 'session_tokens', 'a:3:{s:64:\"faf752f976c7f912bf90ce5d40ebb660b231375a08221ff710e13779fcf5dcf5\";a:4:{s:10:\"expiration\";i:1745679410;s:2:\"ip\";s:14:\"191.104.163.22\";s:2:\"ua\";s:111:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36\";s:5:\"login\";i:1745506610;}s:64:\"ba319dd5d53629e45d44ef8d0a2c4acea26a1810411c963c0568792b0c28f69c\";a:4:{s:10:\"expiration\";i:1745774562;s:2:\"ip\";s:14:\"186.170.222.69\";s:2:\"ua\";s:111:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36\";s:5:\"login\";i:1745601762;}s:64:\"23f25978a37714d2e0a23ae6f1aa89c15a83461fcbdfae585dce6e0678217783\";a:4:{s:10:\"expiration\";i:1745776985;s:2:\"ip\";s:15:\"152.203.246.185\";s:2:\"ua\";s:111:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36\";s:5:\"login\";i:1745604185;}}'),
-(284, 8, 'session_tokens', 'a:1:{s:64:\"e9ff1bda7dca124f28409e53bef5567fe31aad5614e5cf42ab18a750c681887c\";a:4:{s:10:\"expiration\";i:1744905091;s:2:\"ip\";s:15:\"152.203.250.194\";s:2:\"ua\";s:111:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36\";s:5:\"login\";i:1743695491;}}'),
-(189, 9, 'oficina', 'FDL'),
+(402, 11, 'oficina', 'BOG'),
+(284, 8, 'session_tokens', 'a:1:{s:64:\"c61d54639dfe55a9679d6215d0255cfe41807ecb40e54c2d0e8674ffe5488ba2\";a:4:{s:10:\"expiration\";i:1760112803;s:2:\"ip\";s:13:\"152.203.44.93\";s:2:\"ua\";s:125:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0\";s:5:\"login\";i:1759940003;}}'),
+(360, 16, 'comment_shortcuts', 'false'),
 (206, 10, 'nickname', 'lilibastigar'),
-(237, 3, 'session_tokens', 'a:10:{s:64:\"78c54f5dcb4642156470169b062841e40bee89e421000d67c5884f895c2298c2\";a:4:{s:10:\"expiration\";i:1746195495;s:2:\"ip\";s:14:\"181.61.209.247\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36\";s:5:\"login\";i:1744985895;}s:64:\"e2be0bfc21a1d425c0d892982de26e8b5c919087e78b3a55ef6f29d902d3ad9b\";a:4:{s:10:\"expiration\";i:1746476673;s:2:\"ip\";s:13:\"181.61.209.71\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36\";s:5:\"login\";i:1745267073;}s:64:\"788868f3cbc45a721d811501ba1d9db8368c69d88331adb58089cffa5f3df2dc\";a:4:{s:10:\"expiration\";i:1745718931;s:2:\"ip\";s:13:\"181.61.210.55\";s:2:\"ua\";s:144:\"Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/135.0.7049.83 Mobile/15E148 Safari/604.1\";s:5:\"login\";i:1745546131;}s:64:\"11539c7c41f095fe57afb4a4b005c21ed3cb9824a7b18b5503f488dcea7b4ef5\";a:4:{s:10:\"expiration\";i:1745722630;s:2:\"ip\";s:13:\"179.32.67.233\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36\";s:5:\"login\";i:1745549830;}s:64:\"5815b1f512953f93fead4fad2745230921aae6ea770f496cff49461023fffc97\";a:4:{s:10:\"expiration\";i:1745726506;s:2:\"ip\";s:13:\"181.61.210.55\";s:2:\"ua\";s:144:\"Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/135.0.7049.83 Mobile/15E148 Safari/604.1\";s:5:\"login\";i:1745553706;}s:64:\"ba465ab7ab797ce7c5a5880743010a0b19a8a28aea9b47f3125a9c4511ac6d38\";a:4:{s:10:\"expiration\";i:1745768198;s:2:\"ip\";s:15:\"152.203.246.185\";s:2:\"ua\";s:125:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\";s:5:\"login\";i:1745595398;}s:64:\"c809f337a4920ad7776bc9cec723ac48560e84292469e5443ea3956ceca92cc7\";a:4:{s:10:\"expiration\";i:1745779612;s:2:\"ip\";s:13:\"179.33.59.194\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36\";s:5:\"login\";i:1745606812;}s:64:\"84f22af94197c1df1e91bd6f190624500c87899e6635ed1f69b8e2dfb1fd0c34\";a:4:{s:10:\"expiration\";i:1745799068;s:2:\"ip\";s:15:\"152.203.246.185\";s:2:\"ua\";s:125:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\";s:5:\"login\";i:1745626268;}s:64:\"03c34fdecc5187602445ae79b6efdf6bc0836261dd0c8825292fa2d86b484d5d\";a:4:{s:10:\"expiration\";i:1745878522;s:2:\"ip\";s:11:\"181.53.14.1\";s:2:\"ua\";s:111:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36\";s:5:\"login\";i:1745705722;}s:64:\"796211e93b17e32b497f01fa99fbfb511f403a00f1ea82c6ebbf2fb181277583\";a:4:{s:10:\"expiration\";i:1745889655;s:2:\"ip\";s:12:\"181.32.13.58\";s:2:\"ua\";s:117:\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36\";s:5:\"login\";i:1745716855;}}'),
+(308, 3, 'session_tokens', 'a:6:{s:64:\"49a939517a006d8d46c7009baaba5a3a6bd56b433e58015a616fb6037d111cae\";a:4:{s:10:\"expiration\";i:1761344953;s:2:\"ip\";s:14:\"181.61.208.183\";s:2:\"ua\";s:144:\"Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/141.0.7390.41 Mobile/15E148 Safari/604.1\";s:5:\"login\";i:1760135353;}s:64:\"7b650326bcf0c7bfc1e538bfe2e28ae7d5bf8c6a37fc36a5a5e708ad4ff8b3ea\";a:4:{s:10:\"expiration\";i:1761319401;s:2:\"ip\";s:15:\"152.203.249.114\";s:2:\"ua\";s:125:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0\";s:5:\"login\";i:1761146601;}s:64:\"2f00ceb4b65aee269be7e977a638f324d33ed09255d671d2c4ee1166e7d953fa\";a:4:{s:10:\"expiration\";i:1761407750;s:2:\"ip\";s:15:\"152.203.249.114\";s:2:\"ua\";s:125:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0\";s:5:\"login\";i:1761234950;}s:64:\"50638de8901bfc8f317806aec4aa4456b7e52e6675fa3b8d7c6e6ee75656ed09\";a:4:{s:10:\"expiration\";i:1761409014;s:2:\"ip\";s:15:\"152.203.249.114\";s:2:\"ua\";s:125:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0\";s:5:\"login\";i:1761236214;}s:64:\"325fe2908774eee9ae13a619f6ce9325c26a9bc23fef49b62ca099d85013e474\";a:4:{s:10:\"expiration\";i:1761409014;s:2:\"ip\";s:15:\"152.203.249.114\";s:2:\"ua\";s:125:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0\";s:5:\"login\";i:1761236214;}s:64:\"1a36aaf830e6119dbecb3e8cc57beea84e84002f576b9edb07c406fb005a16b8\";a:4:{s:10:\"expiration\";i:1761425437;s:2:\"ip\";s:15:\"152.203.249.114\";s:2:\"ua\";s:125:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0\";s:5:\"login\";i:1761252637;}}'),
+(366, 16, 'edgen_user_level', '0'),
+(367, 16, 'dismissed_wp_pointers', ''),
+(368, 16, 'oficina', 'FDL'),
+(369, 17, 'nickname', 'Fl.vale.rodiguez'),
+(370, 17, 'first_name', 'Vale'),
+(328, 14, 'comment_shortcuts', 'false'),
+(329, 14, 'admin_color', 'fresh'),
+(330, 14, 'use_ssl', '0'),
+(331, 14, 'show_admin_bar_front', 'true'),
+(332, 14, 'locale', ''),
 (151, 8, 'nickname', 'sandra.vanegas'),
 (152, 8, 'first_name', 'Sandra'),
 (153, 8, 'last_name', 'Alfaro'),
@@ -588,16 +621,22 @@ INSERT INTO `edgen_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) V
 (159, 8, 'use_ssl', '0'),
 (160, 8, 'show_admin_bar_front', 'true'),
 (161, 8, 'locale', ''),
-(162, 8, 'edgen_capabilities', 'a:1:{s:6:\"editor\";b:1;}'),
-(163, 8, 'edgen_user_level', '7'),
+(162, 8, 'edgen_capabilities', 'a:1:{s:18:\"plg_office_manager\";b:1;}'),
+(163, 8, 'edgen_user_level', '0'),
 (164, 8, 'oficina', 'BOG'),
+(379, 17, 'locale', ''),
+(380, 17, 'edgen_capabilities', 'a:1:{s:16:\"plg_office_staff\";b:1;}'),
+(381, 17, 'edgen_user_level', '0'),
+(382, 17, 'dismissed_wp_pointers', ''),
+(383, 17, 'oficina', 'FDL'),
+(394, 10, 'session_tokens', 'a:1:{s:64:\"7f6646cfae4b746075c629cbc0e1b923508f9ee322f2c3175b85bb91c2d35259\";a:4:{s:10:\"expiration\";i:1761416862;s:2:\"ip\";s:15:\"152.203.249.114\";s:2:\"ua\";s:111:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36\";s:5:\"login\";i:1761244062;}}'),
 (226, 11, 'syntax_highlighting', 'true'),
 (271, 13, 'comment_shortcuts', 'false'),
 (272, 13, 'admin_color', 'light'),
 (273, 13, 'use_ssl', '0'),
 (274, 13, 'show_admin_bar_front', 'true'),
 (275, 13, 'locale', ''),
-(276, 13, 'edgen_capabilities', 'a:1:{s:13:\"administrator\";b:1;}'),
+(276, 13, 'edgen_capabilities', 'a:1:{s:16:\"plg_office_staff\";b:1;}'),
 (135, 7, 'nickname', 'pereira'),
 (136, 7, 'first_name', 'Oficina Emmaus'),
 (137, 7, 'last_name', 'Pereira'),
@@ -613,8 +652,8 @@ INSERT INTO `edgen_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) V
 (105, 5, 'use_ssl', '0'),
 (106, 5, 'show_admin_bar_front', 'true'),
 (107, 5, 'locale', ''),
-(108, 5, 'edgen_capabilities', 'a:1:{s:6:\"editor\";b:1;}'),
-(109, 5, 'edgen_user_level', '7'),
+(108, 5, 'edgen_capabilities', 'a:1:{s:16:\"plg_office_staff\";b:1;}'),
+(109, 5, 'edgen_user_level', '0'),
 (110, 5, 'dismissed_wp_pointers', ''),
 (111, 5, 'oficina', 'BUC'),
 (115, 6, 'nickname', 'barranquilla'),
@@ -628,30 +667,28 @@ INSERT INTO `edgen_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) V
 (123, 6, 'use_ssl', '0'),
 (124, 6, 'show_admin_bar_front', 'true'),
 (125, 6, 'locale', ''),
-(126, 6, 'edgen_capabilities', 'a:1:{s:6:\"editor\";b:1;}'),
-(127, 6, 'edgen_user_level', '7'),
+(126, 6, 'edgen_capabilities', 'a:1:{s:16:\"plg_office_staff\";b:1;}'),
+(127, 6, 'edgen_user_level', '0'),
 (128, 6, 'dismissed_wp_pointers', ''),
 (129, 6, 'oficina', 'BAR'),
-(146, 7, 'edgen_capabilities', 'a:1:{s:6:\"editor\";b:1;}'),
-(147, 7, 'edgen_user_level', '7'),
+(146, 7, 'edgen_capabilities', 'a:1:{s:16:\"plg_office_staff\";b:1;}'),
+(147, 7, 'edgen_user_level', '0'),
 (148, 7, 'dismissed_wp_pointers', ''),
 (149, 7, 'oficina', 'PER'),
-(175, 9, 'nickname', 'Isabella'),
-(176, 9, 'first_name', 'Isabella'),
-(177, 9, 'last_name', 'Fandiño'),
-(178, 9, 'description', ''),
-(179, 9, 'rich_editing', 'true'),
-(180, 9, 'syntax_highlighting', 'true'),
-(181, 9, 'comment_shortcuts', 'false'),
-(182, 9, 'admin_color', 'fresh'),
+(359, 16, 'syntax_highlighting', 'true'),
+(358, 16, 'rich_editing', 'true'),
+(357, 16, 'description', ''),
+(356, 16, 'last_name', 'rodriguez'),
+(355, 16, 'first_name', 'Jenny'),
+(354, 16, 'nickname', 'Fl.jenny.rodriguez'),
 (211, 10, 'syntax_highlighting', 'true'),
 (212, 10, 'comment_shortcuts', 'false'),
 (213, 10, 'admin_color', 'fresh'),
 (214, 10, 'use_ssl', '0'),
 (215, 10, 'show_admin_bar_front', 'true'),
 (216, 10, 'locale', ''),
-(217, 10, 'edgen_capabilities', 'a:1:{s:6:\"editor\";b:1;}'),
-(218, 10, 'edgen_user_level', '7'),
+(217, 10, 'edgen_capabilities', 'a:1:{s:16:\"plg_office_staff\";b:1;}'),
+(218, 10, 'edgen_user_level', '0'),
 (219, 10, 'dismissed_wp_pointers', ''),
 (220, 10, 'oficina', 'BOG'),
 (221, 11, 'nickname', 'jeissonmzapata'),
@@ -664,8 +701,8 @@ INSERT INTO `edgen_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) V
 (229, 11, 'use_ssl', '0'),
 (230, 11, 'show_admin_bar_front', 'true'),
 (231, 11, 'locale', ''),
-(232, 11, 'edgen_capabilities', 'a:1:{s:6:\"editor\";b:1;}'),
-(233, 11, 'edgen_user_level', '7'),
+(232, 11, 'edgen_capabilities', 'a:1:{s:16:\"plg_office_staff\";b:1;}'),
+(233, 11, 'edgen_user_level', '0'),
 (234, 11, 'dismissed_wp_pointers', ''),
 (238, 12, 'nickname', 'benjaminarray'),
 (239, 12, 'first_name', 'benjamin'),
@@ -678,15 +715,48 @@ INSERT INTO `edgen_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) V
 (246, 12, 'use_ssl', '0'),
 (247, 12, 'show_admin_bar_front', 'true'),
 (248, 12, 'locale', ''),
-(249, 12, 'edgen_capabilities', 'a:1:{s:6:\"editor\";b:1;}'),
-(250, 12, 'edgen_user_level', '7'),
+(249, 12, 'edgen_capabilities', 'a:1:{s:16:\"plg_office_staff\";b:1;}'),
+(250, 12, 'edgen_user_level', '0'),
 (251, 12, 'dismissed_wp_pointers', ''),
 (252, 12, 'oficina', 'PR'),
-(277, 13, 'edgen_user_level', '10'),
+(277, 13, 'edgen_user_level', '0'),
 (278, 13, 'dismissed_wp_pointers', ''),
 (279, 13, 'oficina', 'BO'),
-(296, 5, 'session_tokens', 'a:1:{s:64:\"92387dfd9560e922ea120c0ba46d817dafb27a3dfcbdfd81e0f4fa1d1dc719fe\";a:4:{s:10:\"expiration\";i:1745680874;s:2:\"ip\";s:14:\"191.110.103.50\";s:2:\"ua\";s:111:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36\";s:5:\"login\";i:1745508074;}}'),
-(286, 13, 'edgen_persisted_preferences', 'a:3:{s:4:\"core\";a:1:{s:26:\"isComplementaryAreaVisible\";b:1;}s:14:\"core/edit-post\";a:1:{s:12:\"welcomeGuide\";b:0;}s:9:\"_modified\";s:24:\"2025-03-06T18:14:43.318Z\";}');
+(373, 17, 'rich_editing', 'true'),
+(374, 17, 'syntax_highlighting', 'true'),
+(375, 17, 'comment_shortcuts', 'false'),
+(376, 17, 'admin_color', 'fresh'),
+(377, 17, 'use_ssl', '0'),
+(378, 17, 'show_admin_bar_front', 'true'),
+(348, 15, 'locale', ''),
+(314, 13, 'community-events-location', 'a:1:{s:2:\"ip\";s:12:\"190.146.40.0\";}'),
+(343, 15, 'syntax_highlighting', 'true'),
+(344, 15, 'comment_shortcuts', 'false'),
+(345, 15, 'admin_color', 'fresh'),
+(346, 15, 'use_ssl', '0'),
+(347, 15, 'show_admin_bar_front', 'true'),
+(340, 15, 'last_name', 'Mendoza'),
+(341, 15, 'description', ''),
+(342, 15, 'rich_editing', 'true'),
+(319, 7, 'session_tokens', 'a:1:{s:64:\"86a61dc4fc766ff0f542d53d73fd93f8bb70fa526a87f6375c9a491dac60dba2\";a:4:{s:10:\"expiration\";i:1753577024;s:2:\"ip\";s:14:\"191.106.231.78\";s:2:\"ua\";s:101:\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\";s:5:\"login\";i:1752367424;}}'),
+(336, 14, 'oficina', 'FDL'),
+(365, 16, 'edgen_capabilities', 'a:1:{s:16:\"plg_office_staff\";b:1;}'),
+(338, 15, 'nickname', 'Fl.jeisson.mendoza'),
+(339, 15, 'first_name', 'Jeisson'),
+(296, 5, 'session_tokens', 'a:1:{s:64:\"6f09e49c60b0cf2143f02dae4841ff1ea3521db76b653d3d2968459e6a37a981\";a:4:{s:10:\"expiration\";i:1761314722;s:2:\"ip\";s:15:\"191.110.110.131\";s:2:\"ua\";s:111:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36\";s:5:\"login\";i:1761141922;}}'),
+(350, 15, 'edgen_user_level', '0'),
+(351, 15, 'dismissed_wp_pointers', ''),
+(352, 15, 'oficina', 'FDL'),
+(371, 17, 'last_name', 'rodriguez'),
+(372, 17, 'description', ''),
+(323, 14, 'first_name', 'laura melisa'),
+(324, 14, 'last_name', 'vanegas alfaro'),
+(325, 14, 'description', ''),
+(326, 14, 'rich_editing', 'true'),
+(327, 14, 'syntax_highlighting', 'true'),
+(391, 16, 'session_tokens', 'a:1:{s:64:\"3e1fc3366e05f9ed7fb76fa47cc41139c96ecf5d4dee8a119f15f172272a4c0e\";a:4:{s:10:\"expiration\";i:1757624231;s:2:\"ip\";s:14:\"152.203.152.19\";s:2:\"ua\";s:111:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\";s:5:\"login\";i:1757451431;}}'),
+(286, 13, 'edgen_persisted_preferences', 'a:3:{s:4:\"core\";a:1:{s:26:\"isComplementaryAreaVisible\";b:1;}s:14:\"core/edit-post\";a:1:{s:12:\"welcomeGuide\";b:0;}s:9:\"_modified\";s:24:\"2025-03-06T18:14:43.318Z\";}'),
+(396, 12, 'session_tokens', 'a:2:{s:64:\"fc078d726da4028a0b5b0e6a8f5ef7d56f12f69b2cbe95c0e019d8eae09e6eae\";a:4:{s:10:\"expiration\";i:1760803046;s:2:\"ip\";s:13:\"196.42.37.209\";s:2:\"ua\";s:125:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0\";s:5:\"login\";i:1760630246;}s:64:\"96290921efa79198360fb549c98ee5c3275927201bf6aa5f963aa54a4c6265c2\";a:4:{s:10:\"expiration\";i:1760810461;s:2:\"ip\";s:13:\"196.42.37.209\";s:2:\"ua\";s:125:\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0\";s:5:\"login\";i:1760637661;}}');
 
 -- --------------------------------------------------------
 
@@ -715,15 +785,18 @@ INSERT INTO `edgen_users` (`ID`, `user_login`, `user_pass`, `user_nicename`, `us
 (5, 'bucaramanga', '$wp$2y$10$dRlA/50AedlB6zlfXhlzHucFX8hAGgegD2bo/WxvvPFTxSRKTdxLu', 'bucaramanga', 'bucaramanga@emmausdigital.com', '', '2024-10-02 14:20:41', '', 0, 'bucaramanga'),
 (2, 'daniel.vanegas', '$wp$2y$10$iiVDvaXHsfIGZlsOTWyBUefYAnqvE0rr98DleOEscrSQ1llhsas2.', 'daniel-vanegas', 'davanegasa@gmail.com', '', '2024-09-25 17:19:00', '', 0, 'Daniel Vanegas'),
 (3, 'laura.vanegas', '$wp$2y$10$8KYlT.KamgFX6LuSIVNcWetRTQ3gm49cuoa6PqBOaknSTUMTUVmPW', 'laura-vanegas', 'lauvanbiolog@gmail.com', '', '2024-09-28 01:43:25', '', 0, 'Laura Melissa Vanegas Alfaro'),
-(4, 'Yamile Diaz', '$P$Bq/ZfinTg7pDEZ5rREc8lhPEfgrXGD1', 'yamile-diaz', 'mayadime3@gmail.com', '', '2024-10-02 01:43:18', '', 0, 'Yamile Diaz'),
+(4, 'Yamile Diaz', '$wp$2y$10$di/YM7jo9ecZlxDIWxmFy.LAQtiiP8dJqd6ulJkY7pYfxQ0R3GDIe', 'yamile-diaz', 'mayadime3@gmail.com', '', '2024-10-02 01:43:18', '', 0, 'Yamile Diaz'),
 (6, 'barranquilla', '$wp$2y$10$dlBaD70BOC/EtFg6x1x0We3J35fV1h0L1g3T9.Tml6hks7CTSPrK.', 'barranquilla', 'barranquilla@emmausdigital.com', '', '2024-10-02 14:52:36', '', 0, 'barranquilla'),
-(7, 'pereira', '$P$B3GFcs8PuVChl7qKG8psuDbW5Knwb.1', 'pereira', 'pereira@emmaus.com', '', '2024-10-22 21:25:32', '', 0, 'Oficina Emmaus Pereira'),
-(8, 'sandra.vanegas', '$P$B8uKFDgSsV6gBjM0GJ1xlC6e4iQNma0', 'sandra-vanegas', 'sandra.vanegas5@gmail.com', '', '2024-11-13 14:33:44', '', 0, 'Sandra Alfaro'),
-(9, 'Isabella', '$wp$2y$10$JyOxJBmea93myal/2dgCie5/HT3ZOpX7F.8ip.SxqrG8dbdPerhFe', 'isabella', 'isa@emmaus.com', '', '2024-11-19 16:49:51', '', 0, 'Isabella Fandiño'),
+(7, 'pereira', '$wp$2y$10$TiAXZwv0t/4SLaJ/BHVX5O/w/NL4HgGUr4tGzGC1nkSuowXJGTE16', 'pereira', 'pereira@emmaus.com', '', '2024-10-22 21:25:32', '', 0, 'Oficina Emmaus Pereira'),
+(8, 'sandra.vanegas', '$wp$2y$10$4QSP2up5G2KSOOAGzTd9suQcxxZHK3TUh4X274nfg6n.YQw0UrQJq', 'sandra-vanegas', 'sandra.vanegas5@gmail.com', '', '2024-11-13 14:33:44', '', 0, 'Sandra Alfaro'),
 (10, 'lilibastigar', '$wp$2y$10$W5pSO//bYPbI5ZA2CLXs1udR0zqJyXlcWANpez5AwvVf5skM.xtiW', 'lilibastigar', 'lilibastigar@gmail.com', '', '2024-12-05 22:44:52', '', 0, 'Liliana Bastidas'),
 (12, 'benjaminarray', '$wp$2y$10$XBdip2huYBmXFZF24FubMebV6Qju3m8chWmomp2Jl3.43WmjoJg2e', 'benjaminarray', 'benjaminarray@proton.me', '', '2025-02-05 13:48:05', '', 0, 'benjamin array'),
 (11, 'jeissonmzapata', '$P$BnAYkrwVSQ/6UNSgf51MQH4mZLS65X0', 'jeissonmzapata', 'jeissonmzapata@gmail.com', '', '2024-12-10 18:22:23', '1733854943:$P$B2q9KkbHOq1LyJWlZgmEuUh7A2v9Cm0', 0, 'Jeisson Mendoza'),
-(13, 'admin.bolivia', '$wp$2y$10$2jhwlOhj98TN8hTZCK.6keokzk4ZXyLWFHUXZPvoSer1wEgYRHEey', 'admin-bolivia', 'admin.bolivia@emmausdigital.com', '', '2025-02-25 20:17:00', '', 0, 'admin.bolivia');
+(13, 'admin.bolivia', '$wp$2y$10$2jhwlOhj98TN8hTZCK.6keokzk4ZXyLWFHUXZPvoSer1wEgYRHEey', 'admin-bolivia', 'admin.bolivia@emmausdigital.com', '', '2025-02-25 20:17:00', '', 0, 'admin.bolivia'),
+(16, 'Fl.jenny.rodriguez', '$wp$2y$10$rxZqMMg9q5gKABoimKyLDOBZvYmwQYLHR1lFErjyvFskT8OQFzjdG', 'fl-jenny-rodriguez', 'Fl.jenny.rodriguez@gmail.com', '', '2025-07-29 00:48:49', '', 0, 'Jenny rodriguez'),
+(14, 'FL.Laura.vanegas', '$wp$2y$10$bE/oo4/GTMonc2TzcngnWu.YcO/C98YzAoahZfRSWAY2kGBogkR4C', 'fl-laura-vanegas', 'FL.Laura.vanegas@gmail.com', '', '2025-07-29 00:23:25', '', 0, 'laura melisa vanegas alfaro'),
+(15, 'Fl.jeisson.mendoza', '$wp$2y$10$cFs9uI0HHKrixgYi6Zq6O./hHf6Fq4cfS4UMMqX1zmVryGPzEw0mO', 'fl-jeisson-mendoza', 'Fl.jeisson.mendoza@gmail.com', '', '2025-07-29 00:42:14', '', 0, 'Jeisson Mendoza'),
+(17, 'Fl.vale.rodiguez', '$wp$2y$10$WbLPSlNd3SqqHhnz3nDZFe5MnyHNjQchFWd9Z4CYwtEv8HFZ7YpsC', 'fl-vale-rodiguez', 'Fl.vale.rodiguez@gmail.com', '', '2025-07-29 00:50:35', '1753750235:$generic$HLte8ihDoFyBYop3i-PUbCn1HXjEzg3mViyAvDSK', 0, 'Vale rodriguez');
 
 --
 -- Índices para tablas volcadas
@@ -855,19 +928,19 @@ ALTER TABLE `edgen_links`
 -- AUTO_INCREMENT de la tabla `edgen_options`
 --
 ALTER TABLE `edgen_options`
-  MODIFY `option_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3435;
+  MODIFY `option_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7079;
 
 --
 -- AUTO_INCREMENT de la tabla `edgen_postmeta`
 --
 ALTER TABLE `edgen_postmeta`
-  MODIFY `meta_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+  MODIFY `meta_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
 
 --
 -- AUTO_INCREMENT de la tabla `edgen_posts`
 --
 ALTER TABLE `edgen_posts`
-  MODIFY `ID` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=139;
+  MODIFY `ID` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=152;
 
 --
 -- AUTO_INCREMENT de la tabla `edgen_termmeta`
@@ -891,15 +964,11 @@ ALTER TABLE `edgen_term_taxonomy`
 -- AUTO_INCREMENT de la tabla `edgen_usermeta`
 --
 ALTER TABLE `edgen_usermeta`
-  MODIFY `umeta_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=297;
+  MODIFY `umeta_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=408;
 
 --
 -- AUTO_INCREMENT de la tabla `edgen_users`
 --
 ALTER TABLE `edgen_users`
-  MODIFY `ID` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `ID` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

@@ -19,18 +19,17 @@ export async function mount(container, { contactoId = null, titulo = 'Próximos 
     const $list = container.querySelector(`#${listId}`);
 
     try {
-        const response = await api.get('/diplomas/proximos-completar?limite=50&umbral=80');
+        const url = contactoId 
+            ? `/diplomas/proximos-completar?limite=50&umbral=80&contactoId=${contactoId}`
+            : '/diplomas/proximos-completar?limite=50&umbral=80';
+        
+        const response = await api.get(url);
         
         if (!response || !response.success) {
             throw new Error('Error cargando próximos a completar');
         }
 
-        let proximos = response.data || [];
-
-        // Filtrar por contacto si se especificó
-        if (contactoId) {
-            proximos = proximos.filter(p => p.contacto_id === parseInt(contactoId));
-        }
+        const proximos = response.data || [];
 
         if (proximos.length === 0) {
             $list.innerHTML = `

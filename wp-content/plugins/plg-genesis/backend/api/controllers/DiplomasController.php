@@ -436,7 +436,7 @@ class PlgGenesis_DiplomasController {
 	}
 
 	/**
-	 * GET /plg-genesis/v1/diplomas/proximos-completar?limite=50&umbral=80
+	 * GET /plg-genesis/v1/diplomas/proximos-completar?limite=50&umbral=80&contactoId=123
 	 */
 	public static function proximos_completar(WP_REST_Request $request) {
 		$service = self::get_service();
@@ -449,8 +449,9 @@ class PlgGenesis_DiplomasController {
 
 		$limite = intval($request->get_param('limite') ?? 50);
 		$umbral = intval($request->get_param('umbral') ?? 80);
+		$contactoId = $request->get_param('contactoId') ? intval($request->get_param('contactoId')) : null;
 
-		$result = $service->getProximosACompletar($limite, $umbral);
+		$result = $service->getProximosACompletar($limite, $umbral, $contactoId);
 		if (is_wp_error($result)) {
 			return new WP_REST_Response([
 				'success' => false,
