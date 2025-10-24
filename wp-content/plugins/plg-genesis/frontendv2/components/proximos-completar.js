@@ -1,6 +1,6 @@
 import { api } from '../api/client.js';
 
-export async function mount(container, { contactoId = null, titulo = 'Próximos a Graduarse' } = {}) {
+export async function mount(container, { contactoId = null, programas = [], titulo = 'Próximos a Graduarse' } = {}) {
     const listId = `proximos-list-${Date.now()}`;
     const selectId = `programa-select-${Date.now()}`;
     
@@ -12,9 +12,12 @@ export async function mount(container, { contactoId = null, titulo = 'Próximos 
                     ${titulo}
                 </h3>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    ${contactoId ? `
+                    ${contactoId && programas.length > 0 ? `
                         <select id="${selectId}" class="form-control" style="width: auto; font-size: 0.9rem;">
-                            <option value="">Cargando programas...</option>
+                            <option value="">📚 Selecciona un programa</option>
+                            ${programas.map(p => 
+                                `<option value="${p.programa_id}">${escapeHtml(p.programa_nombre)}</option>`
+                            ).join('')}
                         </select>
                     ` : ''}
                     <span style="font-size: 0.9rem; color: #666;">≥ 80% de progreso</span>
@@ -22,8 +25,8 @@ export async function mount(container, { contactoId = null, titulo = 'Próximos 
             </div>
             <div id="${listId}">
                 <div style="text-align: center; padding: 30px; color: #999;">
-                    <div style="font-size: 3rem; margin-bottom: 10px;">⏳</div>
-                    <p>Cargando programas...</p>
+                    <div style="font-size: 3rem; margin-bottom: 10px;">🎯</div>
+                    <p>Selecciona un programa para ver los estudiantes</p>
                 </div>
             </div>
         </div>
@@ -33,73 +36,32 @@ export async function mount(container, { contactoId = null, titulo = 'Próximos 
     const $select = contactoId ? container.querySelector(`#${selectId}`) : null;
 
     let proximosCache = {}; // Cache de estudiantes por programa
-    let programasDisponibles = [];
 
-    try {
-        // PASO 1: Cargar solo la lista de programas (rápido)
-        if (contactoId && $select) {
-            const responseProgramas = await api.get(`/diplomas/proximos-completar/programas?contactoId=${contactoId}&umbral=80`);
-            
-            if (!responseProgramas || !responseProgramas.success) {
-                throw new Error('Error cargando programas');
-            }
+    if (!contactoId || programas.length === 0) {
+        $list.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #999;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">📚</div>
+                <p>${!contactoId ? 'Por favor, consulta desde el detalle de un contacto' : 'Este contacto no tiene programas asignados'}</p>
+            </div>
+        `;
+        return;
+    }
 
-            programasDisponibles = responseProgramas.data || [];
-
-            if (programasDisponibles.length === 0) {
-                $list.innerHTML = `
-                    <div style="text-align: center; padding: 30px; color: #999;">
-                        <div style="font-size: 3rem; margin-bottom: 10px;">📚</div>
-                        <p>Este contacto no tiene estudiantes cerca de completar</p>
-                    </div>
-                `;
-                $select.innerHTML = '<option value="">Sin programas disponibles</option>';
-                $select.disabled = true;
-                return;
-            }
-
-            // Poblar el selector
-            const totalEstudiantes = programasDisponibles.reduce((sum, p) => sum + p.total_estudiantes, 0);
-            $select.innerHTML = `
-                <option value="">📚 Todos los programas (${totalEstudiantes})</option>
-                ${programasDisponibles.map(p => 
-                    `<option value="${p.programa_id}">${escapeHtml(p.programa_nombre)} (${p.total_estudiantes})</option>`
-                ).join('')}
-            `;
-            
-            // Evento de cambio de programa
-            $select.addEventListener('change', function() {
-                const programaId = this.value ? parseInt(this.value) : null;
+    // Evento de cambio de programa
+    if ($select) {
+        $select.addEventListener('change', function() {
+            const programaId = this.value ? parseInt(this.value) : null;
+            if (programaId) {
                 cargarYRenderizar(programaId);
-            });
-
-            // PASO 2: Si solo hay 1 programa, cargarlo automáticamente
-            if (programasDisponibles.length === 1) {
-                $select.value = programasDisponibles[0].programa_id;
-                await cargarYRenderizar(programasDisponibles[0].programa_id);
             } else {
-                // Si hay múltiples, mostrar mensaje de selección
                 $list.innerHTML = `
                     <div style="text-align: center; padding: 30px; color: #999;">
                         <div style="font-size: 3rem; margin-bottom: 10px;">🎯</div>
                         <p>Selecciona un programa para ver los estudiantes</p>
-                        <p style="font-size: 0.9rem; color: #666;">o selecciona "Todos los programas"</p>
                     </div>
                 `;
             }
-        } else {
-            // Si no hay contacto, no mostrar nada (ya no usamos esta vista)
-            $list.innerHTML = `
-                <div style="text-align: center; padding: 30px; color: #999;">
-                    <div style="font-size: 3rem; margin-bottom: 10px;">📚</div>
-                    <p>Por favor, consulta los estudiantes desde el detalle de un contacto</p>
-                </div>
-            `;
-        }
-
-    } catch (error) {
-        console.error('Error cargando próximos:', error);
-        $list.innerHTML = '<div style="color: #dc3545; padding: 20px;">Error cargando datos</div>';
+        });
     }
 
     // Función para cargar estudiantes de un programa (con cache) y renderizar
