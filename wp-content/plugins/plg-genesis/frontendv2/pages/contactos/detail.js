@@ -1141,7 +1141,7 @@ window.mostrarModalTogglePrograma = function(event, asignacionId, isActivo, prog
         confirmBtn.textContent = 'Procesando...';
         
         try {
-            const response = await api.put(\`/programas-asignaciones/\${asignacionId}/toggle\`, {
+            const response = await api.put('/programas-asignaciones/' + asignacionId + '/toggle', {
                 activo: !isActivo
             });
             
@@ -1156,7 +1156,7 @@ window.mostrarModalTogglePrograma = function(event, asignacionId, isActivo, prog
             errorDiv.textContent = '❌ Error: ' + (error.message || 'Error desconocido');
             errorDiv.style.display = 'block';
             confirmBtn.disabled = false;
-            confirmBtn.textContent = \`\${accionTitulo} Programa\`;
+            confirmBtn.textContent = accionTitulo + ' Programa';
         }
     });
     
