@@ -239,6 +239,28 @@ class PlgGenesis_ProgramasRepository {
         $cnt = pg_affected_rows($res); pg_free_result($res);
         return [ 'updated' => intval($cnt) ];
     }
+
+    public function toggleAsignacion($idAsignacion, $activo){
+        $sql = "UPDATE programas_asignaciones SET activo=$1 WHERE id=$2 RETURNING programa_id, estudiante_id, contacto_id, activo";
+        $res = pg_query_params($this->conn, $sql, [ $activo ? 't' : 'f', intval($idAsignacion) ]);
+        if (!$res){ 
+            $this->logPg('toggleAsignacion'); 
+            return new WP_Error('db_update_failed','Error actualizando estado de asignación',[ 'status'=>500 ]); 
+        }
+        if (pg_num_rows($res) === 0){
+            pg_free_result($res);
+            return new WP_Error('not_found','Asignación no encontrada',[ 'status'=>404 ]);
+        }
+        $row = pg_fetch_assoc($res);
+        pg_free_result($res);
+        return [ 
+            'id' => intval($idAsignacion),
+            'programa_id' => intval($row['programa_id']),
+            'estudiante_id' => $row['estudiante_id'] ? intval($row['estudiante_id']) : null,
+            'contacto_id' => $row['contacto_id'] ? intval($row['contacto_id']) : null,
+            'activo' => $row['activo'] === 't'
+        ];
+    }
 }
 
 

@@ -422,6 +422,7 @@ class PlgGenesis_EstudiantesRepository {
 				p.nombre,
 				p.descripcion,
 				pa.fecha_asignacion,
+				pa.activo,
 				COALESCE(pa.version, p.current_version, 1) as version,
 				CASE 
 					WHEN pa.estudiante_id IS NOT NULL THEN 'directo'
@@ -430,8 +431,8 @@ class PlgGenesis_EstudiantesRepository {
 			FROM programas_asignaciones pa
 			INNER JOIN programas p ON pa.programa_id = p.id
 			LEFT JOIN estudiantes e ON e.id_estudiante = $1
-			WHERE pa.estudiante_id = (SELECT id FROM estudiantes WHERE id_estudiante = $1)
-			   OR (pa.contacto_id = (SELECT id_contacto FROM estudiantes WHERE id_estudiante = $1))
+			WHERE (pa.estudiante_id = (SELECT id FROM estudiantes WHERE id_estudiante = $1)
+			   OR pa.contacto_id = (SELECT id_contacto FROM estudiantes WHERE id_estudiante = $1))
 			ORDER BY pa.fecha_asignacion
 		";
 		
@@ -448,7 +449,8 @@ class PlgGenesis_EstudiantesRepository {
 				'descripcion' => $row['descripcion'],
 				'fecha_asignacion' => $row['fecha_asignacion'],
 				'version' => intval($row['version']),
-				'tipo_asignacion' => $row['tipo_asignacion']
+				'tipo_asignacion' => $row['tipo_asignacion'],
+				'activo' => $row['activo'] === 't'
 			];
 		}
 		pg_free_result($result);

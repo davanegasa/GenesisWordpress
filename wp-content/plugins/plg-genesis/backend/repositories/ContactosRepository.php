@@ -189,6 +189,7 @@ class PlgGenesis_ContactosRepository {
 				pa.id as asignacion_id,
 				pa.programa_id,
 				pa.fecha_asignacion,
+				pa.activo,
 				COALESCE(pa.version, p.current_version, 1) as version,
 				p.nombre as programa_nombre,
 				p.descripcion as programa_descripcion
@@ -211,7 +212,8 @@ class PlgGenesis_ContactosRepository {
 				'programa_nombre' => $row['programa_nombre'],
 				'programa_descripcion' => $row['programa_descripcion'],
 				'fecha_asignacion' => $row['fecha_asignacion'],
-				'version' => intval($row['version'])
+				'version' => intval($row['version']),
+				'activo' => $row['activo'] === 't'
 			];
 		}
 		pg_free_result($result);

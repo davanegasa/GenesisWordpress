@@ -264,19 +264,30 @@ function renderPrograms(container, data) {
     
     programs.forEach((program, progIdx) => {
         const totalCursos = program.cursos?.reduce((sum, level) => sum + (level.cursos?.length || 0), 0) || 0;
+        const isActivo = program.activo !== false; // Por defecto activo si no viene el campo
+        const inactivoStyle = !isActivo ? 'opacity: 0.5; filter: grayscale(70%);' : '';
+        const inactivoBadge = !isActivo ? '<span class="program-badge badge-warning" style="background:#dc3545;color:white;">INACTIVO</span>' : '';
         
         html += `
-            <div class="program-section">
+            <div class="program-section" style="${inactivoStyle}">
                 <div class="program-header collapsible collapsed" data-program-idx="${progIdx}">
-                    <div class="u-flex u-gap" style="align-items:center;flex-wrap:wrap;">
+                    <div class="u-flex u-gap" style="align-items:center;flex-wrap:wrap;flex:1;">
                         <span class="collapse-icon">▶</span>
                         <span class="program-icon">📂</span>
                         <span class="program-name">${escapeHtml(program.programa_nombre)}</span>
                         <span class="program-badge badge-info" style="background:#6366f1;color:white;">
                             v${program.version || 1}
                         </span>
+                        ${inactivoBadge}
+                        <span class="level-summary">${totalCursos} curso${totalCursos !== 1 ? 's' : ''}</span>
                     </div>
-                    <span class="level-summary">${totalCursos} curso${totalCursos !== 1 ? 's' : ''}</span>
+                    <button 
+                        class="btn btn-sm ${isActivo ? 'btn-warning' : 'btn-success'}" 
+                        onclick="togglePrograma(event, ${program.asignacion_id}, ${isActivo}, '${escapeHtml(program.programa_nombre)}')"
+                        title="${isActivo ? 'Desactivar programa' : 'Activar programa'}"
+                        style="margin-left: auto;">
+                        ${isActivo ? '⛔ Desactivar' : '✅ Activar'}
+                    </button>
                 </div>
                 <div class="program-body" data-program-content="${progIdx}" style="display:none;">
                     ${renderProgramLevels(program.cursos || [], progIdx)}
@@ -289,7 +300,12 @@ function renderPrograms(container, data) {
     
     // Event listeners para colapsar/expandir programas
     container.querySelectorAll('.program-header.collapsible').forEach(header => {
-        header.addEventListener('click', () => {
+        header.addEventListener('click', (e) => {
+            // No expandir/colapsar si se clickeó el botón
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                return;
+            }
+            
             const progIdx = header.getAttribute('data-program-idx');
             const body = container.querySelector(`[data-program-content="${progIdx}"]`);
             const isCollapsed = header.classList.contains('collapsed');
@@ -986,6 +1002,39 @@ function toggleCollapse(collapseId) {
         icon.style.transform = 'rotate(-90deg)';
     }
 }
+
+// ============ TOGGLE PROGRAMA ============
+
+window.togglePrograma = async function(event, asignacionId, isActivo, programaNombre) {
+    event.stopPropagation();
+    
+    // Confirmación solo al desactivar
+    if (isActivo) {
+        const confirmacion = confirm(
+            `¿Está seguro de desactivar el programa "${programaNombre}"?\n\n` +
+            `El programa se ocultará pero los datos históricos se mantendrán.`
+        );
+        if (!confirmacion) {
+            return;
+        }
+    }
+    
+    try {
+        const response = await api.put(`/programas-asignaciones/${asignacionId}/toggle`, {
+            activo: !isActivo
+        });
+        
+        if (response.success) {
+            // Recargar la página o solo la sección de programas
+            location.reload();
+        } else {
+            alert('Error al actualizar el programa: ' + (response.error?.message || 'Error desconocido'));
+        }
+    } catch (error) {
+        console.error('Error toggling programa:', error);
+        alert('Error al actualizar el programa: ' + (error.message || 'Error desconocido'));
+    }
+};
 
 // Hacer toggleCollapse disponible globalmente
 window.toggleCollapse = toggleCollapse;
