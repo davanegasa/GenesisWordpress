@@ -5,6 +5,7 @@ import * as ProximosCompletar from '../../components/proximos-completar.js';
 let contactPrograms = [];
 let currentContactCode = null;
 let currentContactName = null;
+let currentContactId = null;
 
 export async function mount(container, { code } = {}){
     container.innerHTML = `
@@ -97,6 +98,9 @@ export async function mount(container, { code } = {}){
         
         // Configurar tabs
         setupTabs(container, d.id, code.trim());
+        
+        // Guardar ID del contacto para uso posterior
+        currentContactId = d.id;
         
         // Cargar historial académico
         loadAcademicHistory(container, code.trim(), d.nombre || 'Contacto');
@@ -249,13 +253,22 @@ function renderPrograms(container, data) {
     const stats = data.statistics || {};
     
     if (programs.length === 0) {
-        container.innerHTML = '<div style="padding:20px;color:var(--plg-mutedText);">No hay programas asignados a este contacto</div>';
+        container.innerHTML = `
+            <div style="padding:20px;color:var(--plg-mutedText);text-align:center;">
+                No hay programas asignados a este contacto
+            </div>
+            <div style="text-align:center;margin-top:16px;">
+                <button onclick="mostrarModalAsignarPrograma()" class="btn btn-primary">
+                    ➕ Agregar Programa
+                </button>
+            </div>
+        `;
         return;
     }
     
     let html = `
-        <div style="margin-bottom:16px;">
-            <div class="stats-grid">
+        <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+            <div class="stats-grid" style="flex:1;">
                 <div class="stat-card">
                     <div class="stat-value">${stats.total_programas || 0}</div>
                     <div class="stat-label">Programas</div>
@@ -265,6 +278,9 @@ function renderPrograms(container, data) {
                     <div class="stat-label">Cursos en Programas</div>
                 </div>
             </div>
+            <button onclick="mostrarModalAsignarPrograma()" class="btn btn-primary" style="margin-left:16px;">
+                ➕ Agregar Programa
+            </button>
         </div>
     `;
     
@@ -1183,6 +1199,205 @@ window.mostrarModalTogglePrograma = function(event, asignacionId, isActivo, prog
 // Mantener la función antigua por compatibilidad pero redirigir al modal
 window.togglePrograma = function(event, asignacionId, isActivo, programaNombre) {
     mostrarModalTogglePrograma(event, asignacionId, isActivo, programaNombre, 0);
+};
+
+// ============ ASIGNAR PROGRAMA ============
+
+window.mostrarModalAsignarPrograma = async function() {
+    if (!currentContactId) {
+        alert('Error: No se pudo identificar el contacto');
+        return;
+    }
+    
+    // Crear overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'asignar-programa-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    // Crear modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    `;
+    
+    modal.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0 0 8px 0; color: #333; font-size: 1.25rem;">
+                ➕ Asignar Programa
+            </h3>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                Selecciona un programa para asignarlo a ${escapeHtml(currentContactName || 'este contacto')}
+            </p>
+        </div>
+        
+        <div id="programas-list-container" style="margin-bottom: 20px;">
+            <div style="text-align:center;padding:20px;color:#666;">
+                Cargando programas disponibles...
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button 
+                id="asignar-programa-cancel"
+                class="btn btn-secondary"
+                style="padding: 8px 20px;">
+                Cancelar
+            </button>
+        </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    // Cargar programas disponibles
+    try {
+        const response = await api.get('/programas');
+        const programas = response?.data?.items || [];
+        
+        // Filtrar programas ya asignados
+        const programasAsignados = contactPrograms.map(p => p.programa_id);
+        const programasDisponibles = programas.filter(p => !programasAsignados.includes(p.id));
+        
+        const listContainer = document.getElementById('programas-list-container');
+        
+        if (programasDisponibles.length === 0) {
+            listContainer.innerHTML = `
+                <div style="text-align:center;padding:30px;color:#666;">
+                    <div style="font-size:3rem;margin-bottom:12px;">✅</div>
+                    <div style="font-size:1rem;font-weight:500;margin-bottom:8px;">
+                        Todos los programas ya están asignados
+                    </div>
+                    <div style="font-size:0.9rem;color:#999;">
+                        Este contacto tiene todos los programas disponibles
+                    </div>
+                </div>
+            `;
+        } else {
+            listContainer.innerHTML = `
+                <div style="margin-bottom:12px;font-weight:500;color:#333;">
+                    Programas disponibles (${programasDisponibles.length}):
+                </div>
+                ${programasDisponibles.map(programa => `
+                    <div 
+                        class="programa-item-selectable"
+                        data-programa-id="${programa.id}"
+                        data-programa-nombre="${escapeHtml(programa.nombre)}"
+                        style="
+                            padding: 16px;
+                            margin-bottom: 8px;
+                            border: 2px solid #e0e0e0;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                            background: white;
+                        "
+                        onmouseover="this.style.borderColor='#6366f1';this.style.background='#f8f9ff'"
+                        onmouseout="this.style.borderColor='#e0e0e0';this.style.background='white'"
+                        onclick="asignarProgramaAlContacto(${programa.id}, '${escapeHtml(programa.nombre).replace(/'/g, "\\'")}')">
+                        <div style="font-weight:600;font-size:1rem;color:#333;margin-bottom:4px;">
+                            📂 ${escapeHtml(programa.nombre)}
+                        </div>
+                        ${programa.descripcion ? `
+                            <div style="font-size:0.85rem;color:#666;">
+                                ${escapeHtml(programa.descripcion)}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('')}
+            `;
+        }
+    } catch (error) {
+        console.error('Error cargando programas:', error);
+        document.getElementById('programas-list-container').innerHTML = `
+            <div style="text-align:center;padding:20px;color:#dc3545;">
+                ❌ Error al cargar programas disponibles
+            </div>
+        `;
+    }
+    
+    // Cerrar modal
+    function cerrarModal() {
+        document.body.removeChild(overlay);
+    }
+    
+    // Event listeners
+    document.getElementById('asignar-programa-cancel').addEventListener('click', cerrarModal);
+    
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) cerrarModal();
+    });
+};
+
+window.asignarProgramaAlContacto = async function(programaId, programaNombre) {
+    const overlay = document.getElementById('asignar-programa-overlay');
+    if (!overlay) return;
+    
+    // Mostrar loading
+    const modal = overlay.querySelector('div');
+    modal.innerHTML = `
+        <div style="text-align:center;padding:40px;">
+            <div style="font-size:2rem;margin-bottom:16px;">⏳</div>
+            <div style="font-size:1rem;color:#666;">
+                Asignando programa "${escapeHtml(programaNombre)}"...
+            </div>
+        </div>
+    `;
+    
+    try {
+        const response = await api.post('/programas/' + programaId + '/asignar', {
+            contactoId: currentContactId
+        });
+        
+        if (response.success) {
+            // Cerrar modal
+            document.body.removeChild(overlay);
+            
+            // Recargar programas
+            const container = document.querySelector('.card');
+            if (container && currentContactCode) {
+                await loadAcademicHistory(container, currentContactCode, currentContactName);
+            }
+            
+            // Mostrar mensaje de éxito (opcional)
+            // alert('Programa asignado correctamente');
+        } else {
+            throw new Error(response.error?.message || 'Error desconocido');
+        }
+    } catch (error) {
+        console.error('Error asignando programa:', error);
+        modal.innerHTML = `
+            <div style="text-align:center;padding:40px;">
+                <div style="font-size:2rem;margin-bottom:16px;color:#dc3545;">❌</div>
+                <div style="font-size:1rem;color:#333;font-weight:500;margin-bottom:8px;">
+                    Error al asignar programa
+                </div>
+                <div style="font-size:0.9rem;color:#666;margin-bottom:20px;">
+                    ${error.message || 'Error desconocido'}
+                </div>
+                <button onclick="document.body.removeChild(document.getElementById('asignar-programa-overlay'))" class="btn btn-secondary">
+                    Cerrar
+                </button>
+            </div>
+        `;
+    }
 };
 
 // Hacer toggleCollapse disponible globalmente
