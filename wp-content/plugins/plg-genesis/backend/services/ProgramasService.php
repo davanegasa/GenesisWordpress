@@ -15,6 +15,10 @@ class PlgGenesis_ProgramasService {
     public function forzarAsignaciones($idPrograma, $toVersion, $scope='all'){
         return $this->repo->upgradeAssignments($idPrograma, $toVersion, $scope);
     }
+
+    public function toggleAsignacion($idAsignacion, $activo){
+        return $this->repo->toggleAsignacion($idAsignacion, $activo);
+    }
 }
 
 

@@ -198,13 +198,13 @@ class PlgGenesis_DiplomasRepository {
 		foreach ($estudiantes as $estudiante) {
 			$estId = $estudiante['id'];
 
-			// Obtener programas asignados al contacto o estudiante
+			// Obtener programas asignados al contacto o estudiante (solo activos)
 			$idField = $contactoId ? 'contacto_id' : 'estudiante_id';
 			$idValue = $contactoId ? intval($contactoId) : $estId;
 
 			$sqlAsig = "SELECT programa_id, version 
 						FROM programas_asignaciones 
-						WHERE $idField = $1";
+						WHERE $idField = $1 AND activo = true";
 			$resAsig = pg_query_params($this->conn, $sqlAsig, [ $idValue ]);
 			if (!$resAsig) continue;
 
@@ -682,7 +682,7 @@ class PlgGenesis_DiplomasRepository {
 			FROM estudiantes e
 			JOIN programas_asignaciones pa ON pa.contacto_id = e.id_contacto
 			JOIN programas p ON p.id = pa.programa_id
-			WHERE e.id_contacto = $1
+			WHERE e.id_contacto = $1 AND pa.activo = true
 		";
 
 		$resEstudiantes = pg_query_params($this->conn, $sqlEstudiantes, [ $contactoIdInt ]);
@@ -955,7 +955,7 @@ class PlgGenesis_DiplomasRepository {
 			JOIN contactos c ON c.id = e.id_contacto
 			JOIN programas_asignaciones pa ON pa.contacto_id = e.id_contacto
 			JOIN programas p ON p.id = pa.programa_id
-			WHERE e.id_contacto = $1" . ($programaId ? " AND pa.programa_id = $2" : "") . "
+			WHERE e.id_contacto = $1 AND pa.activo = true" . ($programaId ? " AND pa.programa_id = $2" : "") . "
 		";
 
 		$params = $programaId ? [ $contactoIdInt, intval($programaId) ] : [ $contactoIdInt ];

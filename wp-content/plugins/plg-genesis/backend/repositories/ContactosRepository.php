@@ -189,6 +189,7 @@ class PlgGenesis_ContactosRepository {
 				pa.id as asignacion_id,
 				pa.programa_id,
 				pa.fecha_asignacion,
+				pa.activo,
 				COALESCE(pa.version, p.current_version, 1) as version,
 				p.nombre as programa_nombre,
 				p.descripcion as programa_descripcion
@@ -211,7 +212,8 @@ class PlgGenesis_ContactosRepository {
 				'programa_nombre' => $row['programa_nombre'],
 				'programa_descripcion' => $row['programa_descripcion'],
 				'fecha_asignacion' => $row['fecha_asignacion'],
-				'version' => intval($row['version'])
+				'version' => intval($row['version']),
+				'activo' => $row['activo'] === 't'
 			];
 		}
 		pg_free_result($result);
@@ -348,8 +350,8 @@ class PlgGenesis_ContactosRepository {
 	 * Obtiene estadísticas generales del contacto
 	 */
 	private function getOverallStats($contactoId) {
-		// Contar programas
-		$sqlProgramas = "SELECT COUNT(*) as total FROM programas_asignaciones WHERE contacto_id = $1";
+		// Contar programas activos
+		$sqlProgramas = "SELECT COUNT(*) as total FROM programas_asignaciones WHERE contacto_id = $1 AND activo = true";
 		$resProg = pg_query_params($this->conn, $sqlProgramas, [$contactoId]);
 		$totalProgramas = $resProg ? intval(pg_fetch_result($resProg, 0, 0)) : 0;
 		if ($resProg) pg_free_result($resProg);
@@ -360,12 +362,12 @@ class PlgGenesis_ContactosRepository {
 		$totalEstudiantes = $resEst ? intval(pg_fetch_result($resEst, 0, 0)) : 0;
 		if ($resEst) pg_free_result($resEst);
 		
-		// Contar cursos en los programas
+		// Contar cursos en los programas activos
 		$sqlCursos = "
 			SELECT COUNT(DISTINCT pc.curso_id) as total
 			FROM programas_asignaciones pa
 			INNER JOIN programas_cursos pc ON pa.programa_id = pc.programa_id
-			WHERE pa.contacto_id = $1
+			WHERE pa.contacto_id = $1 AND pa.activo = true
 		";
 		$resCursos = pg_query_params($this->conn, $sqlCursos, [$contactoId]);
 		$totalCursosPrograma = $resCursos ? intval(pg_fetch_result($resCursos, 0, 0)) : 0;

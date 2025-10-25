@@ -3,6 +3,9 @@ import * as ProximosCompletar from '../../components/proximos-completar.js';
 
 // Variable global para almacenar los programas del contacto
 let contactPrograms = [];
+let currentContactCode = null;
+let currentContactName = null;
+let currentContactId = null;
 
 export async function mount(container, { code } = {}){
     container.innerHTML = `
@@ -95,6 +98,9 @@ export async function mount(container, { code } = {}){
         
         // Configurar tabs
         setupTabs(container, d.id, code.trim());
+        
+        // Guardar ID del contacto para uso posterior
+        currentContactId = d.id;
         
         // Cargar historial académico
         loadAcademicHistory(container, code.trim(), d.nombre || 'Contacto');
@@ -204,6 +210,10 @@ async function loadAcademicHistory(container, contactCode, contactName) {
     const programsSection = container.querySelector('#c-programs-section');
     const studentsSection = container.querySelector('#c-students-section');
     
+    // Guardar para recargas posteriores
+    currentContactCode = contactCode;
+    currentContactName = contactName;
+    
     if (!programsSection || !studentsSection) return;
     
     programsSection.innerHTML = '<div style="padding:20px;text-align:center;color:var(--plg-mutedText);">Cargando programas...</div>';
@@ -243,13 +253,22 @@ function renderPrograms(container, data) {
     const stats = data.statistics || {};
     
     if (programs.length === 0) {
-        container.innerHTML = '<div style="padding:20px;color:var(--plg-mutedText);">No hay programas asignados a este contacto</div>';
+        container.innerHTML = `
+            <div style="padding:20px;color:var(--plg-mutedText);text-align:center;">
+                No hay programas asignados a este contacto
+            </div>
+            <div style="text-align:center;margin-top:16px;">
+                <button onclick="mostrarModalAsignarPrograma()" class="btn btn-primary">
+                    ➕ Agregar Programa
+                </button>
+            </div>
+        `;
         return;
     }
     
     let html = `
-        <div style="margin-bottom:16px;">
-            <div class="stats-grid">
+        <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+            <div class="stats-grid" style="flex:1;">
                 <div class="stat-card">
                     <div class="stat-value">${stats.total_programas || 0}</div>
                     <div class="stat-label">Programas</div>
@@ -259,24 +278,48 @@ function renderPrograms(container, data) {
                     <div class="stat-label">Cursos en Programas</div>
                 </div>
             </div>
+            <button onclick="mostrarModalAsignarPrograma()" class="btn btn-primary" style="margin-left:16px;">
+                ➕ Agregar Programa
+            </button>
         </div>
     `;
     
     programs.forEach((program, progIdx) => {
         const totalCursos = program.cursos?.reduce((sum, level) => sum + (level.cursos?.length || 0), 0) || 0;
+        const isActivo = program.activo !== false; // Por defecto activo si no viene el campo
+        const inactivoStyle = !isActivo ? 'opacity: 0.5; filter: grayscale(70%);' : '';
+        const inactivoBadge = !isActivo ? '<span class="program-badge badge-warning" style="background:#dc3545;color:white;font-size:0.75rem;padding:2px 8px;">INACTIVO</span>' : '';
         
         html += `
-            <div class="program-section">
-                <div class="program-header collapsible collapsed" data-program-idx="${progIdx}">
-                    <div class="u-flex u-gap" style="align-items:center;flex-wrap:wrap;">
+            <div class="program-section" style="${inactivoStyle}">
+                <div class="program-header collapsible collapsed" data-program-idx="${progIdx}" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;">
+                    <div class="u-flex u-gap" style="align-items:center;flex-wrap:wrap;flex:1;">
                         <span class="collapse-icon">▶</span>
                         <span class="program-icon">📂</span>
                         <span class="program-name">${escapeHtml(program.programa_nombre)}</span>
-                        <span class="program-badge badge-info" style="background:#6366f1;color:white;">
+                        <span class="program-badge badge-info" style="background:#6366f1;color:white;font-size:0.75rem;padding:2px 8px;">
                             v${program.version || 1}
                         </span>
+                        ${inactivoBadge}
+                        <span class="level-summary">${totalCursos} curso${totalCursos !== 1 ? 's' : ''}</span>
                     </div>
-                    <span class="level-summary">${totalCursos} curso${totalCursos !== 1 ? 's' : ''}</span>
+                    <a 
+                        href="javascript:void(0)"
+                        onclick="mostrarModalTogglePrograma(event, ${program.asignacion_id}, ${isActivo}, '${escapeHtml(program.programa_nombre).replace(/'/g, "\\'")}', ${progIdx})"
+                        title="${isActivo ? 'Desactivar programa' : 'Activar programa'}"
+                        style="
+                            color:${isActivo ? '#dc3545' : '#28a745'};
+                            font-size:0.75rem;
+                            text-decoration:none;
+                            margin-left:12px;
+                            opacity:0.6;
+                            transition:opacity 0.2s;
+                            white-space:nowrap;
+                        "
+                        onmouseover="this.style.opacity='1'"
+                        onmouseout="this.style.opacity='0.6'">
+                        ${isActivo ? '⚙️ desactivar' : '⚙️ activar'}
+                    </a>
                 </div>
                 <div class="program-body" data-program-content="${progIdx}" style="display:none;">
                     ${renderProgramLevels(program.cursos || [], progIdx)}
@@ -289,7 +332,12 @@ function renderPrograms(container, data) {
     
     // Event listeners para colapsar/expandir programas
     container.querySelectorAll('.program-header.collapsible').forEach(header => {
-        header.addEventListener('click', () => {
+        header.addEventListener('click', (e) => {
+            // No expandir/colapsar si se clickeó el botón
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                return;
+            }
+            
             const progIdx = header.getAttribute('data-program-idx');
             const body = container.querySelector(`[data-program-content="${progIdx}"]`);
             const isCollapsed = header.classList.contains('collapsed');
@@ -986,6 +1034,483 @@ function toggleCollapse(collapseId) {
         icon.style.transform = 'rotate(-90deg)';
     }
 }
+
+// ============ TOGGLE PROGRAMA CON MODAL DE CONFIRMACIÓN ============
+
+window.mostrarModalTogglePrograma = function(event, asignacionId, isActivo, programaNombre, progIdx) {
+    event.stopPropagation();
+    
+    const accion = isActivo ? 'desactivar' : 'activar';
+    const accionTitulo = isActivo ? 'Desactivar' : 'Activar';
+    const colorAccion = isActivo ? '#dc3545' : '#28a745';
+    
+    // Crear overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'toggle-programa-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    // Crear modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    `;
+    
+    modal.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0 0 8px 0; color: ${colorAccion}; font-size: 1.25rem;">
+                ⚠️ ${accionTitulo} Programa
+            </h3>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                Esta es una acción importante que afectará la visibilidad del programa.
+            </p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
+            <div style="font-weight: 600; margin-bottom: 8px;">Programa:</div>
+            <div style="font-size: 1.1rem; color: #333;">${escapeHtml(programaNombre)}</div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #666;">
+                ${isActivo 
+                    ? '⚠️ Al desactivar, el programa se ocultará de las vistas pero <strong>NO se eliminarán</strong> los datos históricos (cursos completados, diplomas, etc.).'
+                    : '✅ Al activar, el programa volverá a estar visible y accesible.'
+                }
+            </p>
+            
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">
+                Para confirmar, escribe el nombre del programa:
+            </label>
+            <input 
+                type="text" 
+                id="toggle-programa-input"
+                class="input" 
+                placeholder="${escapeHtml(programaNombre)}"
+                style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;"
+                autocomplete="off"
+            />
+            <div id="toggle-programa-error" style="color: #dc3545; font-size: 0.85rem; margin-top: 6px; display: none;">
+                ❌ El nombre no coincide. Por favor verifica.
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button 
+                id="toggle-programa-cancel"
+                class="btn btn-secondary"
+                style="padding: 8px 20px;">
+                Cancelar
+            </button>
+            <button 
+                id="toggle-programa-confirm"
+                class="btn"
+                style="background: ${colorAccion}; color: white; padding: 8px 20px; border: none;">
+                ${accionTitulo} Programa
+            </button>
+        </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    // Focus en el input
+    const input = document.getElementById('toggle-programa-input');
+    setTimeout(() => input.focus(), 100);
+    
+    // Cerrar modal
+    function cerrarModal() {
+        document.body.removeChild(overlay);
+    }
+    
+    // Event listeners
+    document.getElementById('toggle-programa-cancel').addEventListener('click', cerrarModal);
+    
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) cerrarModal();
+    });
+    
+    document.getElementById('toggle-programa-confirm').addEventListener('click', async () => {
+        const inputValue = input.value.trim();
+        const errorDiv = document.getElementById('toggle-programa-error');
+        
+        // Validar que el nombre coincida
+        if (inputValue.toLowerCase() !== programaNombre.toLowerCase()) {
+            errorDiv.style.display = 'block';
+            input.style.borderColor = '#dc3545';
+            input.focus();
+            return;
+        }
+        
+        // Proceder con el toggle
+        const confirmBtn = document.getElementById('toggle-programa-confirm');
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Procesando...';
+        
+        try {
+            const response = await api.put('/programas-asignaciones/' + asignacionId + '/toggle', {
+                activo: !isActivo
+            });
+            
+            if (response.success) {
+                cerrarModal();
+                // Recargar solo la sección de programas en lugar de toda la página
+                const container = document.querySelector('.card');
+                if (container && currentContactCode) {
+                    await loadAcademicHistory(container, currentContactCode, currentContactName);
+                } else {
+                    location.reload();
+                }
+            } else {
+                throw new Error(response.error?.message || 'Error desconocido');
+            }
+        } catch (error) {
+            console.error('Error toggling programa:', error);
+            errorDiv.textContent = '❌ Error: ' + (error.message || 'Error desconocido');
+            errorDiv.style.display = 'block';
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = accionTitulo + ' Programa';
+        }
+    });
+    
+    // Enter para confirmar
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('toggle-programa-confirm').click();
+        }
+    });
+};
+
+// Mantener la función antigua por compatibilidad pero redirigir al modal
+window.togglePrograma = function(event, asignacionId, isActivo, programaNombre) {
+    mostrarModalTogglePrograma(event, asignacionId, isActivo, programaNombre, 0);
+};
+
+// ============ ASIGNAR PROGRAMA ============
+
+window.mostrarModalAsignarPrograma = async function() {
+    if (!currentContactId) {
+        alert('Error: No se pudo identificar el contacto');
+        return;
+    }
+    
+    // Crear overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'asignar-programa-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    // Crear modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    `;
+    
+    modal.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0 0 8px 0; color: #333; font-size: 1.25rem;">
+                ➕ Asignar Programa
+            </h3>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                Selecciona un programa para asignarlo a ${escapeHtml(currentContactName || 'este contacto')}
+            </p>
+        </div>
+        
+        <div id="programas-list-container" style="margin-bottom: 20px;">
+            <div style="text-align:center;padding:20px;color:#666;">
+                Cargando programas disponibles...
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button 
+                id="asignar-programa-cancel"
+                class="btn btn-secondary"
+                style="padding: 8px 20px;">
+                Cancelar
+            </button>
+        </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    // Cargar programas disponibles
+    try {
+        const response = await api.get('/programas');
+        const programas = response?.data?.items || [];
+        
+        // Filtrar programas ya asignados
+        const programasAsignados = contactPrograms.map(p => p.programa_id);
+        const programasDisponibles = programas.filter(p => !programasAsignados.includes(p.id));
+        
+        const listContainer = document.getElementById('programas-list-container');
+        
+        if (programasDisponibles.length === 0) {
+            listContainer.innerHTML = `
+                <div style="text-align:center;padding:30px;color:#666;">
+                    <div style="font-size:3rem;margin-bottom:12px;">✅</div>
+                    <div style="font-size:1rem;font-weight:500;margin-bottom:8px;">
+                        Todos los programas ya están asignados
+                    </div>
+                    <div style="font-size:0.9rem;color:#999;">
+                        Este contacto tiene todos los programas disponibles
+                    </div>
+                </div>
+            `;
+        } else {
+            listContainer.innerHTML = `
+                <div style="margin-bottom:12px;font-weight:500;color:#333;">
+                    Programas disponibles (${programasDisponibles.length}):
+                </div>
+                ${programasDisponibles.map(programa => `
+                    <div 
+                        class="programa-item-selectable"
+                        data-programa-id="${programa.id}"
+                        data-programa-nombre="${escapeHtml(programa.nombre)}"
+                        style="
+                            padding: 16px;
+                            margin-bottom: 8px;
+                            border: 2px solid #e0e0e0;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                            background: white;
+                        "
+                        onmouseover="this.style.borderColor='#6366f1';this.style.background='#f8f9ff'"
+                        onmouseout="this.style.borderColor='#e0e0e0';this.style.background='white'"
+                        onclick="confirmarAsignacionPrograma(${programa.id}, '${escapeHtml(programa.nombre).replace(/'/g, "\\'")}')">
+                        <div style="font-weight:600;font-size:1rem;color:#333;margin-bottom:4px;">
+                            📂 ${escapeHtml(programa.nombre)}
+                        </div>
+                        ${programa.descripcion ? `
+                            <div style="font-size:0.85rem;color:#666;">
+                                ${escapeHtml(programa.descripcion)}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('')}
+            `;
+        }
+    } catch (error) {
+        console.error('Error cargando programas:', error);
+        document.getElementById('programas-list-container').innerHTML = `
+            <div style="text-align:center;padding:20px;color:#dc3545;">
+                ❌ Error al cargar programas disponibles
+            </div>
+        `;
+    }
+    
+    // Cerrar modal
+    function cerrarModal() {
+        document.body.removeChild(overlay);
+    }
+    
+    // Event listeners
+    document.getElementById('asignar-programa-cancel').addEventListener('click', cerrarModal);
+    
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) cerrarModal();
+    });
+};
+
+window.confirmarAsignacionPrograma = function(programaId, programaNombre) {
+    // Cerrar el modal de selección primero
+    const modalSeleccion = document.getElementById('asignar-programa-overlay');
+    if (modalSeleccion) {
+        document.body.removeChild(modalSeleccion);
+    }
+    
+    // Crear overlay de confirmación
+    const overlay = document.createElement('div');
+    overlay.id = 'confirmar-asignacion-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+    `;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    `;
+    
+    modal.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0 0 8px 0; color: #6366f1; font-size: 1.25rem;">
+                ✅ Confirmar Asignación
+            </h3>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                ¿Estás seguro de asignar este programa al contacto?
+            </p>
+        </div>
+        
+        <div style="background: #f8f9ff; padding: 16px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #6366f1;">
+            <div style="font-weight: 600; margin-bottom: 4px; color: #333;">Programa:</div>
+            <div style="font-size: 1.1rem; color: #6366f1;">📂 ${escapeHtml(programaNombre)}</div>
+        </div>
+        
+        <div style="background: #fff3cd; padding: 12px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+            <div style="font-size: 0.9rem; color: #856404;">
+                ℹ️ El programa será asignado al contacto <strong>${escapeHtml(currentContactName || 'actual')}</strong> 
+                y todos sus estudiantes heredarán este programa automáticamente.
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button 
+                id="confirmar-asignacion-cancel"
+                class="btn btn-secondary"
+                style="padding: 8px 20px;">
+                Cancelar
+            </button>
+            <button 
+                id="confirmar-asignacion-confirm"
+                class="btn btn-primary"
+                style="padding: 8px 20px;">
+                Confirmar Asignación
+            </button>
+        </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    function cerrarModal() {
+        document.body.removeChild(overlay);
+    }
+    
+    document.getElementById('confirmar-asignacion-cancel').addEventListener('click', cerrarModal);
+    
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) cerrarModal();
+    });
+    
+    document.getElementById('confirmar-asignacion-confirm').addEventListener('click', () => {
+        cerrarModal();
+        asignarProgramaAlContacto(programaId, programaNombre);
+    });
+};
+
+window.asignarProgramaAlContacto = async function(programaId, programaNombre) {
+    // Crear overlay de loading
+    const overlay = document.createElement('div');
+    overlay.id = 'loading-asignacion-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+    `;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 40px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    `;
+    
+    modal.innerHTML = `
+        <div style="text-align:center;">
+            <div style="font-size:2rem;margin-bottom:16px;">⏳</div>
+            <div style="font-size:1rem;color:#666;">
+                Asignando programa "${escapeHtml(programaNombre)}"...
+            </div>
+        </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    try {
+        const response = await api.post('/programas/' + programaId + '/asignar', {
+            contactoId: currentContactId
+        });
+        
+        if (response.success) {
+            // Cerrar modal
+            document.body.removeChild(overlay);
+            
+            // Recargar programas
+            const container = document.querySelector('.card');
+            if (container && currentContactCode) {
+                await loadAcademicHistory(container, currentContactCode, currentContactName);
+            }
+            
+            // Mostrar mensaje de éxito (opcional)
+            // alert('Programa asignado correctamente');
+        } else {
+            throw new Error(response.error?.message || 'Error desconocido');
+        }
+    } catch (error) {
+        console.error('Error asignando programa:', error);
+        modal.innerHTML = `
+            <div style="text-align:center;padding:20px;">
+                <div style="font-size:2rem;margin-bottom:16px;color:#dc3545;">❌</div>
+                <div style="font-size:1rem;color:#333;font-weight:500;margin-bottom:8px;">
+                    Error al asignar programa
+                </div>
+                <div style="font-size:0.9rem;color:#666;margin-bottom:20px;">
+                    ${error.message || 'Error desconocido'}
+                </div>
+                <button onclick="document.body.removeChild(document.getElementById('loading-asignacion-overlay'))" class="btn btn-secondary">
+                    Cerrar
+                </button>
+            </div>
+        `;
+    }
+};
 
 // Hacer toggleCollapse disponible globalmente
 window.toggleCollapse = toggleCollapse;

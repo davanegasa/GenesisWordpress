@@ -56,6 +56,24 @@ class PlgGenesis_ProgramasController {
             'callback'            => [ __CLASS__, 'post_upgrade_assignments' ],
             'permission_callback' => plg_genesis_can('plg_edit_programs')
         ]);
+
+        // Toggle activar/desactivar asignación
+        register_rest_route('plg-genesis/v1', '/programas-asignaciones/(?P<id>[0-9]+)/toggle', [
+            'methods'             => 'PUT',
+            'callback'            => [ __CLASS__, 'put_toggle_asignacion' ],
+            'permission_callback' => [ __CLASS__, 'check_manager_permission' ]
+        ]);
+    }
+
+    /**
+     * Permission callback: solo Office Manager o Super Admin
+     */
+    public static function check_manager_permission() {
+        if (!is_user_logged_in()) {
+            return false;
+        }
+        $user = wp_get_current_user();
+        return in_array('plg_office_manager', $user->roles) || in_array('plg_super_admin', $user->roles);
     }
 
     private static function error($wpError){
@@ -168,6 +186,22 @@ class PlgGenesis_ProgramasController {
         $scope = strval($payload['scope'] ?? 'all');
         if ($toVersion <= 0){ return self::error(new WP_Error('invalid_payload','toVersion requerido',[ 'status'=>422 ])); }
         $res = $svc->forzarAsignaciones($request->get_param('id'), $toVersion, $scope);
+        if (is_wp_error($res)) return self::error($res);
+        return new WP_REST_Response([ 'success'=>true, 'data'=> $res ], 200);
+    }
+
+    public static function put_toggle_asignacion($request){
+        $office = PlgGenesis_OfficeResolver::resolve_user_office(get_current_user_id());
+        if (is_wp_error($office)) return self::error($office);
+        $conn = PlgGenesis_ConnectionProvider::get_connection_for_office($office);
+        if (is_wp_error($conn)) return self::error($conn);
+        $repo = new PlgGenesis_ProgramasRepository($conn); $svc = new PlgGenesis_ProgramasService($repo);
+        $payload = $request->get_json_params() ?: [];
+        $activo = isset($payload['activo']) ? filter_var($payload['activo'], FILTER_VALIDATE_BOOLEAN) : null;
+        if ($activo === null){ 
+            return self::error(new WP_Error('invalid_payload','Campo activo requerido (boolean)',[ 'status'=>422 ])); 
+        }
+        $res = $svc->toggleAsignacion($request->get_param('id'), $activo);
         if (is_wp_error($res)) return self::error($res);
         return new WP_REST_Response([ 'success'=>true, 'data'=> $res ], 200);
     }
