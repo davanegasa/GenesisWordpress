@@ -266,28 +266,38 @@ function renderPrograms(container, data) {
         const totalCursos = program.cursos?.reduce((sum, level) => sum + (level.cursos?.length || 0), 0) || 0;
         const isActivo = program.activo !== false; // Por defecto activo si no viene el campo
         const inactivoStyle = !isActivo ? 'opacity: 0.5; filter: grayscale(70%);' : '';
-        const inactivoBadge = !isActivo ? '<span class="program-badge badge-warning" style="background:#dc3545;color:white;">INACTIVO</span>' : '';
+        const inactivoBadge = !isActivo ? '<span class="program-badge badge-warning" style="background:#dc3545;color:white;font-size:0.75rem;padding:2px 8px;">INACTIVO</span>' : '';
         
         html += `
             <div class="program-section" style="${inactivoStyle}">
-                <div class="program-header collapsible collapsed" data-program-idx="${progIdx}">
+                <div class="program-header collapsible collapsed" data-program-idx="${progIdx}" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;">
                     <div class="u-flex u-gap" style="align-items:center;flex-wrap:wrap;flex:1;">
                         <span class="collapse-icon">▶</span>
                         <span class="program-icon">📂</span>
                         <span class="program-name">${escapeHtml(program.programa_nombre)}</span>
-                        <span class="program-badge badge-info" style="background:#6366f1;color:white;">
+                        <span class="program-badge badge-info" style="background:#6366f1;color:white;font-size:0.75rem;padding:2px 8px;">
                             v${program.version || 1}
                         </span>
                         ${inactivoBadge}
                         <span class="level-summary">${totalCursos} curso${totalCursos !== 1 ? 's' : ''}</span>
                     </div>
-                    <button 
-                        class="btn btn-sm ${isActivo ? 'btn-warning' : 'btn-success'}" 
-                        onclick="togglePrograma(event, ${program.asignacion_id}, ${isActivo}, '${escapeHtml(program.programa_nombre)}')"
+                    <a 
+                        href="javascript:void(0)"
+                        onclick="mostrarModalTogglePrograma(event, ${program.asignacion_id}, ${isActivo}, '${escapeHtml(program.programa_nombre).replace(/'/g, "\\'")}', ${progIdx})"
                         title="${isActivo ? 'Desactivar programa' : 'Activar programa'}"
-                        style="margin-left: auto;">
-                        ${isActivo ? '⛔ Desactivar' : '✅ Activar'}
-                    </button>
+                        style="
+                            color:${isActivo ? '#dc3545' : '#28a745'};
+                            font-size:0.75rem;
+                            text-decoration:none;
+                            margin-left:12px;
+                            opacity:0.6;
+                            transition:opacity 0.2s;
+                            white-space:nowrap;
+                        "
+                        onmouseover="this.style.opacity='1'"
+                        onmouseout="this.style.opacity='0.6'">
+                        ${isActivo ? '⚙️ desactivar' : '⚙️ activar'}
+                    </a>
                 </div>
                 <div class="program-body" data-program-content="${progIdx}" style="display:none;">
                     ${renderProgramLevels(program.cursos || [], progIdx)}
@@ -1003,37 +1013,164 @@ function toggleCollapse(collapseId) {
     }
 }
 
-// ============ TOGGLE PROGRAMA ============
+// ============ TOGGLE PROGRAMA CON MODAL DE CONFIRMACIÓN ============
 
-window.togglePrograma = async function(event, asignacionId, isActivo, programaNombre) {
+window.mostrarModalTogglePrograma = function(event, asignacionId, isActivo, programaNombre, progIdx) {
     event.stopPropagation();
     
-    // Confirmación solo al desactivar
-    if (isActivo) {
-        const confirmacion = confirm(
-            `¿Está seguro de desactivar el programa "${programaNombre}"?\n\n` +
-            `El programa se ocultará pero los datos históricos se mantendrán.`
-        );
-        if (!confirmacion) {
-            return;
-        }
+    const accion = isActivo ? 'desactivar' : 'activar';
+    const accionTitulo = isActivo ? 'Desactivar' : 'Activar';
+    const colorAccion = isActivo ? '#dc3545' : '#28a745';
+    
+    // Crear overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'toggle-programa-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    // Crear modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    `;
+    
+    modal.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0 0 8px 0; color: ${colorAccion}; font-size: 1.25rem;">
+                ⚠️ ${accionTitulo} Programa
+            </h3>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                Esta es una acción importante que afectará la visibilidad del programa.
+            </p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
+            <div style="font-weight: 600; margin-bottom: 8px;">Programa:</div>
+            <div style="font-size: 1.1rem; color: #333;">${escapeHtml(programaNombre)}</div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #666;">
+                ${isActivo 
+                    ? '⚠️ Al desactivar, el programa se ocultará de las vistas pero <strong>NO se eliminarán</strong> los datos históricos (cursos completados, diplomas, etc.).'
+                    : '✅ Al activar, el programa volverá a estar visible y accesible.'
+                }
+            </p>
+            
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">
+                Para confirmar, escribe el nombre del programa:
+            </label>
+            <input 
+                type="text" 
+                id="toggle-programa-input"
+                class="input" 
+                placeholder="${escapeHtml(programaNombre)}"
+                style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;"
+                autocomplete="off"
+            />
+            <div id="toggle-programa-error" style="color: #dc3545; font-size: 0.85rem; margin-top: 6px; display: none;">
+                ❌ El nombre no coincide. Por favor verifica.
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button 
+                id="toggle-programa-cancel"
+                class="btn btn-secondary"
+                style="padding: 8px 20px;">
+                Cancelar
+            </button>
+            <button 
+                id="toggle-programa-confirm"
+                class="btn"
+                style="background: ${colorAccion}; color: white; padding: 8px 20px; border: none;">
+                ${accionTitulo} Programa
+            </button>
+        </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    // Focus en el input
+    const input = document.getElementById('toggle-programa-input');
+    setTimeout(() => input.focus(), 100);
+    
+    // Cerrar modal
+    function cerrarModal() {
+        document.body.removeChild(overlay);
     }
     
-    try {
-        const response = await api.put(`/programas-asignaciones/${asignacionId}/toggle`, {
-            activo: !isActivo
-        });
+    // Event listeners
+    document.getElementById('toggle-programa-cancel').addEventListener('click', cerrarModal);
+    
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) cerrarModal();
+    });
+    
+    document.getElementById('toggle-programa-confirm').addEventListener('click', async () => {
+        const inputValue = input.value.trim();
+        const errorDiv = document.getElementById('toggle-programa-error');
         
-        if (response.success) {
-            // Recargar la página o solo la sección de programas
-            location.reload();
-        } else {
-            alert('Error al actualizar el programa: ' + (response.error?.message || 'Error desconocido'));
+        // Validar que el nombre coincida
+        if (inputValue.toLowerCase() !== programaNombre.toLowerCase()) {
+            errorDiv.style.display = 'block';
+            input.style.borderColor = '#dc3545';
+            input.focus();
+            return;
         }
-    } catch (error) {
-        console.error('Error toggling programa:', error);
-        alert('Error al actualizar el programa: ' + (error.message || 'Error desconocido'));
-    }
+        
+        // Proceder con el toggle
+        const confirmBtn = document.getElementById('toggle-programa-confirm');
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Procesando...';
+        
+        try {
+            const response = await api.put(\`/programas-asignaciones/\${asignacionId}/toggle\`, {
+                activo: !isActivo
+            });
+            
+            if (response.success) {
+                cerrarModal();
+                location.reload();
+            } else {
+                throw new Error(response.error?.message || 'Error desconocido');
+            }
+        } catch (error) {
+            console.error('Error toggling programa:', error);
+            errorDiv.textContent = '❌ Error: ' + (error.message || 'Error desconocido');
+            errorDiv.style.display = 'block';
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = \`\${accionTitulo} Programa\`;
+        }
+    });
+    
+    // Enter para confirmar
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('toggle-programa-confirm').click();
+        }
+    });
+};
+
+// Mantener la función antigua por compatibilidad pero redirigir al modal
+window.togglePrograma = function(event, asignacionId, isActivo, programaNombre) {
+    mostrarModalTogglePrograma(event, asignacionId, isActivo, programaNombre, 0);
 };
 
 // Hacer toggleCollapse disponible globalmente
