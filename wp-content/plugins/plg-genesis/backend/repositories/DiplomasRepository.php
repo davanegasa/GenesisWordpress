@@ -656,134 +656,584 @@ class PlgGenesis_DiplomasRepository {
 	}
 
 	/**
-	 * Obtiene estudiantes próximos a completar (progreso >= 80%)
-	 * Retorna información de niveles y programas que están por completar
+	 * Obtiene lista de programas que tienen estudiantes próximos a completar
+	 * Retorna solo los programas con contador de estudiantes (ligero y rápido)
+	 * OPTIMIZADO: Usa queries simples y procesa en PHP
+	 * 
+	 * @param int $contactoId ID del contacto (OBLIGATORIO)
+	 * @param int $umbral Porcentaje mínimo de progreso (default 80)
+	 * @return array Lista de programas con contador de estudiantes próximos
 	 */
-	public function getProximosACompletar($limite = 50, $umbral = 80, $contactoId = null) {
-		// Obtener todos los programas activos con sus niveles y cursos
-		$whereClause = $contactoId ? "WHERE pa.contacto_id = $1" : "";
-		$sqlProgramas = "
-			SELECT DISTINCT
-				pa.contacto_id,
-				pa.programa_id,
-				pa.version,
-				p.nombre as programa_nombre,
-				np.id as nivel_id,
-				np.nombre as nivel_nombre,
-				e.id as estudiante_id,
-				e.id_estudiante as estudiante_codigo,
-				TRIM(COALESCE(e.nombre1, '') || ' ' || COALESCE(e.apellido1, '')) as estudiante_nombre,
-				c.nombre as contacto_nombre
-			FROM programas_asignaciones pa
-			JOIN programas p ON pa.programa_id = p.id
-			JOIN estudiantes e ON e.id_contacto = pa.contacto_id
-			JOIN contactos c ON c.id = pa.contacto_id
-			LEFT JOIN niveles_programas np ON np.programa_id = p.id AND np.version = pa.version
-			$whereClause
-			ORDER BY pa.programa_id, np.id, e.id
-		";
-		
-		$res = $contactoId 
-			? pg_query_params($this->conn, $sqlProgramas, [ intval($contactoId) ])
-			: pg_query($this->conn, $sqlProgramas);
-		
-		if (!$res) {
-			$this->logPg('getProximosACompletar.programas', $sqlProgramas);
-			return new WP_Error('db_error', 'Error consultando programas', [ 'status' => 500 ]);
+	public function getProgramasConProximos($contactoId, $umbral = 80) {
+		if (!$contactoId) {
+			return new WP_Error('invalid_params', 'El parámetro contactoId es obligatorio', [ 'status' => 422 ]);
 		}
 
-		$proximos = [];
-		$processed = []; // Para evitar duplicados
+		$contactoIdInt = intval($contactoId);
+		$umbralInt = intval($umbral);
 
-		while ($row = pg_fetch_assoc($res)) {
+		// QUERY 1: Estudiantes del contacto con sus programas asignados
+		$sqlEstudiantes = "
+			SELECT 
+				e.id as estudiante_id,
+				pa.programa_id,
+				p.nombre as programa_nombre,
+				pa.version
+			FROM estudiantes e
+			JOIN programas_asignaciones pa ON pa.contacto_id = e.id_contacto
+			JOIN programas p ON p.id = pa.programa_id
+			WHERE e.id_contacto = $1
+		";
+
+		$resEstudiantes = pg_query_params($this->conn, $sqlEstudiantes, [ $contactoIdInt ]);
+		if (!$resEstudiantes) {
+			$this->logPg('getProgramasConProximos:estudiantes', $sqlEstudiantes);
+			return new WP_Error('db_query_failed', 'Error obteniendo estudiantes', [ 'status' => 500 ]);
+		}
+
+		$estudiantesPrograms = [];
+		$programasInfo = [];
+		while ($row = pg_fetch_assoc($resEstudiantes)) {
 			$estudianteId = intval($row['estudiante_id']);
 			$programaId = intval($row['programa_id']);
 			$version = intval($row['version']);
-			$nivelId = $row['nivel_id'] ? intval($row['nivel_id']) : null;
 
-			// Calcular progreso del nivel (si existe)
-			if ($nivelId) {
-				$key = "nivel_{$nivelId}_{$estudianteId}";
-				if (!isset($processed[$key])) {
-					$progreso = $this->calcularProgresoNivel($nivelId, $estudianteId);
-					
-					if ($progreso['porcentaje'] >= $umbral && $progreso['porcentaje'] < 100) {
-						// Verificar que no tenga diploma emitido ya
-						$sqlCheck = "SELECT id FROM diplomas_entregados 
-									 WHERE tipo = 'nivel' 
-									 AND nivel_id = $1 
-									 AND estudiante_id = $2";
-						$resCheck = pg_query_params($this->conn, $sqlCheck, [$nivelId, $estudianteId]);
-						if ($resCheck && pg_num_rows($resCheck) === 0) {
-							$proximos[] = [
-								'tipo' => 'nivel',
-								'estudiante_id' => $estudianteId,
-								'estudiante_codigo' => $row['estudiante_codigo'],
-								'estudiante_nombre' => $row['estudiante_nombre'],
-								'contacto_id' => intval($row['contacto_id']),
-								'contacto_nombre' => $row['contacto_nombre'],
-								'programa_id' => $programaId,
-								'programa_nombre' => $row['programa_nombre'],
-								'nivel_id' => $nivelId,
-								'nivel_nombre' => $row['nivel_nombre'],
-								'version' => $version,
-								'progreso' => $progreso['porcentaje'],
-								'cursos_completados' => $progreso['completados'],
-								'cursos_totales' => $progreso['total'],
-								'cursos_faltantes' => $progreso['faltantes']
-							];
-						}
-						if ($resCheck) pg_free_result($resCheck);
-					}
-					$processed[$key] = true;
-				}
-			}
+			$estudiantesPrograms[] = [
+				'estudiante_id' => $estudianteId,
+				'programa_id' => $programaId,
+				'version' => $version
+			];
 
-			// Calcular progreso del programa completo
-			$keyPrograma = "programa_{$programaId}_{$version}_{$estudianteId}";
-			if (!isset($processed[$keyPrograma])) {
-				$progreso = $this->calcularProgresoPrograma($programaId, $version, $estudianteId);
-				
-				if ($progreso['porcentaje'] >= $umbral && $progreso['porcentaje'] < 100) {
-					// Verificar que no tenga diploma emitido ya
-					$sqlCheck = "SELECT id FROM diplomas_entregados 
-								 WHERE tipo = 'programa_completo' 
-								 AND programa_id = $1 
-								 AND estudiante_id = $2";
-					$resCheck = pg_query_params($this->conn, $sqlCheck, [$programaId, $estudianteId]);
-					if ($resCheck && pg_num_rows($resCheck) === 0) {
-						$proximos[] = [
-							'tipo' => 'programa_completo',
-							'estudiante_id' => $estudianteId,
-							'estudiante_codigo' => $row['estudiante_codigo'],
-							'estudiante_nombre' => $row['estudiante_nombre'],
-							'contacto_id' => intval($row['contacto_id']),
-							'contacto_nombre' => $row['contacto_nombre'],
-							'programa_id' => $programaId,
-							'programa_nombre' => $row['programa_nombre'],
-							'nivel_id' => null,
-							'nivel_nombre' => null,
-							'version' => $version,
-							'progreso' => $progreso['porcentaje'],
-							'cursos_completados' => $progreso['completados'],
-							'cursos_totales' => $progreso['total'],
-							'cursos_faltantes' => $progreso['faltantes']
-						];
-					}
-					if ($resCheck) pg_free_result($resCheck);
-				}
-				$processed[$keyPrograma] = true;
+			if (!isset($programasInfo[$programaId])) {
+				$programasInfo[$programaId] = $row['programa_nombre'];
 			}
 		}
-		pg_free_result($res);
+		pg_free_result($resEstudiantes);
+
+		if (empty($estudiantesPrograms)) {
+			return [];
+		}
+
+		// QUERY 2: Cursos requeridos por programa/nivel (estructura del programa)
+		$programaIds = array_values(array_unique(array_column($estudiantesPrograms, 'programa_id')));
+		$placeholders = implode(',', array_map(function($i) { return '$' . ($i + 1); }, array_keys($programaIds)));
+		
+		$sqlCursosRequeridos = "
+			SELECT 
+				pc.programa_id,
+				pc.version,
+				pc.nivel_id,
+				np.nombre as nivel_nombre,
+				pc.curso_id,
+				c.nombre as curso_nombre
+			FROM programas_cursos pc
+			JOIN cursos c ON c.id = pc.curso_id
+			LEFT JOIN niveles_programas np ON np.id = pc.nivel_id
+			WHERE pc.programa_id IN ($placeholders)
+			ORDER BY pc.programa_id, pc.nivel_id, pc.curso_id
+		";
+
+		$resCursos = pg_query_params($this->conn, $sqlCursosRequeridos, array_values($programaIds));
+		if (!$resCursos) {
+			$this->logPg('getProgramasConProximos:cursos', $sqlCursosRequeridos);
+			return new WP_Error('db_query_failed', 'Error obteniendo cursos', [ 'status' => 500 ]);
+		}
+
+		$cursosRequeridos = [];
+		while ($row = pg_fetch_assoc($resCursos)) {
+			$programaId = intval($row['programa_id']);
+			$version = intval($row['version']);
+			$nivelId = $row['nivel_id'] ? intval($row['nivel_id']) : null;
+			$cursoId = intval($row['curso_id']);
+
+			$key = "{$programaId}_{$version}";
+			if (!isset($cursosRequeridos[$key])) {
+				$cursosRequeridos[$key] = [
+					'niveles' => [],
+					'programa_completo' => []
+				];
+			}
+
+			$cursosRequeridos[$key]['programa_completo'][] = $cursoId;
+
+			if ($nivelId) {
+				if (!isset($cursosRequeridos[$key]['niveles'][$nivelId])) {
+					$cursosRequeridos[$key]['niveles'][$nivelId] = [
+						'nombre' => $row['nivel_nombre'],
+						'cursos' => []
+					];
+				}
+				$cursosRequeridos[$key]['niveles'][$nivelId]['cursos'][] = $cursoId;
+			}
+		}
+		pg_free_result($resCursos);
+
+		// QUERY 3: Progreso de estudiantes (qué cursos han completado)
+		$estudianteIds = array_values(array_unique(array_column($estudiantesPrograms, 'estudiante_id')));
+		$placeholders = implode(',', array_map(function($i) { return '$' . ($i + 1); }, array_keys($estudianteIds)));
+
+		$sqlProgreso = "
+			SELECT 
+				ec.estudiante_id,
+				ec.curso_id,
+				MAX(ec.porcentaje) as porcentaje
+			FROM estudiantes_cursos ec
+			WHERE ec.estudiante_id IN ($placeholders)
+			GROUP BY ec.estudiante_id, ec.curso_id
+		";
+
+		$resProgreso = pg_query_params($this->conn, $sqlProgreso, array_values($estudianteIds));
+		if (!$resProgreso) {
+			$this->logPg('getProgramasConProximos:progreso', $sqlProgreso);
+			return new WP_Error('db_query_failed', 'Error obteniendo progreso', [ 'status' => 500 ]);
+		}
+
+		$progresoEstudiantes = [];
+		while ($row = pg_fetch_assoc($resProgreso)) {
+			$estudianteId = intval($row['estudiante_id']);
+			$cursoId = intval($row['curso_id']);
+			$porcentaje = floatval($row['porcentaje']);
+
+			if (!isset($progresoEstudiantes[$estudianteId])) {
+				$progresoEstudiantes[$estudianteId] = [];
+			}
+			$progresoEstudiantes[$estudianteId][$cursoId] = $porcentaje;
+		}
+		pg_free_result($resProgreso);
+
+		// QUERY 4: Diplomas ya emitidos (para excluirlos)
+		$sqlDiplomas = "
+			SELECT 
+				estudiante_id,
+				programa_id,
+				nivel_id,
+				tipo
+			FROM diplomas_entregados
+			WHERE estudiante_id IN ($placeholders)
+		";
+
+		$resDiplomas = pg_query_params($this->conn, $sqlDiplomas, array_values($estudianteIds));
+		if (!$resDiplomas) {
+			$this->logPg('getProgramasConProximos:diplomas', $sqlDiplomas);
+			return new WP_Error('db_query_failed', 'Error obteniendo diplomas', [ 'status' => 500 ]);
+		}
+
+		$diplomasEmitidos = [];
+		while ($row = pg_fetch_assoc($resDiplomas)) {
+			$estudianteId = intval($row['estudiante_id']);
+			$programaId = intval($row['programa_id']);
+			$nivelId = $row['nivel_id'] ? intval($row['nivel_id']) : null;
+			$tipo = $row['tipo'];
+
+			$key = $tipo === 'nivel' 
+				? "{$estudianteId}_{$programaId}_nivel_{$nivelId}"
+				: "{$estudianteId}_{$programaId}_programa";
+
+			$diplomasEmitidos[$key] = true;
+		}
+		pg_free_result($resDiplomas);
+
+		// PROCESAMIENTO EN PHP: Calcular porcentajes y filtrar
+		$programasConProximos = [];
+
+		foreach ($estudiantesPrograms as $ep) {
+			$estudianteId = $ep['estudiante_id'];
+			$programaId = $ep['programa_id'];
+			$version = $ep['version'];
+			$key = "{$programaId}_{$version}";
+
+			if (!isset($cursosRequeridos[$key])) {
+				continue;
+			}
+
+			$progreso = $progresoEstudiantes[$estudianteId] ?? [];
+			$estructura = $cursosRequeridos[$key];
+
+			// Calcular progreso por nivel
+			foreach ($estructura['niveles'] as $nivelId => $nivelInfo) {
+				$diplomaKey = "{$estudianteId}_{$programaId}_nivel_{$nivelId}";
+				if (isset($diplomasEmitidos[$diplomaKey])) {
+					continue; // Ya tiene diploma de este nivel
+				}
+
+				$cursosRequeridos = $nivelInfo['cursos'];
+				$cursosCompletados = 0;
+
+				foreach ($cursosRequeridos as $cursoId) {
+					if (isset($progreso[$cursoId]) && $progreso[$cursoId] >= 70) {
+						$cursosCompletados++;
+					}
+				}
+
+				$porcentaje = count($cursosRequeridos) > 0 
+					? round(100.0 * $cursosCompletados / count($cursosRequeridos), 1)
+					: 0;
+
+				if ($porcentaje >= $umbralInt) {
+					if (!isset($programasConProximos[$programaId])) {
+						$programasConProximos[$programaId] = [];
+					}
+					$programasConProximos[$programaId][$estudianteId] = true;
+				}
+			}
+
+			// Calcular progreso por programa completo
+			$diplomaKey = "{$estudianteId}_{$programaId}_programa";
+			if (!isset($diplomasEmitidos[$diplomaKey])) {
+				$cursosRequeridos = $estructura['programa_completo'];
+				$cursosCompletados = 0;
+
+				foreach ($cursosRequeridos as $cursoId) {
+					if (isset($progreso[$cursoId]) && $progreso[$cursoId] >= 70) {
+						$cursosCompletados++;
+					}
+				}
+
+				$porcentaje = count($cursosRequeridos) > 0 
+					? round(100.0 * $cursosCompletados / count($cursosRequeridos), 1)
+					: 0;
+
+				if ($porcentaje >= $umbralInt) {
+					if (!isset($programasConProximos[$programaId])) {
+						$programasConProximos[$programaId] = [];
+					}
+					$programasConProximos[$programaId][$estudianteId] = true;
+				}
+			}
+		}
+
+		// Formatear resultado
+		$resultado = [];
+		foreach ($programasConProximos as $programaId => $estudiantes) {
+			$resultado[] = [
+				'programa_id' => $programaId,
+				'programa_nombre' => $programasInfo[$programaId],
+				'total_estudiantes' => count($estudiantes)
+			];
+		}
+
+		// Ordenar por nombre de programa
+		usort($resultado, function($a, $b) {
+			return strcmp($a['programa_nombre'], $b['programa_nombre']);
+		});
+
+		return $resultado;
+	}
+
+	/**
+	 * Obtiene estudiantes próximos a completar (progreso >= 80%)
+	 * Retorna información detallada de niveles y programas que están por completar
+	 * OPTIMIZADO: Usa queries simples y procesa en PHP
+	 * IMPORTANTE: contactoId es OBLIGATORIO para evitar queries muy pesadas en producción
+	 * 
+	 * @param int $limite Límite de resultados
+	 * @param int $umbral Porcentaje mínimo de progreso (default 80)
+	 * @param int $contactoId ID del contacto (OBLIGATORIO)
+	 * @param int|null $programaId ID del programa (opcional, para filtrar por programa específico)
+	 */
+	public function getProximosACompletar($limite = 50, $umbral = 80, $contactoId = null, $programaId = null) {
+		if (!$contactoId) {
+			return new WP_Error('invalid_params', 'El parámetro contactoId es obligatorio', [ 'status' => 422 ]);
+		}
+
+		$contactoIdInt = intval($contactoId);
+		$umbralInt = intval($umbral);
+		$limiteInt = intval($limite);
+
+		// QUERY 1: Estudiantes del contacto con sus programas asignados
+		$sqlEstudiantes = "
+			SELECT 
+				e.id as estudiante_id,
+				e.id_estudiante as estudiante_codigo,
+				TRIM(COALESCE(e.nombre1, '') || ' ' || COALESCE(e.apellido1, '')) as estudiante_nombre,
+				c.id as contacto_id,
+				c.nombre as contacto_nombre,
+				pa.programa_id,
+				p.nombre as programa_nombre,
+				pa.version
+			FROM estudiantes e
+			JOIN contactos c ON c.id = e.id_contacto
+			JOIN programas_asignaciones pa ON pa.contacto_id = e.id_contacto
+			JOIN programas p ON p.id = pa.programa_id
+			WHERE e.id_contacto = $1" . ($programaId ? " AND pa.programa_id = $2" : "") . "
+		";
+
+		$params = $programaId ? [ $contactoIdInt, intval($programaId) ] : [ $contactoIdInt ];
+		$resEstudiantes = pg_query_params($this->conn, $sqlEstudiantes, $params);
+		
+		if (!$resEstudiantes) {
+			$this->logPg('getProximosACompletar:estudiantes', $sqlEstudiantes);
+			return new WP_Error('db_query_failed', 'Error obteniendo estudiantes', [ 'status' => 500 ]);
+		}
+
+		$estudiantesInfo = [];
+		$estudiantesPrograms = [];
+		while ($row = pg_fetch_assoc($resEstudiantes)) {
+			$estudianteId = intval($row['estudiante_id']);
+			$programaId = intval($row['programa_id']);
+			$version = intval($row['version']);
+
+			if (!isset($estudiantesInfo[$estudianteId])) {
+				$estudiantesInfo[$estudianteId] = [
+					'codigo' => $row['estudiante_codigo'],
+					'nombre' => $row['estudiante_nombre'],
+					'contacto_id' => intval($row['contacto_id']),
+					'contacto_nombre' => $row['contacto_nombre']
+				];
+			}
+
+			$estudiantesPrograms[] = [
+				'estudiante_id' => $estudianteId,
+				'programa_id' => $programaId,
+				'programa_nombre' => $row['programa_nombre'],
+				'version' => $version
+			];
+		}
+		pg_free_result($resEstudiantes);
+
+		if (empty($estudiantesPrograms)) {
+			return [];
+		}
+
+		// QUERY 2: Cursos requeridos por programa/nivel
+		$programaIds = array_values(array_unique(array_column($estudiantesPrograms, 'programa_id')));
+		$placeholders = implode(',', array_map(function($i) { return '$' . ($i + 1); }, array_keys($programaIds)));
+		
+		$sqlCursosRequeridos = "
+			SELECT 
+				pc.programa_id,
+				pc.version,
+				pc.nivel_id,
+				np.nombre as nivel_nombre,
+				pc.curso_id,
+				c.nombre as curso_nombre
+			FROM programas_cursos pc
+			JOIN cursos c ON c.id = pc.curso_id
+			LEFT JOIN niveles_programas np ON np.id = pc.nivel_id
+			WHERE pc.programa_id IN ($placeholders)
+			ORDER BY pc.programa_id, pc.nivel_id, pc.curso_id
+		";
+
+		$resCursos = pg_query_params($this->conn, $sqlCursosRequeridos, array_values($programaIds));
+		if (!$resCursos) {
+			$this->logPg('getProximosACompletar:cursos', $sqlCursosRequeridos);
+			return new WP_Error('db_query_failed', 'Error obteniendo cursos', [ 'status' => 500 ]);
+		}
+
+		$cursosRequeridos = [];
+		while ($row = pg_fetch_assoc($resCursos)) {
+			$programaId = intval($row['programa_id']);
+			$version = intval($row['version']);
+			$nivelId = $row['nivel_id'] ? intval($row['nivel_id']) : null;
+			$cursoId = intval($row['curso_id']);
+
+			$key = "{$programaId}_{$version}";
+			if (!isset($cursosRequeridos[$key])) {
+				$cursosRequeridos[$key] = [
+					'niveles' => [],
+					'programa_completo' => []
+				];
+			}
+
+			$cursosRequeridos[$key]['programa_completo'][] = [
+				'id' => $cursoId,
+				'nombre' => $row['curso_nombre']
+			];
+
+			if ($nivelId) {
+				if (!isset($cursosRequeridos[$key]['niveles'][$nivelId])) {
+					$cursosRequeridos[$key]['niveles'][$nivelId] = [
+						'nombre' => $row['nivel_nombre'],
+						'cursos' => []
+					];
+				}
+				$cursosRequeridos[$key]['niveles'][$nivelId]['cursos'][] = [
+					'id' => $cursoId,
+					'nombre' => $row['curso_nombre']
+				];
+			}
+		}
+		pg_free_result($resCursos);
+
+		// QUERY 3: Progreso de estudiantes
+		$estudianteIds = array_values(array_unique(array_column($estudiantesPrograms, 'estudiante_id')));
+		$placeholders = implode(',', array_map(function($i) { return '$' . ($i + 1); }, array_keys($estudianteIds)));
+
+		$sqlProgreso = "
+			SELECT 
+				ec.estudiante_id,
+				ec.curso_id,
+				MAX(ec.porcentaje) as porcentaje
+			FROM estudiantes_cursos ec
+			WHERE ec.estudiante_id IN ($placeholders)
+			GROUP BY ec.estudiante_id, ec.curso_id
+		";
+
+		$resProgreso = pg_query_params($this->conn, $sqlProgreso, array_values($estudianteIds));
+		if (!$resProgreso) {
+			$this->logPg('getProximosACompletar:progreso', $sqlProgreso);
+			return new WP_Error('db_query_failed', 'Error obteniendo progreso', [ 'status' => 500 ]);
+		}
+
+		$progresoEstudiantes = [];
+		while ($row = pg_fetch_assoc($resProgreso)) {
+			$estudianteId = intval($row['estudiante_id']);
+			$cursoId = intval($row['curso_id']);
+			$porcentaje = floatval($row['porcentaje']);
+
+			if (!isset($progresoEstudiantes[$estudianteId])) {
+				$progresoEstudiantes[$estudianteId] = [];
+			}
+			$progresoEstudiantes[$estudianteId][$cursoId] = $porcentaje;
+		}
+		pg_free_result($resProgreso);
+
+		// QUERY 4: Diplomas ya emitidos
+		$sqlDiplomas = "
+			SELECT 
+				estudiante_id,
+				programa_id,
+				nivel_id,
+				tipo
+			FROM diplomas_entregados
+			WHERE estudiante_id IN ($placeholders)
+		";
+
+		$resDiplomas = pg_query_params($this->conn, $sqlDiplomas, array_values($estudianteIds));
+		if (!$resDiplomas) {
+			$this->logPg('getProximosACompletar:diplomas', $sqlDiplomas);
+			return new WP_Error('db_query_failed', 'Error obteniendo diplomas', [ 'status' => 500 ]);
+		}
+
+		$diplomasEmitidos = [];
+		while ($row = pg_fetch_assoc($resDiplomas)) {
+			$estudianteId = intval($row['estudiante_id']);
+			$programaId = intval($row['programa_id']);
+			$nivelId = $row['nivel_id'] ? intval($row['nivel_id']) : null;
+			$tipo = $row['tipo'];
+
+			$key = $tipo === 'nivel' 
+				? "{$estudianteId}_{$programaId}_nivel_{$nivelId}"
+				: "{$estudianteId}_{$programaId}_programa";
+
+			$diplomasEmitidos[$key] = true;
+		}
+		pg_free_result($resDiplomas);
+
+		// PROCESAMIENTO EN PHP: Calcular porcentajes y generar resultado
+		$proximos = [];
+
+		foreach ($estudiantesPrograms as $ep) {
+			$estudianteId = $ep['estudiante_id'];
+			$programaId = $ep['programa_id'];
+			$programaNombre = $ep['programa_nombre'];
+			$version = $ep['version'];
+			$key = "{$programaId}_{$version}";
+
+			if (!isset($cursosRequeridos[$key])) {
+				continue;
+			}
+
+			$progreso = $progresoEstudiantes[$estudianteId] ?? [];
+			$estructura = $cursosRequeridos[$key];
+			$infoEstudiante = $estudiantesInfo[$estudianteId];
+
+			// Calcular progreso por nivel
+			foreach ($estructura['niveles'] as $nivelId => $nivelInfo) {
+				$diplomaKey = "{$estudianteId}_{$programaId}_nivel_{$nivelId}";
+				if (isset($diplomasEmitidos[$diplomaKey])) {
+					continue; // Ya tiene diploma
+				}
+
+				$cursosNivel = $nivelInfo['cursos'];
+				$cursosCompletados = 0;
+				$faltantes = [];
+
+				foreach ($cursosNivel as $curso) {
+					$cursoId = $curso['id'];
+					if (isset($progreso[$cursoId]) && $progreso[$cursoId] >= 70) {
+						$cursosCompletados++;
+					} else {
+						$faltantes[] = ['nombre' => $curso['nombre']];
+					}
+				}
+
+				$totalCursos = count($cursosNivel);
+				$porcentaje = $totalCursos > 0 
+					? round(100.0 * $cursosCompletados / $totalCursos, 1)
+					: 0;
+
+				if ($porcentaje >= $umbralInt && $porcentaje < 100) {
+					$proximos[] = [
+						'tipo' => 'nivel',
+						'estudiante_id' => $estudianteId,
+						'estudiante_codigo' => $infoEstudiante['codigo'],
+						'estudiante_nombre' => $infoEstudiante['nombre'],
+						'contacto_id' => $infoEstudiante['contacto_id'],
+						'contacto_nombre' => $infoEstudiante['contacto_nombre'],
+						'programa_id' => $programaId,
+						'programa_nombre' => $programaNombre,
+						'nivel_id' => $nivelId,
+						'nivel_nombre' => $nivelInfo['nombre'],
+						'version' => $version,
+						'progreso' => $porcentaje,
+						'cursos_completados' => $cursosCompletados,
+						'cursos_totales' => $totalCursos,
+						'cursos_faltantes' => $faltantes
+					];
+				}
+			}
+
+			// Calcular progreso por programa completo
+			$diplomaKey = "{$estudianteId}_{$programaId}_programa";
+			if (!isset($diplomasEmitidos[$diplomaKey])) {
+				$cursosPrograma = $estructura['programa_completo'];
+				$cursosCompletados = 0;
+				$faltantes = [];
+
+				foreach ($cursosPrograma as $curso) {
+					$cursoId = $curso['id'];
+					if (isset($progreso[$cursoId]) && $progreso[$cursoId] >= 70) {
+						$cursosCompletados++;
+					} else {
+						$faltantes[] = ['nombre' => $curso['nombre']];
+					}
+				}
+
+				$totalCursos = count($cursosPrograma);
+				$porcentaje = $totalCursos > 0 
+					? round(100.0 * $cursosCompletados / $totalCursos, 1)
+					: 0;
+
+				if ($porcentaje >= $umbralInt && $porcentaje < 100) {
+					$proximos[] = [
+						'tipo' => 'programa_completo',
+						'estudiante_id' => $estudianteId,
+						'estudiante_codigo' => $infoEstudiante['codigo'],
+						'estudiante_nombre' => $infoEstudiante['nombre'],
+						'contacto_id' => $infoEstudiante['contacto_id'],
+						'contacto_nombre' => $infoEstudiante['contacto_nombre'],
+						'programa_id' => $programaId,
+						'programa_nombre' => $programaNombre,
+						'nivel_id' => null,
+						'nivel_nombre' => null,
+						'version' => $version,
+						'progreso' => $porcentaje,
+						'cursos_completados' => $cursosCompletados,
+						'cursos_totales' => $totalCursos,
+						'cursos_faltantes' => $faltantes
+					];
+				}
+			}
+		}
 
 		// Ordenar por progreso descendente
 		usort($proximos, function($a, $b) {
 			return $b['progreso'] <=> $a['progreso'];
 		});
 
-		// Limitar resultados
-		return array_slice($proximos, 0, $limite);
+		// Aplicar límite
+		return array_slice($proximos, 0, $limiteInt);
 	}
 
 	/**

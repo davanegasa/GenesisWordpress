@@ -1,5 +1,4 @@
 import { api } from '../../api/client.js';
-import * as ProximosCompletar from '../../components/proximos-completar.js';
 
 export async function mount(container) {
 	container.innerHTML = `
@@ -17,7 +16,19 @@ export async function mount(container) {
 			<div class="card-title">Actividad reciente</div>
 			<ul id="activity" class="activity-list"></ul>
 		</div>
-		<div id="proximos-completar-widget" class="u-mt-16"></div>
+		<div class="card u-mt-16" style="border-left: 4px solid #ff9800;">
+			<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+				<span style="font-size: 1.5rem;">🔥</span>
+				<h3 style="margin: 0; color: #ff9800;">Próximos a Graduarse</h3>
+			</div>
+			<p style="color: #666; margin-bottom: 10px;">
+				Para ver los estudiantes próximos a completar programas o niveles, 
+				ve al detalle de cada contacto y busca la pestaña <strong>"🔥 Por Completar"</strong>.
+			</p>
+			<a href="#/contactos" class="btn btn-primary" style="display: inline-block;">
+				📋 Ver Contactos
+			</a>
+		</div>
 	`;
 	try {
 		const res = await api.get('/estadisticas');
@@ -43,17 +54,8 @@ export async function mount(container) {
 		const list = document.getElementById('activity');
 		list.innerHTML = '<li class="activity-item"><span class="activity-text">Error cargando KPIs</span></li>';
 	}
-
-	// Montar widget de próximos a completar
-	const widgetContainer = container.querySelector('#proximos-completar-widget');
-	if (widgetContainer) {
-		ProximosCompletar.mount(widgetContainer);
-	}
 }
 
 export function unmount() {
-	// Unmount widget
-	if (ProximosCompletar.unmount) {
-		ProximosCompletar.unmount();
-	}
+	// Nothing to unmount
 }

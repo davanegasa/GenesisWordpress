@@ -70,10 +70,26 @@ class PlgGenesis_DiplomasService {
 	}
 
 	/**
-	 * Obtiene estudiantes próximos a completar (>= 80% de progreso)
+	 * Obtiene lista de programas con estudiantes próximos a completar
+	 * Retorna solo programas y contador (ligero y rápido)
+	 * 
+	 * @param int $contactoId ID del contacto (OBLIGATORIO)
+	 * @param int $umbral Porcentaje mínimo de progreso
 	 */
-	public function getProximosACompletar($limite = 50, $umbral = 80, $contactoId = null) {
-		return $this->repository->getProximosACompletar($limite, $umbral, $contactoId);
+	public function getProgramasConProximos($contactoId, $umbral = 80) {
+		return $this->repository->getProgramasConProximos($contactoId, $umbral);
+	}
+
+	/**
+	 * Obtiene estudiantes próximos a completar (>= 80% de progreso)
+	 * 
+	 * @param int $limite Límite de resultados
+	 * @param int $umbral Porcentaje mínimo de progreso
+	 * @param int $contactoId ID del contacto (OBLIGATORIO)
+	 * @param int|null $programaId ID del programa (opcional, para filtrar por programa específico)
+	 */
+	public function getProximosACompletar($limite = 50, $umbral = 80, $contactoId = null, $programaId = null) {
+		return $this->repository->getProximosACompletar($limite, $umbral, $contactoId, $programaId);
 	}
 
 	/**

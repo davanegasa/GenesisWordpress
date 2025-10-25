@@ -1,41 +1,120 @@
 import { api } from '../api/client.js';
 
-export async function mount(container, { contactoId = null, titulo = 'Próximos a Graduarse' } = {}) {
+export async function mount(container, { contactoId = null, programas = [], titulo = 'Próximos a Graduarse' } = {}) {
     const listId = `proximos-list-${Date.now()}`;
+    const selectId = `programa-select-${Date.now()}`;
     
     container.innerHTML = `
         <div class="card" style="border-left: 4px solid #ff9800;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                 <h3 style="margin: 0; color: #ff9800; display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 1.5rem;">🔥</span>
                     ${titulo}
                 </h3>
-                <span style="font-size: 0.9rem; color: #666;">≥ 80% de progreso</span>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    ${contactoId && programas.length > 0 ? `
+                        <select id="${selectId}" class="form-control" style="width: auto; font-size: 0.9rem;">
+                            <option value="">📚 Selecciona un programa</option>
+                            ${programas.map(p => 
+                                `<option value="${p.programa_id}">${escapeHtml(p.programa_nombre)}</option>`
+                            ).join('')}
+                        </select>
+                    ` : ''}
+                    <span style="font-size: 0.9rem; color: #666;">≥ 80% de progreso</span>
+                </div>
             </div>
-            <div id="${listId}">Cargando...</div>
+            <div id="${listId}">
+                <div style="text-align: center; padding: 30px; color: #999;">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">🎯</div>
+                    <p>Selecciona un programa para ver los estudiantes</p>
+                </div>
+            </div>
         </div>
     `;
 
     const $list = container.querySelector(`#${listId}`);
+    const $select = contactoId ? container.querySelector(`#${selectId}`) : null;
 
-    try {
-        const url = contactoId 
-            ? `/diplomas/proximos-completar?limite=50&umbral=80&contactoId=${contactoId}`
-            : '/diplomas/proximos-completar?limite=50&umbral=80';
-        
-        const response = await api.get(url);
-        
-        if (!response || !response.success) {
-            throw new Error('Error cargando próximos a completar');
+    let proximosCache = {}; // Cache de estudiantes por programa
+
+    if (!contactoId || programas.length === 0) {
+        $list.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #999;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">📚</div>
+                <p>${!contactoId ? 'Por favor, consulta desde el detalle de un contacto' : 'Este contacto no tiene programas asignados'}</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Evento de cambio de programa
+    if ($select) {
+        $select.addEventListener('change', function() {
+            const programaId = this.value ? parseInt(this.value) : null;
+            if (programaId) {
+                cargarYRenderizar(programaId);
+            } else {
+                $list.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #999;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">🎯</div>
+                        <p>Selecciona un programa para ver los estudiantes</p>
+                    </div>
+                `;
+            }
+        });
+    }
+
+    // Función para cargar estudiantes de un programa (con cache) y renderizar
+    async function cargarYRenderizar(programaId) {
+        const cacheKey = programaId || 'todos';
+
+        // Si ya está en cache, renderizar directamente
+        if (proximosCache[cacheKey]) {
+            renderProximos(proximosCache[cacheKey]);
+            return;
         }
 
-        const proximos = response.data || [];
+        // Mostrar loading
+        $list.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #999;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">⏳</div>
+                <p>Cargando estudiantes...</p>
+            </div>
+        `;
 
-        if (proximos.length === 0) {
+        try {
+            // Cargar datos desde el servidor
+            const url = programaId 
+                ? `/diplomas/proximos-completar?limite=50&umbral=80&contactoId=${contactoId}&programaId=${programaId}`
+                : `/diplomas/proximos-completar?limite=50&umbral=80&contactoId=${contactoId}`;
+            
+            const response = await api.get(url);
+            
+            if (!response || !response.success) {
+                throw new Error('Error cargando estudiantes');
+            }
+
+            const proximos = response.data || [];
+            
+            // Guardar en cache
+            proximosCache[cacheKey] = proximos;
+
+            // Renderizar
+            renderProximos(proximos);
+
+        } catch (error) {
+            console.error('Error cargando estudiantes:', error);
+            $list.innerHTML = '<div style="color: #dc3545; padding: 20px;">Error cargando estudiantes</div>';
+        }
+    }
+
+    // Función para renderizar la lista de estudiantes
+    function renderProximos(proximos) {
+        if (!proximos || proximos.length === 0) {
             $list.innerHTML = `
                 <div style="text-align: center; padding: 30px; color: #999;">
                     <div style="font-size: 3rem; margin-bottom: 10px;">📚</div>
-                    <p>${contactoId ? 'Este contacto no tiene estudiantes cerca de completar' : 'No hay estudiantes cerca de completar en este momento'}</p>
+                    <p>No hay estudiantes cerca de completar</p>
                 </div>
             `;
             return;
@@ -129,10 +208,6 @@ export async function mount(container, { contactoId = null, titulo = 'Próximos 
             alert(`💪 ¡Vamos ${nombre}! Estás muy cerca de completar, no te rindas!`);
             // Aquí podrías agregar funcionalidad para enviar mensaje/email
         };
-
-    } catch (error) {
-        console.error('Error cargando próximos:', error);
-        $list.innerHTML = '<div style="color: #dc3545; padding: 20px;">Error cargando datos</div>';
     }
 }
 

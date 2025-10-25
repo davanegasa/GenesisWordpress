@@ -1,6 +1,9 @@
 import { api } from '../../api/client.js';
 import * as ProximosCompletar from '../../components/proximos-completar.js';
 
+// Variable global para almacenar los programas del contacto
+let contactPrograms = [];
+
 export async function mount(container, { code } = {}){
     container.innerHTML = `
         <div class="card">
@@ -211,6 +214,9 @@ async function loadAcademicHistory(container, contactCode, contactName) {
     try {
         const response = await api.get(`/contactos/${encodeURIComponent(contactCode)}/academic-history`);
         const data = response?.data || {};
+        
+        // Guardar programas para uso en otros componentes
+        contactPrograms = data.programs || [];
         
         // Renderizar programas
         renderPrograms(programsSection, data);
@@ -842,6 +848,7 @@ async function loadProximosCompletar(container, contactoId) {
     try {
         await ProximosCompletar.mount(proximosSection, { 
             contactoId: contactoId,
+            programas: contactPrograms,
             titulo: 'Estudiantes Próximos a Graduarse'
         });
     } catch (error) {
