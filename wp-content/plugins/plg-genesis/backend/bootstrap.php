@@ -313,3 +313,27 @@ add_action('template_redirect', function() {
 		}
 	}
 }, 1);
+
+// ==========================================
+// PERSONALIZACIÓN DE LOGIN
+// ==========================================
+
+// Reemplazar completamente la página de login
+add_action('login_init', function() {
+	// Solo reemplazar la vista, no el procesamiento del POST
+	if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+		// Cargar nuestra página de login personalizada
+		require_once plugin_dir_path(__FILE__) . '../frontend/custom-login.php';
+		exit;
+	}
+});
+
+// Capturar errores de login y redirigir a nuestra página personalizada
+add_filter('wp_login_errors', function($errors) {
+	if (!empty($errors->errors)) {
+		$error_code = key($errors->errors);
+		wp_redirect(add_query_arg('error', $error_code, site_url('wp-login.php')));
+		exit;
+	}
+	return $errors;
+});

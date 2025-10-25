@@ -1,0 +1,366 @@
+/**
+ * Login Moderno - Emmaus Digital
+ * Diseño de pantalla dividida sin imágenes
+ */
+
+/* Variables */
+:root {
+	--primary: #2563eb;
+	--accent: #0ea5e9;
+	--dark: #1e293b;
+	--success: #10b981;
+	--error: #ef4444;
+}
+
+/* Body - Reset completo */
+body.login {
+	background: var(--dark) !important;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	overflow-x: hidden !important;
+}
+
+/* Eliminar TODOS los elementos de WordPress que no necesitamos */
+body.login div#login h1,
+body.login div#login h1 a {
+	display: none !important;
+	visibility: hidden !important;
+	height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+/* Panel izquierdo - Fondo azul con gradiente */
+body.login::before {
+	content: '';
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 50vw;
+	height: 100vh;
+	background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+	z-index: 1;
+}
+
+/* Texto del panel izquierdo */
+body.login::after {
+	content: 'Gestiona tu progreso académico de forma simple y efectiva';
+	position: fixed;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 50vw;
+	text-align: center;
+	padding: 0 10%;
+	box-sizing: border-box;
+	color: white;
+	font-size: 36px;
+	font-weight: 700;
+	line-height: 1.4;
+	z-index: 2;
+}
+
+/* Contenedor principal del formulario */
+#login {
+	position: fixed !important;
+	right: 0;
+	top: 0;
+	width: 50vw !important;
+	height: 100vh !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	padding: 40px !important;
+	box-sizing: border-box !important;
+	margin: 0 !important;
+	z-index: 10;
+}
+
+/* Formulario */
+body.login #loginform,
+body.login #lostpasswordform {
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	width: 100% !important;
+	max-width: 380px !important;
+	box-sizing: border-box !important;
+}
+
+/* Título "Iniciar Sesión" */
+body.login form::before {
+	content: 'Iniciar Sesión';
+	display: block;
+	font-size: 32px;
+	font-weight: 700;
+	color: white;
+	margin-bottom: 40px;
+}
+
+body.login #lostpasswordform::before {
+	content: 'Recuperar Contraseña';
+}
+
+/* Todos los párrafos del formulario */
+body.login form p {
+	margin: 0 0 20px 0 !important;
+	padding: 0 !important;
+}
+
+/* Labels */
+body.login form label {
+	color: rgba(255, 255, 255, 0.9) !important;
+	font-size: 12px !important;
+	font-weight: 600 !important;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 8px !important;
+	display: block !important;
+}
+
+/* Inputs */
+body.login input[type="text"],
+body.login input[type="password"],
+body.login input[type="email"] {
+	background: rgba(255, 255, 255, 0.1) !important;
+	border: 1px solid rgba(255, 255, 255, 0.2) !important;
+	border-radius: 8px !important;
+	color: white !important;
+	font-size: 15px !important;
+	padding: 14px 16px !important;
+	width: 100% !important;
+	box-sizing: border-box !important;
+	transition: all 0.3s ease !important;
+	margin: 0 !important;
+	box-shadow: none !important;
+	height: auto !important;
+}
+
+body.login input[type="text"]::placeholder,
+body.login input[type="password"]::placeholder,
+body.login input[type="email"]::placeholder {
+	color: rgba(255, 255, 255, 0.5) !important;
+}
+
+body.login input[type="text"]:focus,
+body.login input[type="password"]:focus,
+body.login input[type="email"]:focus {
+	background: rgba(255, 255, 255, 0.15) !important;
+	border-color: rgba(255, 255, 255, 0.4) !important;
+	outline: none !important;
+	box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Botón principal */
+body.login .button-primary,
+body.login .wp-hide-pw {
+	background: white !important;
+	border: none !important;
+	border-radius: 8px !important;
+	color: var(--primary) !important;
+	font-size: 16px !important;
+	font-weight: 600 !important;
+	padding: 16px 32px !important;
+	cursor: pointer !important;
+	transition: all 0.3s ease !important;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+	text-shadow: none !important;
+	height: auto !important;
+	line-height: normal !important;
+}
+
+body.login .button-primary {
+	width: 100% !important;
+	margin: 0 !important;
+}
+
+body.login .button-primary:hover,
+body.login .wp-hide-pw:hover {
+	background: rgba(255, 255, 255, 0.95) !important;
+	transform: translateY(-2px) !important;
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.login .button-primary:active {
+	transform: translateY(0) !important;
+}
+
+/* Checkbox */
+body.login input[type="checkbox"] {
+	width: 16px !important;
+	height: 16px !important;
+	margin: 0 8px 0 0 !important;
+	cursor: pointer !important;
+	accent-color: white !important;
+	border: 2px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+body.login .forgetmenot {
+	margin: 0 0 20px 0 !important;
+}
+
+body.login .forgetmenot label {
+	color: rgba(255, 255, 255, 0.8) !important;
+	font-size: 14px !important;
+	font-weight: 500 !important;
+	text-transform: none !important;
+	letter-spacing: normal !important;
+	display: inline !important;
+	cursor: pointer !important;
+}
+
+/* Contenedor submit */
+body.login .submit {
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+/* Enlaces */
+body.login #nav,
+body.login #backtoblog {
+	text-align: center !important;
+	margin: 20px 0 0 0 !important;
+	padding: 0 !important;
+}
+
+body.login #nav a,
+body.login #backtoblog a {
+	color: rgba(255, 255, 255, 0.8) !important;
+	font-size: 14px !important;
+	text-decoration: none !important;
+	padding: 8px 12px !important;
+	border-radius: 6px !important;
+	display: inline-block !important;
+	transition: all 0.2s ease !important;
+}
+
+body.login #nav a:hover,
+body.login #backtoblog a:hover {
+	color: white !important;
+	background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Mensajes */
+body.login .message,
+body.login #login_error {
+	border: none !important;
+	border-radius: 8px !important;
+	padding: 14px 18px !important;
+	margin: 0 0 20px 0 !important;
+	font-size: 14px !important;
+	box-sizing: border-box !important;
+}
+
+body.login .message {
+	background: rgba(16, 185, 129, 0.2) !important;
+	color: #ecfdf5 !important;
+	border-left: 3px solid var(--success) !important;
+}
+
+body.login #login_error {
+	background: rgba(239, 68, 68, 0.2) !important;
+	color: #fef2f2 !important;
+	border-left: 3px solid var(--error) !important;
+}
+
+/* Privacy link */
+body.login .privacy-policy-page-link {
+	text-align: center !important;
+	margin-top: 16px !important;
+}
+
+body.login .privacy-policy-page-link a {
+	color: rgba(255, 255, 255, 0.7) !important;
+	font-size: 13px !important;
+	text-decoration: none !important;
+}
+
+body.login .privacy-policy-page-link a:hover {
+	color: white !important;
+	text-decoration: underline !important;
+}
+
+/* Loading animation */
+body.login .button-primary.loading {
+	color: transparent !important;
+	pointer-events: none;
+}
+
+body.login .button-primary.loading::after {
+	content: '';
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	top: 50%;
+	left: 50%;
+	margin: -9px 0 0 -9px;
+	border: 3px solid rgba(37, 99, 235, 0.3);
+	border-top-color: var(--primary);
+	border-radius: 50%;
+	animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media screen and (max-width: 900px) {
+	body.login::before {
+		width: 100vw !important;
+	}
+	
+	body.login::after {
+		top: 20% !important;
+		width: 100vw !important;
+		font-size: 28px !important;
+		padding: 0 40px !important;
+	}
+	
+	#login {
+		width: 100vw !important;
+		top: auto !important;
+		bottom: 0 !important;
+		height: auto !important;
+		position: fixed !important;
+		padding: 40px 30px !important;
+		background: var(--dark) !important;
+		border-radius: 24px 24px 0 0 !important;
+	}
+	
+	body.login form::before {
+		font-size: 28px !important;
+		margin-bottom: 32px !important;
+	}
+}
+
+@media screen and (max-width: 480px) {
+	body.login::after {
+		font-size: 24px !important;
+		padding: 0 30px !important;
+		top: 15% !important;
+	}
+	
+	#login {
+		padding: 30px 24px !important;
+	}
+	
+	body.login form::before {
+		font-size: 24px !important;
+	}
+	
+	body.login input[type="text"],
+	body.login input[type="password"],
+	body.login input[type="email"] {
+		font-size: 14px !important;
+		padding: 12px 14px !important;
+	}
+	
+	body.login .button-primary {
+		padding: 14px 24px !important;
+		font-size: 15px !important;
+	}
+}
