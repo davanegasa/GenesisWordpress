@@ -23,6 +23,7 @@ const AuthService = {
 				email: user.email || '',
 				roles: user.roles || [],
 				office: user.office || null,
+				contacto_id: user.contacto_id || null, // NUEVO: agregar contacto_id
 			};
 
 			// Las capabilities vienen en el objeto global de WordPress
@@ -94,6 +95,21 @@ const AuthService = {
 	 */
 	canSwitchOffice() {
 		return this.can('plg_switch_office');
+	},
+
+	/**
+	 * Verifica si es Contact Viewer
+	 */
+	isContactViewer() {
+		return this.hasRole('plg_contact_viewer');
+	},
+
+	/**
+	 * Obtiene el ID del contacto asociado (solo para contact_viewer)
+	 * @returns {number|null}
+	 */
+	getContactId() {
+		return this.userInfo?.contacto_id || null;
 	},
 
 	/**

@@ -6,7 +6,7 @@ class PlgGenesis_CatalogsController {
 		register_rest_route('plg-genesis/v1', '/catalogs', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_catalogs' ],
-			'permission_callback' => plg_genesis_can('plg_view_programs') // Catálogos relacionados con programas
+			'permission_callback' => '__return_true' // Todos los usuarios autenticados pueden ver catálogos
 		]);
 	}
 

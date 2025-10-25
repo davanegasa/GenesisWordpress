@@ -1,5 +1,6 @@
 import { api } from '../../api/client.js';
 import * as ProximosCompletar from '../../components/proximos-completar.js';
+import AuthService from '../../services/auth.js';
 
 // Variable global para almacenar los programas del contacto
 let contactPrograms = [];
@@ -26,6 +27,11 @@ export async function mount(container, { code } = {}){
         const res = await api.get('/contactos/'+encodeURIComponent(code.trim()));
         const d = (res && res.data) || {};
         
+        // Tab de acceso solo para usuarios con permiso de crear usuarios
+        const showAccesoTab = AuthService.can('plg_create_users');
+        const accesoTabHtml = showAccesoTab ? '<div class="tab" data-tab="acceso">🔑 Acceso</div>' : '';
+        const accesoContentHtml = showAccesoTab ? '<div class="tab-content u-hidden" data-content="acceso"><div id="c-acceso-section">Cargando...</div></div>' : '';
+        
         $ct.innerHTML = `
             <div class="contact-card">
                 <div class="contact-avatar">${(d.nombre||'C').slice(0,1)}</div>
@@ -43,6 +49,7 @@ export async function mount(container, { code } = {}){
                 <div class="tab" data-tab="diplomas">🎓 Diplomas</div>
                 <div class="tab" data-tab="actas">📋 Actas</div>
                 <div class="tab" data-tab="proximos">🔥 Por Completar</div>
+                ${accesoTabHtml}
             </div>
             
             <div class="tab-content" data-content="perfil">
@@ -94,6 +101,8 @@ export async function mount(container, { code } = {}){
             <div class="tab-content u-hidden" data-content="proximos">
                 <div id="c-proximos-section"></div>
             </div>
+            
+            ${accesoContentHtml}
         `;
         
         // Configurar tabs
@@ -165,6 +174,7 @@ function setupTabs(container, contactoId, contactCode) {
     let diplomasLoaded = false;
     let actasLoaded = false;
     let proximosLoaded = false;
+    let accesoLoaded = false;
     
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -199,6 +209,12 @@ function setupTabs(container, contactoId, contactCode) {
             if (targetTab === 'proximos' && !proximosLoaded && contactoId) {
                 proximosLoaded = true;
                 loadProximosCompletar(container, contactoId);
+            }
+            
+            // Cargar acceso cuando se activa la tab (lazy loading)
+            if (targetTab === 'acceso' && !accesoLoaded) {
+                accesoLoaded = true;
+                loadAcceso(container, contactCode);
             }
         });
     });
@@ -1514,6 +1530,157 @@ window.asignarProgramaAlContacto = async function(programaId, programaNombre) {
 
 // Hacer toggleCollapse disponible globalmente
 window.toggleCollapse = toggleCollapse;
+
+// ============ ACCESO AL PORTAL ============
+
+async function loadAcceso(container, contactCode) {
+    const section = container.querySelector('#c-acceso-section');
+    if (!section) return;
+    
+    section.innerHTML = '<div style="padding:20px;text-align:center;color:var(--plg-mutedText);">Cargando información de acceso...</div>';
+    
+    try {
+        const res = await api.get(`/contactos/${contactCode}/acceso`);
+        const acceso = res.data;
+        
+        if (!acceso) {
+            // No tiene acceso
+            // Obtener el email del contacto desde el endpoint
+            const contactRes = await api.get(`/contactos/${contactCode}`);
+            const contactEmail = contactRes?.data?.email || '';
+            
+            section.innerHTML = `
+                <div class="card" style="max-width:800px;margin:0 auto;">
+                    <h3>Acceso al Portal</h3>
+                    <p>⚪ Este contacto NO tiene acceso al portal</p>
+                    <button onclick="mostrarModalCrearAcceso('${contactCode}', '${escapeHtml(contactEmail)}')" class="btn btn-primary">
+                        ➕ Crear Acceso al Portal
+                    </button>
+                    <div style="margin-top:16px;padding:12px;background:#f0f9ff;border-radius:8px;">
+                        <p><strong>Al crear el acceso, el contacto podrá:</strong></p>
+                        <ul style="margin:8px 0;padding-left:24px;">
+                            <li>✓ Ver el progreso de sus estudiantes</li>
+                            <li>✓ Ver diplomas y certificados</li>
+                            <li>✓ Consultar historial académico</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Ya tiene acceso
+            section.innerHTML = `
+                <div class="card" style="max-width:800px;margin:0 auto;">
+                    <h3>Acceso al Portal</h3>
+                    <p>✅ Este contacto tiene acceso al portal</p>
+                    <div style="margin-top:16px;background:#f8f9fa;padding:16px;border-radius:8px;">
+                        <p style="margin-bottom:8px;"><strong>Username:</strong> ${escapeHtml(acceso.username)}</p>
+                        <p style="margin-bottom:8px;"><strong>Email:</strong> ${escapeHtml(acceso.email)}</p>
+                        <p><strong>Creado:</strong> ${new Date(acceso.created).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error cargando acceso:', error);
+        section.innerHTML = `
+            <div class="card" style="max-width:800px;margin:0 auto;">
+                <p style="color:var(--plg-danger);">Error al cargar información de acceso</p>
+            </div>
+        `;
+    }
+}
+
+window.mostrarModalCrearAcceso = async function(contactCode, contactEmail = '') {
+    // Generar username a partir del email (parte antes del @)
+    const suggestedUsername = contactEmail ? contactEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'crear-acceso-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    
+    overlay.innerHTML = `
+        <div class="card" style="max-width:500px;width:90%;max-height:80vh;overflow:auto;">
+            <h3>🔑 Crear Acceso al Portal</h3>
+            <form id="form-crear-acceso" style="margin-top:16px;">
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="display:block;margin-bottom:4px;">Username *</label>
+                    <input type="text" id="acceso-username" class="input" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" value="${escapeHtml(suggestedUsername)}" required>
+                    <small style="color:var(--plg-mutedText);">Se usará para iniciar sesión</small>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="display:block;margin-bottom:4px;">Email *</label>
+                    <input type="email" id="acceso-email" class="input" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" value="${escapeHtml(contactEmail)}" required>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="display:block;margin-bottom:4px;">Contraseña *</label>
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" id="acceso-password" class="input" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;" required>
+                        <button type="button" onclick="generarPassword()" class="btn" style="padding:8px 16px;">🔄 Generar</button>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label>
+                        <input type="checkbox" id="acceso-enviar-email" ${contactEmail ? 'checked' : ''}> Enviar credenciales por email
+                    </label>
+                </div>
+                <div style="display:flex;gap:12px;margin-top:16px;">
+                    <button type="button" onclick="cerrarModalCrearAcceso()" class="btn btn-secondary" style="flex:1;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1;">✅ Crear Acceso</button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Generar contraseña automáticamente al abrir el modal
+    generarPassword();
+    
+    document.getElementById('form-crear-acceso').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('acceso-username').value;
+        const email = document.getElementById('acceso-email').value;
+        const password = document.getElementById('acceso-password').value;
+        const enviar_email = document.getElementById('acceso-enviar-email').checked;
+        
+        try {
+            const res = await api.post(`/contactos/${contactCode}/crear-acceso`, {
+                username, email, password, enviar_email
+            });
+            
+            if (res.success) {
+                cerrarModalCrearAcceso();
+                // Recargar la sección de acceso
+                const container = document.querySelector('.card');
+                if (container) {
+                    await loadAcceso(container, contactCode);
+                }
+                alert('✅ Acceso creado exitosamente');
+            } else {
+                alert('❌ Error: ' + (res.error?.message || 'Error desconocido'));
+            }
+        } catch (error) {
+            alert('❌ Error al crear acceso: ' + (error.message || 'Error desconocido'));
+        }
+    });
+};
+
+window.cerrarModalCrearAcceso = function() {
+    const overlay = document.getElementById('crear-acceso-overlay');
+    if (overlay) {
+        document.body.removeChild(overlay);
+    }
+};
+
+window.generarPassword = function() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('acceso-password').value = password;
+};
 
 function formatDate(dateStr) {
     if (!dateStr) return '-';

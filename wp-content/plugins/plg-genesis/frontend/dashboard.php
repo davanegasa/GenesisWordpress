@@ -1,3 +1,22 @@
+<?php
+// Verificar autenticación
+if (!is_user_logged_in()) {
+	wp_redirect(wp_login_url());
+	exit;
+}
+
+// Redirigir solo a contact_viewer al dashboard v2
+$current_user = wp_get_current_user();
+if (in_array('plg_contact_viewer', $current_user->roles)) {
+	$dashboard_v2_page = get_page_by_path('dashboard-v2');
+	if ($dashboard_v2_page) {
+		wp_redirect(get_permalink($dashboard_v2_page->ID));
+		exit;
+	}
+	// Si no encuentra la página dashboard-v2, mostrar mensaje de error
+	wp_die('Error: No se encontró la página Dashboard V2. Por favor contacta al administrador.');
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

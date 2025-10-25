@@ -15,7 +15,11 @@ export function startRouter() {
 }
 
 function parseHash() {
-	let h = location.hash || '#/dashboard';
+	let h = location.hash || '';
+	// Si no hay hash, usar default según rol
+	if (!h || h === '#') {
+		h = '#/'; // Usar ruta raíz que carga el dashboard adaptativo
+	}
 	return h;
 }
 
@@ -36,6 +40,8 @@ async function handleRoute() {
 
 function resolveLoader(hash) {
 	const container = getContainer();
+	// Ruta raíz - redirige al dashboard adaptativo
+	if (hash === '#/' || hash === '') return () => import('../pages/dashboard/index.js').then(m => m.mount(container));
 	if (hash.startsWith('#/dashboard')) return () => import('../pages/dashboard/index.js').then(m => m.mount(container));
     if (hash.startsWith('#/estudiantes/asignar')) return () => import('../pages/estudiantes/assign.js').then(m => m.mount(container));
     if (hash.startsWith('#/estudiantes/nuevo')) return () => import('../pages/estudiantes/create.js').then(m => m.mount(container));

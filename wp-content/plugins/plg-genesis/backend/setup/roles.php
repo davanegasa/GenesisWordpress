@@ -4,11 +4,12 @@ if (!defined('ABSPATH')) { exit; }
 /**
  * Setup de roles y capabilities para plg-genesis
  * 
- * Define 4 roles principales:
+ * Define 5 roles principales:
  * - Super Admin: acceso total, multi-oficina
  * - Office Manager: administrador de su oficina
  * - Office Staff: operativo de su oficina
  * - Office Viewer: solo lectura de su oficina
+ * - Contact Viewer: visualización propia (contactos y sus estudiantes)
  */
 class PlgGenesis_Roles {
 	
@@ -62,17 +63,30 @@ class PlgGenesis_Roles {
 			'plg_edit_users',
 			'plg_delete_users',
 			
-			// ESPECIALES
-			'plg_switch_office',    // Cambiar entre oficinas (solo Super Admin)
-			'plg_view_swagger',     // Acceder a documentación API
-		];
-	}
+		// ESPECIALES
+		'plg_switch_office',    // Cambiar entre oficinas (solo Super Admin)
+		'plg_view_swagger',     // Acceder a documentación API
+		
+		// CONTACTOS - Permisos propios
+		'plg_view_own_students',   // Ver solo estudiantes asociados a su contacto
+		'plg_view_own_diplomas',   // Ver solo diplomas de sus estudiantes
+	];
+}
 	
 	/**
 	 * Define las capabilities por rol
 	 */
 	public static function get_role_capabilities() {
 		return [
+			// CONTACT VIEWER - Solo sus estudiantes y diplomas
+			'plg_contact_viewer' => array_merge(
+				['read' => true],
+				array_fill_keys([
+					'plg_view_own_students',
+					'plg_view_own_diplomas',
+				], true)
+			),
+			
 			// OFFICE VIEWER - Solo lectura
 			'plg_office_viewer' => array_merge(
 				['read' => true],
@@ -192,7 +206,7 @@ class PlgGenesis_Roles {
 	 * Elimina todos los roles del plugin
 	 */
 	public static function remove_roles() {
-		$roles = ['plg_office_viewer', 'plg_office_staff', 'plg_office_manager', 'plg_super_admin'];
+		$roles = ['plg_contact_viewer', 'plg_office_viewer', 'plg_office_staff', 'plg_office_manager', 'plg_super_admin'];
 		foreach ($roles as $role) {
 			remove_role($role);
 		}
@@ -211,6 +225,7 @@ class PlgGenesis_Roles {
 	 */
 	public static function get_role_display_name($role_slug) {
 		$names = [
+			'plg_contact_viewer'  => 'Visor de Contacto',
 			'plg_office_viewer'  => 'Visualizador de Oficina',
 			'plg_office_staff'   => 'Personal de Oficina',
 			'plg_office_manager' => 'Administrador de Oficina',
