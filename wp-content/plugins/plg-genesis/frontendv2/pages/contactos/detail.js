@@ -3,6 +3,8 @@ import * as ProximosCompletar from '../../components/proximos-completar.js';
 
 // Variable global para almacenar los programas del contacto
 let contactPrograms = [];
+let currentContactCode = null;
+let currentContactName = null;
 
 export async function mount(container, { code } = {}){
     container.innerHTML = `
@@ -203,6 +205,10 @@ function setupTabs(container, contactoId, contactCode) {
 async function loadAcademicHistory(container, contactCode, contactName) {
     const programsSection = container.querySelector('#c-programs-section');
     const studentsSection = container.querySelector('#c-students-section');
+    
+    // Guardar para recargas posteriores
+    currentContactCode = contactCode;
+    currentContactName = contactName;
     
     if (!programsSection || !studentsSection) return;
     
@@ -1147,7 +1153,13 @@ window.mostrarModalTogglePrograma = function(event, asignacionId, isActivo, prog
             
             if (response.success) {
                 cerrarModal();
-                location.reload();
+                // Recargar solo la sección de programas en lugar de toda la página
+                const container = document.querySelector('.card');
+                if (container && currentContactCode) {
+                    await loadAcademicHistory(container, currentContactCode, currentContactName);
+                } else {
+                    location.reload();
+                }
             } else {
                 throw new Error(response.error?.message || 'Error desconocido');
             }
