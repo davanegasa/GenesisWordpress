@@ -233,9 +233,9 @@ async function showCreateModal() {
 	const rolesResponse = await apiClient.get('/user-management/roles/assignable');
 	const roles = rolesResponse.success ? rolesResponse.data : {};
 
-	const modal = createModal({
+	const modalObj = createModal({
 		title: 'Crear Nuevo Usuario',
-		body: `
+		bodyHtml: `
 			<div style="display:flex; flex-direction:column; gap:16px;">
 				<div>
 					<label style="display:block; margin-bottom:4px; font-weight:500;">Usuario *</label>
@@ -277,19 +277,19 @@ async function showCreateModal() {
 						</select>
 					</div>
 				` : ''}
+				<div style="display:flex;gap:12px;margin-top:16px;">
+					<button id="btn-cancel-modal" class="btn btn-secondary" style="flex:1;">Cancelar</button>
+					<button id="btn-save-user" class="btn btn-primary" style="flex:1;">Crear Usuario</button>
+				</div>
 			</div>
-		`,
-		footer: `
-			<button id="btn-cancel-modal" class="btn-secondary">Cancelar</button>
-			<button id="btn-save-user" class="btn-primary">Crear Usuario</button>
 		`,
 	});
 
-	document.body.appendChild(modal);
+	document.body.appendChild(modalObj.overlay);
 
 	// Event listeners
 	document.getElementById('btn-cancel-modal').addEventListener('click', () => {
-		modal.remove();
+		modalObj.close();
 	});
 
 	document.getElementById('btn-save-user').addEventListener('click', async () => {
@@ -315,7 +315,7 @@ async function showCreateModal() {
 			}
 
 			showToast('✓ Usuario creado exitosamente', 'success');
-			modal.remove();
+			modalObj.close();
 			loadUsers();
 		} catch (error) {
 			showToast('Error al crear usuario: ' + error.message, 'error');

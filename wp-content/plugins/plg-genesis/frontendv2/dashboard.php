@@ -117,15 +117,16 @@ if (!defined('ABSPATH')) { exit; }
 				}
 			}
 			
-			$user_data = [
-				'id' => $current_user->ID,
-				'name' => $current_user->display_name,
-				'email' => $current_user->user_email,
-				'login' => $current_user->user_login,
-				'roles' => $current_user->roles,
-				'office' => get_user_meta($current_user->ID, 'oficina', true) ?: null,
-				'capabilities' => $plg_caps,
-			];
+		$user_data = [
+			'id' => $current_user->ID,
+			'name' => $current_user->display_name,
+			'email' => $current_user->user_email,
+			'login' => $current_user->user_login,
+			'roles' => $current_user->roles,
+			'office' => get_user_meta($current_user->ID, 'oficina', true) ?: null,
+			'contacto_id' => get_user_meta($current_user->ID, 'contacto_id', true) ?: null,
+			'capabilities' => $plg_caps,
+		];
 			
 			echo json_encode($user_data);
 		?>;

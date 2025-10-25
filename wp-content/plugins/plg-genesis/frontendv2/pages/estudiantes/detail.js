@@ -1,27 +1,30 @@
 import { api } from '../../api/client.js';
 import { getCatalogs } from '../../services/catalogs.js';
 import { openAssignCourseModal } from '../../components/estudiantes/assignCourse.js';
+import AuthService from '../../services/auth.js';
 
 function getHashParams(){ const h=location.hash; const q=h.includes('?')?h.split('?')[1]:''; const p=new URLSearchParams(q); const o={}; for(const [k,v] of p.entries()) o[k]=v; return o; }
 
 export async function mount(container, { id } = {}){
 	const hp = getHashParams();
-	
-
+	const isContactViewer = AuthService.isContactViewer();
 	
 	// Determinar URL de retorno
 	let backUrl = '#/estudiantes';
-	if (hp.contactoCode) {
+	
+	if (isContactViewer) {
+		// Para contact_viewer, siempre volver al dashboard
+		backUrl = '#/';
+	} else if (hp.contactoCode) {
 		// Si viene desde el detalle de un contacto
 		backUrl = '#/contacto/' + encodeURIComponent(hp.contactoCode);
-
 	} else if (hp.contactoId) {
 		// Si viene desde la lista de estudiantes filtrada por contacto
 		backUrl = '#/estudiantes?contactoId=' + encodeURIComponent(hp.contactoId);
-
-	} else {
-
 	}
+	
+	// Para contact_viewer: ocultar botón de guardar
+	const saveButtonHtml = !isContactViewer ? '<button id="u-guardar" class="btn btn-primary">Guardar cambios</button>' : '';
 	
 	container.innerHTML = `
 		<div class="card">
@@ -29,7 +32,7 @@ export async function mount(container, { id } = {}){
 				<div class="card-title">Estudiante <span class="badge">${id||''}</span></div>
 				<div class="u-flex u-gap">
 					<a id="u-back" class="btn btn-secondary" href="${backUrl}">Volver</a>
-					<button id="u-guardar" class="btn btn-primary">Guardar cambios</button>
+					${saveButtonHtml}
 				</div>
 			</div>
 			<div id="u-alert" class="alert alert-warning u-hidden">Faltan datos obligatorios (Estado civil o Escolaridad). Por favor complétalos antes de guardar.</div>
@@ -135,48 +138,49 @@ export async function mount(container, { id } = {}){
         const studentName = d.nombreCompleto || `${d.nombre1||''} ${d.apellido1||''}`.trim();
         loadAcademicHistory(container, id, studentName);
         
-        // Botón Editar y alternancia de modo
-        const headerActions = container.querySelector('#u-guardar').parentElement;
-        const editBtn = document.createElement('button'); editBtn.id = 'u-editar'; editBtn.className = 'btn'; editBtn.textContent = 'Editar';
-        headerActions.insertBefore(editBtn, headerActions.firstChild);
-        function setMode(isEdit){
-            container.querySelector('#u-view').classList.toggle('u-hidden', !!isEdit);
-            container.querySelector('#u-edit').classList.toggle('u-hidden', !isEdit);
-            container.querySelector('#u-guardar').classList.toggle('u-hidden', !isEdit);
-            editBtn.classList.toggle('u-hidden', !!isEdit);
-        }
-        setMode(false);
-        // Asegurar carga de catálogos para selects en modo edición
-        const fillOptions = (el, arr, val)=>{ if (!el) return; el.innerHTML = ['<option value="">Seleccione…</option>'].concat(arr.map(x=>`<option value="${x}" ${val===x?'selected':''}>${x}</option>`)).join(''); };
-        editBtn.addEventListener('click', ()=>{
-            const civEl = container.querySelector('#u-estado_civil');
-            const eduEl = container.querySelector('#u-escolaridad');
-            if (civEl && civEl.options.length<=1) fillOptions(civEl, civils, d.estadoCivil||'');
-            if (eduEl && eduEl.options.length<=1) fillOptions(eduEl, edu, d.escolaridad||'');
-        });
-        editBtn.addEventListener('click', ()=> setMode(true));
-		const showAlert = ()=>{
-			const alertEl = container.querySelector('#u-alert');
-			const civ = container.querySelector('#u-estado_civil').value;
-			const edv = container.querySelector('#u-escolaridad').value;
-			const missing = (!civ || !edv);
-			alertEl.classList.toggle('u-hidden', !missing);
-			const civEl = container.querySelector('#u-estado_civil');
-			const eduEl = container.querySelector('#u-escolaridad');
-			civEl.classList.toggle('invalid', !civ);
-			eduEl.classList.toggle('invalid', !edv);
-			civEl.setAttribute('aria-invalid', String(!civ));
-			eduEl.setAttribute('aria-invalid', String(!edv));
-		};
-		showAlert();
-		container.querySelector('#u-estado_civil').addEventListener('change', showAlert);
-		container.querySelector('#u-escolaridad').addEventListener('change', showAlert);
-		['#u-doc_identidad','#u-nombre1','#u-apellido1'].forEach(sel=>{
-			const el = container.querySelector(sel);
-			el.addEventListener('input', ()=>{ if (el.value) el.classList.remove('invalid'); });
-		});
+        // Botón Editar y alternancia de modo (solo para no contact_viewer)
+        if (!isContactViewer) {
+            const headerActions = container.querySelector('#u-guardar').parentElement;
+            const editBtn = document.createElement('button'); editBtn.id = 'u-editar'; editBtn.className = 'btn'; editBtn.textContent = 'Editar';
+            headerActions.insertBefore(editBtn, headerActions.firstChild);
+            function setMode(isEdit){
+                container.querySelector('#u-view').classList.toggle('u-hidden', !!isEdit);
+                container.querySelector('#u-edit').classList.toggle('u-hidden', !isEdit);
+                container.querySelector('#u-guardar').classList.toggle('u-hidden', !isEdit);
+                editBtn.classList.toggle('u-hidden', !!isEdit);
+            }
+            setMode(false);
+            // Asegurar carga de catálogos para selects en modo edición
+            const fillOptions = (el, arr, val)=>{ if (!el) return; el.innerHTML = ['<option value="">Seleccione…</option>'].concat(arr.map(x=>`<option value="${x}" ${val===x?'selected':''}>${x}</option>`)).join(''); };
+            editBtn.addEventListener('click', ()=>{
+                const civEl = container.querySelector('#u-estado_civil');
+                const eduEl = container.querySelector('#u-escolaridad');
+                if (civEl && civEl.options.length<=1) fillOptions(civEl, civils, d.estadoCivil||'');
+                if (eduEl && eduEl.options.length<=1) fillOptions(eduEl, edu, d.escolaridad||'');
+            });
+            editBtn.addEventListener('click', ()=> setMode(true));
+            const showAlert = ()=>{
+                const alertEl = container.querySelector('#u-alert');
+                const civ = container.querySelector('#u-estado_civil').value;
+                const edv = container.querySelector('#u-escolaridad').value;
+                const missing = (!civ || !edv);
+                alertEl.classList.toggle('u-hidden', !missing);
+                const civEl = container.querySelector('#u-estado_civil');
+                const eduEl = container.querySelector('#u-escolaridad');
+                civEl.classList.toggle('invalid', !civ);
+                eduEl.classList.toggle('invalid', !edv);
+                civEl.setAttribute('aria-invalid', String(!civ));
+                eduEl.setAttribute('aria-invalid', String(!edv));
+            };
+            showAlert();
+            container.querySelector('#u-estado_civil').addEventListener('change', showAlert);
+            container.querySelector('#u-escolaridad').addEventListener('change', showAlert);
+            ['#u-doc_identidad','#u-nombre1','#u-apellido1'].forEach(sel=>{
+                const el = container.querySelector(sel);
+                el.addEventListener('input', ()=>{ if (el.value) el.classList.remove('invalid'); });
+            });
 
-		container.querySelector('#u-guardar').addEventListener('click', async ()=>{
+            container.querySelector('#u-guardar').addEventListener('click', async ()=>{
 			const msg = container.querySelector('#u-msg');
 			const btn = container.querySelector('#u-guardar');
 			// Validación requerida
@@ -239,6 +243,7 @@ export async function mount(container, { id } = {}){
 			}
 			btn.disabled = false; btn.textContent = prev;
 		});
+        } // Fin if (!isContactViewer)
 	} catch (e) {
 		$ed.textContent = 'No fue posible cargar el estudiante';
 	}
@@ -277,24 +282,30 @@ async function loadAcademicHistory(container, studentId, studentName) {
 	const section = container.querySelector('#u-academic-section');
 	if (!section) return;
 	
+	// Botón de asignar curso solo para no contact_viewer
+	const isContactViewer = AuthService.isContactViewer();
+	const assignButtonHtml = !isContactViewer ? '<button id="btn-asignar-curso" class="btn btn-primary">+ Asignar Curso</button>' : '';
+	
 	section.innerHTML = `
 		<div class="u-flex u-gap" style="justify-content:space-between;align-items:center;margin-bottom:16px;">
-			<button id="btn-asignar-curso" class="btn btn-primary">+ Asignar Curso</button>
+			${assignButtonHtml}
 		</div>
 		<div id="academic-content">
 			<div style="padding:20px;text-align:center;color:var(--plg-mutedText);">Cargando historial...</div>
 		</div>
 	`;
 	
-	// Configurar botón de asignar curso
-	const btnAsignar = section.querySelector('#btn-asignar-curso');
-	if (btnAsignar) {
-		btnAsignar.addEventListener('click', () => {
-			openAssignCourseModal(studentId, studentName, () => {
-				// Recargar historial después de asignar curso
-				loadAcademicHistory(container, studentId, studentName);
+	// Configurar botón de asignar curso (solo si existe)
+	if (!isContactViewer) {
+		const btnAsignar = section.querySelector('#btn-asignar-curso');
+		if (btnAsignar) {
+			btnAsignar.addEventListener('click', () => {
+				openAssignCourseModal(studentId, studentName, () => {
+					// Recargar historial después de asignar curso
+					loadAcademicHistory(container, studentId, studentName);
+				});
 			});
-		});
+		}
 	}
 	
 	try {

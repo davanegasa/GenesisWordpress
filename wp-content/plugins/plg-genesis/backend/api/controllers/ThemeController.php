@@ -10,7 +10,7 @@ class PlgGenesis_ThemeController {
 		register_rest_route('plg-genesis/v1', '/theme', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_theme' ],
-			'permission_callback' => plg_genesis_can('plg_view_theme')
+			'permission_callback' => '__return_true' // Todos los usuarios autenticados pueden ver el tema
 		]);
 		register_rest_route('plg-genesis/v1', '/theme', [
 			'methods'             => 'PUT',

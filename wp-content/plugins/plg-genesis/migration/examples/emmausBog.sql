@@ -8,6 +8,20 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
 SET search_path = public, pg_catalog;
 
 --
@@ -728,6 +742,7 @@ CREATE TABLE programas_asignaciones (
     contacto_id integer,
     fecha_asignacion timestamp without time zone DEFAULT now(),
     version integer,
+    activo boolean DEFAULT true NOT NULL,
     CONSTRAINT chk_uno_o_otro CHECK ((((estudiante_id IS NOT NULL) AND (contacto_id IS NULL)) OR ((contacto_id IS NOT NULL) AND (estudiante_id IS NULL))))
 );
 
@@ -760,6 +775,13 @@ COMMENT ON COLUMN programas_asignaciones.contacto_id IS 'ID del contacto al que 
 --
 
 COMMENT ON COLUMN programas_asignaciones.fecha_asignacion IS 'Fecha en la que se asigna el programa';
+
+
+--
+-- Name: COLUMN programas_asignaciones.activo; Type: COMMENT; Schema: public; Owner: emmaus
+--
+
+COMMENT ON COLUMN programas_asignaciones.activo IS 'Indica si la asignación está activa. Los programas inactivos se ocultan pero mantienen el historial de progreso.';
 
 
 --
@@ -44557,11 +44579,11 @@ COPY programas (id, nombre, descripcion, current_version, created_at, updated_at
 -- Data for Name: programas_asignaciones; Type: TABLE DATA; Schema: public; Owner: emmaus
 --
 
-COPY programas_asignaciones (id, programa_id, estudiante_id, contacto_id, fecha_asignacion, version) FROM stdin;
-4	1	\N	19	2025-04-01 12:40:09.071981	1
-1	1	\N	24	2024-12-08 18:06:58.401576	1
-2	2	\N	24	2024-12-08 18:06:58.401576	1
-3	3	\N	24	2024-12-08 18:06:58.401576	1
+COPY programas_asignaciones (id, programa_id, estudiante_id, contacto_id, fecha_asignacion, version, activo) FROM stdin;
+4	1	\N	19	2025-04-01 12:40:09.071981	1	t
+1	1	\N	24	2024-12-08 18:06:58.401576	1	t
+2	2	\N	24	2024-12-08 18:06:58.401576	1	t
+3	3	\N	24	2024-12-08 18:06:58.401576	1	t
 \.
 
 
@@ -45206,6 +45228,20 @@ CREATE INDEX idx_programa_id ON programas_asignaciones USING btree (programa_id)
 
 
 --
+-- Name: idx_programas_asig_contacto_activo; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_programas_asig_contacto_activo ON programas_asignaciones USING btree (contacto_id, activo);
+
+
+--
+-- Name: idx_programas_asignaciones_activo; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
+--
+
+CREATE INDEX idx_programas_asignaciones_activo ON programas_asignaciones USING btree (activo) WHERE (activo = true);
+
+
+--
 -- Name: idx_unique_contacto_programa; Type: INDEX; Schema: public; Owner: emmaus; Tablespace: 
 --
 
@@ -45481,6 +45517,26 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --
+-- Name: actas_diplomas; Type: ACL; Schema: public; Owner: emmaus
+--
+
+REVOKE ALL ON TABLE actas_diplomas FROM PUBLIC;
+REVOKE ALL ON TABLE actas_diplomas FROM emmaus;
+GRANT ALL ON TABLE actas_diplomas TO emmaus;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE actas_diplomas TO emmaus_admin;
+
+
+--
+-- Name: actas_diplomas_id_seq; Type: ACL; Schema: public; Owner: emmaus
+--
+
+REVOKE ALL ON SEQUENCE actas_diplomas_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE actas_diplomas_id_seq FROM emmaus;
+GRANT ALL ON SEQUENCE actas_diplomas_id_seq TO emmaus;
+GRANT SELECT,USAGE ON SEQUENCE actas_diplomas_id_seq TO emmaus_admin;
+
+
+--
 -- Name: asistencias_congresos; Type: ACL; Schema: public; Owner: emmaus
 --
 
@@ -45607,6 +45663,26 @@ REVOKE ALL ON SEQUENCE cursos_id_seq FROM PUBLIC;
 REVOKE ALL ON SEQUENCE cursos_id_seq FROM emmaus;
 GRANT ALL ON SEQUENCE cursos_id_seq TO emmaus;
 GRANT ALL ON SEQUENCE cursos_id_seq TO emmaus_admin;
+
+
+--
+-- Name: diplomas_entregados; Type: ACL; Schema: public; Owner: emmaus
+--
+
+REVOKE ALL ON TABLE diplomas_entregados FROM PUBLIC;
+REVOKE ALL ON TABLE diplomas_entregados FROM emmaus;
+GRANT ALL ON TABLE diplomas_entregados TO emmaus;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE diplomas_entregados TO emmaus_admin;
+
+
+--
+-- Name: diplomas_entregados_id_seq; Type: ACL; Schema: public; Owner: emmaus
+--
+
+REVOKE ALL ON SEQUENCE diplomas_entregados_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE diplomas_entregados_id_seq FROM emmaus;
+GRANT ALL ON SEQUENCE diplomas_entregados_id_seq TO emmaus;
+GRANT SELECT,USAGE ON SEQUENCE diplomas_entregados_id_seq TO emmaus_admin;
 
 
 --

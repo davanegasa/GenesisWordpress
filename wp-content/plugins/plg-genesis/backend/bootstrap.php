@@ -28,7 +28,7 @@ register_deactivation_hook(__FILE__, function() {
  */
 add_action('init', function() {
 	$version = get_option('plg_genesis_roles_version', '0');
-	$current_version = '1.0.0'; // Incrementar cuando cambien roles
+	$current_version = '1.1.0'; // Incrementar cuando cambien roles (agregado plg_contact_viewer)
 	
 	if (version_compare($version, $current_version, '<')) {
 		PlgGenesis_Roles::setup_roles();
@@ -241,6 +241,14 @@ add_action('rest_api_init', function () {
 	if (class_exists('PlgGenesis_DiplomasController')) {
 		PlgGenesis_DiplomasController::register_routes();
 	}
+	require_once __DIR__ . '/api/controllers/UserController.php';
+	if (class_exists('PlgGenesis_UserController')) {
+		PlgGenesis_UserController::register_routes();
+	}
+	require_once __DIR__ . '/api/controllers/ContactViewerFixController.php';
+	if (class_exists('PlgGenesis_ContactViewerFixController')) {
+		PlgGenesis_ContactViewerFixController::register_routes();
+	}
     
     // CORS controlado (whitelist): permitir dashboard desde dominios específicos
     add_action('rest_api_init', function(){
@@ -275,3 +283,33 @@ add_action('rest_api_init', function () {
         add_filter('wp_cookie_samesite', 'plg_genesis_cookie_samesite');
     }
 });
+
+// Redirigir al Dashboard V2 después del login (para todos)
+add_filter('login_redirect', function($redirect_to, $request, $user) {
+	if (isset($user->roles) && is_array($user->roles)) {
+		// Obtener la URL del Dashboard V2
+		$dashboard_v2_page = get_page_by_path('dashboard-v2');
+		if ($dashboard_v2_page) {
+			return get_permalink($dashboard_v2_page->ID);
+		}
+	}
+	return $redirect_to;
+}, 10, 3);
+
+// Interceptar accesos a /dashboard/ solo para contact_viewer
+add_action('template_redirect', function() {
+	global $post;
+	
+	// Verificar si estamos en la página del dashboard v1
+	if (is_page() && $post && $post->post_name === 'dashboard') {
+		// Solo redirigir a contact_viewer
+		$current_user = wp_get_current_user();
+		if (in_array('plg_contact_viewer', $current_user->roles)) {
+			$dashboard_v2_page = get_page_by_path('dashboard-v2');
+			if ($dashboard_v2_page) {
+				wp_redirect(get_permalink($dashboard_v2_page->ID), 301);
+				exit;
+			}
+		}
+	}
+}, 1);

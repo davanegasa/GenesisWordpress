@@ -3,6 +3,7 @@ if (!defined('ABSPATH')) { exit; }
 
 require_once dirname(__FILE__, 3) . '/infrastructure/OfficeResolver.php';
 require_once dirname(__FILE__, 3) . '/infrastructure/ConnectionProvider.php';
+require_once dirname(__FILE__, 4) . '/infrastructure/ContactResolver.php';
 require_once dirname(__FILE__, 3) . '/repositories/EstudiantesRepository.php';
 require_once dirname(__FILE__, 3) . '/services/EstudiantesService.php';
 
@@ -36,7 +37,14 @@ class PlgGenesis_EstudiantesController {
 		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_estudiante' ],
-			'permission_callback' => plg_genesis_can('plg_view_students')
+			'permission_callback' => function($request) {
+				// Permitir si tiene el permiso general
+				if (current_user_can('plg_view_students')) {
+					return true;
+				}
+				// O si es contact_viewer - la validación del estudiante específico se hace en el callback
+				return PlgGenesis_ContactResolver::is_contact_viewer(get_current_user_id());
+			}
 		]);
 
 		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)/observaciones', [
@@ -60,7 +68,14 @@ class PlgGenesis_EstudiantesController {
 		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)/academic-history', [
 			'methods'             => 'GET',
 			'callback'            => [ __CLASS__, 'get_academic_history' ],
-			'permission_callback' => plg_genesis_can('plg_view_students')
+			'permission_callback' => function($request) {
+				// Permitir si tiene el permiso general
+				if (current_user_can('plg_view_students')) {
+					return true;
+				}
+				// O si es contact_viewer
+				return PlgGenesis_ContactResolver::is_contact_viewer(get_current_user_id());
+			}
 		]);
 
 		register_rest_route('plg-genesis/v1', '/estudiantes/(?P<id>[A-Za-z0-9\-_%]+)', [
@@ -101,6 +116,14 @@ class PlgGenesis_EstudiantesController {
 		$svc  = new PlgGenesis_EstudiantesService($repo);
 		$result = $svc->getById($id);
 		if (is_wp_error($result)) return self::error($result);
+		
+		// Validar permisos para contact_viewer
+		$estudiante_contacto_id = $result['id_contacto'] ?? null;
+		if ($estudiante_contacto_id) {
+			$can_access = PlgGenesis_ContactResolver::can_access_student(get_current_user_id(), $estudiante_contacto_id);
+			if (is_wp_error($can_access)) { return self::error($can_access); }
+		}
+		
 		return new WP_REST_Response([ 'success' => true, 'data' => $result ], 200);
 	}
 
