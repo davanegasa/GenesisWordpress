@@ -198,13 +198,13 @@ class PlgGenesis_DiplomasRepository {
 		foreach ($estudiantes as $estudiante) {
 			$estId = $estudiante['id'];
 
-			// Obtener programas asignados al contacto o estudiante
+			// Obtener programas asignados al contacto o estudiante (solo activos)
 			$idField = $contactoId ? 'contacto_id' : 'estudiante_id';
 			$idValue = $contactoId ? intval($contactoId) : $estId;
 
 			$sqlAsig = "SELECT programa_id, version 
 						FROM programas_asignaciones 
-						WHERE $idField = $1";
+						WHERE $idField = $1 AND activo = true";
 			$resAsig = pg_query_params($this->conn, $sqlAsig, [ $idValue ]);
 			if (!$resAsig) continue;
 

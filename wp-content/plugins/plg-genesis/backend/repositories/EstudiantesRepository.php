@@ -433,6 +433,7 @@ class PlgGenesis_EstudiantesRepository {
 			LEFT JOIN estudiantes e ON e.id_estudiante = $1
 			WHERE (pa.estudiante_id = (SELECT id FROM estudiantes WHERE id_estudiante = $1)
 			   OR pa.contacto_id = (SELECT id_contacto FROM estudiantes WHERE id_estudiante = $1))
+			   AND pa.activo = true
 			ORDER BY pa.fecha_asignacion
 		";
 		
