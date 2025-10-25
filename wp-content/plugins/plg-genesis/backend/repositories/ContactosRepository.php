@@ -195,7 +195,7 @@ class PlgGenesis_ContactosRepository {
 				p.descripcion as programa_descripcion
 			FROM programas_asignaciones pa
 			INNER JOIN programas p ON pa.programa_id = p.id
-			WHERE pa.contacto_id = $1 AND pa.activo = true
+			WHERE pa.contacto_id = $1
 			ORDER BY pa.fecha_asignacion DESC
 		";
 		
