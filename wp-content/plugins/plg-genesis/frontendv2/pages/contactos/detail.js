@@ -1311,7 +1311,7 @@ window.mostrarModalAsignarPrograma = async function() {
                         "
                         onmouseover="this.style.borderColor='#6366f1';this.style.background='#f8f9ff'"
                         onmouseout="this.style.borderColor='#e0e0e0';this.style.background='white'"
-                        onclick="asignarProgramaAlContacto(${programa.id}, '${escapeHtml(programa.nombre).replace(/'/g, "\\'")}')">
+                        onclick="confirmarAsignacionPrograma(${programa.id}, '${escapeHtml(programa.nombre).replace(/'/g, "\\'")}')">
                         <div style="font-weight:600;font-size:1rem;color:#333;margin-bottom:4px;">
                             📂 ${escapeHtml(programa.nombre)}
                         </div>
@@ -1346,20 +1346,132 @@ window.mostrarModalAsignarPrograma = async function() {
     });
 };
 
-window.asignarProgramaAlContacto = async function(programaId, programaNombre) {
-    const overlay = document.getElementById('asignar-programa-overlay');
-    if (!overlay) return;
+window.confirmarAsignacionPrograma = function(programaId, programaNombre) {
+    // Cerrar el modal de selección primero
+    const modalSeleccion = document.getElementById('asignar-programa-overlay');
+    if (modalSeleccion) {
+        document.body.removeChild(modalSeleccion);
+    }
     
-    // Mostrar loading
-    const modal = overlay.querySelector('div');
+    // Crear overlay de confirmación
+    const overlay = document.createElement('div');
+    overlay.id = 'confirmar-asignacion-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+    `;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    `;
+    
     modal.innerHTML = `
-        <div style="text-align:center;padding:40px;">
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0 0 8px 0; color: #6366f1; font-size: 1.25rem;">
+                ✅ Confirmar Asignación
+            </h3>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                ¿Estás seguro de asignar este programa al contacto?
+            </p>
+        </div>
+        
+        <div style="background: #f8f9ff; padding: 16px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #6366f1;">
+            <div style="font-weight: 600; margin-bottom: 4px; color: #333;">Programa:</div>
+            <div style="font-size: 1.1rem; color: #6366f1;">📂 ${escapeHtml(programaNombre)}</div>
+        </div>
+        
+        <div style="background: #fff3cd; padding: 12px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+            <div style="font-size: 0.9rem; color: #856404;">
+                ℹ️ El programa será asignado al contacto <strong>${escapeHtml(currentContactName || 'actual')}</strong> 
+                y todos sus estudiantes heredarán este programa automáticamente.
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button 
+                id="confirmar-asignacion-cancel"
+                class="btn btn-secondary"
+                style="padding: 8px 20px;">
+                Cancelar
+            </button>
+            <button 
+                id="confirmar-asignacion-confirm"
+                class="btn btn-primary"
+                style="padding: 8px 20px;">
+                Confirmar Asignación
+            </button>
+        </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    function cerrarModal() {
+        document.body.removeChild(overlay);
+    }
+    
+    document.getElementById('confirmar-asignacion-cancel').addEventListener('click', cerrarModal);
+    
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) cerrarModal();
+    });
+    
+    document.getElementById('confirmar-asignacion-confirm').addEventListener('click', () => {
+        cerrarModal();
+        asignarProgramaAlContacto(programaId, programaNombre);
+    });
+};
+
+window.asignarProgramaAlContacto = async function(programaId, programaNombre) {
+    // Crear overlay de loading
+    const overlay = document.createElement('div');
+    overlay.id = 'loading-asignacion-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+    `;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 40px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    `;
+    
+    modal.innerHTML = `
+        <div style="text-align:center;">
             <div style="font-size:2rem;margin-bottom:16px;">⏳</div>
             <div style="font-size:1rem;color:#666;">
                 Asignando programa "${escapeHtml(programaNombre)}"...
             </div>
         </div>
     `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
     
     try {
         const response = await api.post('/programas/' + programaId + '/asignar', {
@@ -1384,7 +1496,7 @@ window.asignarProgramaAlContacto = async function(programaId, programaNombre) {
     } catch (error) {
         console.error('Error asignando programa:', error);
         modal.innerHTML = `
-            <div style="text-align:center;padding:40px;">
+            <div style="text-align:center;padding:20px;">
                 <div style="font-size:2rem;margin-bottom:16px;color:#dc3545;">❌</div>
                 <div style="font-size:1rem;color:#333;font-weight:500;margin-bottom:8px;">
                     Error al asignar programa
@@ -1392,7 +1504,7 @@ window.asignarProgramaAlContacto = async function(programaId, programaNombre) {
                 <div style="font-size:0.9rem;color:#666;margin-bottom:20px;">
                     ${error.message || 'Error desconocido'}
                 </div>
-                <button onclick="document.body.removeChild(document.getElementById('asignar-programa-overlay'))" class="btn btn-secondary">
+                <button onclick="document.body.removeChild(document.getElementById('loading-asignacion-overlay'))" class="btn btn-secondary">
                     Cerrar
                 </button>
             </div>
